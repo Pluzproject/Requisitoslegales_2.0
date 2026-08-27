@@ -213,25 +213,37 @@
         }
 
         function populateFilters() {
+            // Función para obtener valores únicos evitando duplicados por mayúsculas/minúsculas
             function getUniqueValues(key) {
-                var values = [];
+                var uniqueMap = {};
                 for(var i = 0; i < rawData.length; i++) {
                     var val = rawData[i][key];
-                    if(val && values.indexOf(val) === -1) values.push(val.trim());
+                    if(val) {
+                        var trimmed = val.trim();
+                        var lower = trimmed.toLowerCase();
+                        if(!uniqueMap[lower]) {
+                            uniqueMap[lower] = trimmed; // Mantiene una versión limpia para mostrar
+                        }
+                    }
                 }
-                return values;
+                return Object.values(uniqueMap);
             }
+
             function fillSelect(id, data, sortDesc) {
                 var select = document.getElementById(id);
                 if(sortDesc) {
                     data.sort((a, b) => b.localeCompare(a));
-                } else { data.sort(); }
+                } else { 
+                    data.sort((a, b) => a.localeCompare(b)); 
+                }
                 for(var i = 0; i < data.length; i++) {
                     var opt = document.createElement('option');
-                    opt.value = data[i]; opt.textContent = data[i];
+                    opt.value = data[i]; 
+                    opt.textContent = data[i];
                     select.appendChild(opt);
                 }
             }
+
             fillSelect('filterMesAnio', getUniqueValues('mesAnio'), true);
             fillSelect('filterAnio', getUniqueValues('a'), true);
             fillSelect('filterPilar', getUniqueValues('Pilar del SIG'), false);
@@ -243,9 +255,9 @@
             var s = document.getElementById('searchInput').value.toLowerCase();
             var ma = document.getElementById('filterMesAnio').value;
             var an = document.getElementById('filterAnio').value;
-            var pi = document.getElementById('filterPilar').value;
-            var ti = document.getElementById('filterTipo').value;
-            var au = document.getElementById('filterAutoridad').value;
+            var pi = document.getElementById('filterPilar').value.toLowerCase();
+            var ti = document.getElementById('filterTipo').value.toLowerCase();
+            var au = document.getElementById('filterAutoridad').value.toLowerCase();
 
             var filtered = [];
             for(var i = 0; i < rawData.length; i++) {
@@ -253,9 +265,11 @@
                 var matchS = !s || (item['Norma'] && item['Norma'].toLowerCase().includes(s)) || (item['Sumilla / Descripción'] && item['Sumilla / Descripción'].toLowerCase().includes(s));
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
-                var matchPI = !pi || (item['Pilar del SIG'] && item['Pilar del SIG'].trim() === pi);
-                var matchTI = !ti || (item['Tipo de norma'] && item['Tipo de norma'].trim() === ti);
-                var matchAU = !au || (item['Autoridad'] && item['Autoridad'].trim() === au);
+                
+                // Comparación insensible a mayúsculas/minúsculas
+                var matchPI = !pi || (item['Pilar del SIG'] && item['Pilar del SIG'].trim().toLowerCase() === pi);
+                var matchTI = !ti || (item['Tipo de norma'] && item['Tipo de norma'].trim().toLowerCase() === ti);
+                var matchAU = !au || (item['Autoridad'] && item['Autoridad'].trim().toLowerCase() === au);
                 
                 if(matchS && matchMA && matchAN && matchPI && matchTI && matchAU) {
                     filtered.push(item);
@@ -284,13 +298,14 @@
             for (var i = 0; i < data.length; i++) {
                 var item = data[i];
                 
-                var pilar = (item['Pilar del SIG'] || 'No especificado').trim();
+                // Agrupar sumas unificando mayúsculas y minúsculas para mantener consistencia en gráficos
+                var pilar = item['Pilar del SIG'] ? item['Pilar del SIG'].trim() : 'No especificado';
                 pilaresCounts[pilar] = (pilaresCounts[pilar] || 0) + 1;
 
-                var tipo = (item['Tipo de norma'] || 'No especificado').trim();
+                var tipo = item['Tipo de norma'] ? item['Tipo de norma'].trim() : 'No especificado';
                 tiposCounts[tipo] = (tiposCounts[tipo] || 0) + 1;
 
-                var autoridad = (item['Autoridad'] || 'No especificada').trim();
+                var autoridad = item['Autoridad'] ? item['Autoridad'].trim() : 'No especificada';
                 autoridadesCounts[autoridad] = (autoridadesCounts[autoridad] || 0) + 1;
             }
 
