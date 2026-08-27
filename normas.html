@@ -106,6 +106,46 @@
         </div>
     </main>
 
+    <!-- MODAL / GLOBO DE DETALLE DE NORMA -->
+    <div id="normaModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto animate-fade-in">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold leading-none">&times;</button>
+            
+            <h3 class="text-xl font-bold text-blue-900 mb-4 border-b pb-2 flex items-center gap-2">
+                <span>Detalle de la Norma</span>
+            </h3>
+
+            <div class="space-y-4 text-sm text-gray-800">
+                <div class="grid grid-cols-2 gap-4 bg-blue-50 p-3 rounded-xl">
+                    <div><strong class="text-blue-900 block text-xs uppercase">Fecha:</strong> <span id="modalFecha" class="text-gray-700 font-medium"></span></div>
+                    <div><strong class="text-blue-900 block text-xs uppercase">Norma:</strong> <span id="modalNorma" class="text-blue-900 font-bold"></span></div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-gray-50 p-2.5 rounded-lg border"><strong class="text-gray-500 block text-[10px] uppercase">Pilar:</strong> <span id="modalPilar" class="font-semibold text-xs"></span></div>
+                    <div class="bg-gray-50 p-2.5 rounded-lg border"><strong class="text-gray-500 block text-[10px] uppercase">Tipo:</strong> <span id="modalTipo" class="font-semibold text-xs"></span></div>
+                    <div class="bg-gray-50 p-2.5 rounded-lg border"><strong class="text-gray-500 block text-[10px] uppercase">Autoridad:</strong> <span id="modalAutoridad" class="font-semibold text-xs"></span></div>
+                </div>
+
+                <div>
+                    <strong class="text-blue-900 block text-xs uppercase mb-1">Sumilla / Descripción:</strong>
+                    <p id="modalSumilla" class="p-3 bg-gray-50 rounded-xl border text-gray-700 leading-relaxed"></p>
+                </div>
+
+                <div>
+                    <strong class="text-blue-900 block text-xs uppercase mb-1">Recomendación:</strong>
+                    <p id="modalRecomendacion" class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-gray-700 italic leading-relaxed"></p>
+                </div>
+
+                <div id="modalEnlaceContainer" class="pt-2 text-right">
+                    <a id="modalEnlace" href="#" target="_blank" class="inline-flex items-center gap-2 bg-blue-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition shadow">
+                        Ver documento original ↗
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
         var rawData = []; var lastUpdateRawDate = "";
@@ -118,6 +158,11 @@
                 if(el) { el.addEventListener('change', applyFilters); el.addEventListener('input', applyFilters); }
             }
             document.getElementById('btnReset').addEventListener('click', resetDashboard);
+
+            // Cerrar modal haciendo clic fuera de la caja blanca
+            document.getElementById('normaModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
         });
 
         function fetchData() {
@@ -183,16 +228,53 @@
             for(var i = 0; i < reversed.length; i++) {
                 var item = reversed[i];
                 var tr = document.createElement('tr');
+                // Indicamos visualmente que la fila se puede presionar
+                tr.className = "cursor-pointer transition-colors";
                 tr.innerHTML = '<td>' + (item.fEstandar || item['Fecha'] || '-') + '</td>' +
                                '<td class="font-bold">' + (item['Norma'] || '-') + '</td>' +
                                '<td>' + (item['Pilar del SIG'] || '-') + '</td>' +
                                '<td class="text-xs">' + (item['Sumilla / Descripción'] || '-') + '</td>' +
                                '<td class="text-xs">' + (item['Autoridad'] || '-') + '</td>' +
                                '<td class="text-xs">' + (item['Tipo de norma'] || '-') + '</td>' +
-                               '<td>' + (item['Enlace'] && item['Enlace'] !== '--' ? '<a href="' + item['Enlace'] + '" target="_blank" class="text-blue-600 underline">Ver</a>' : '-') + '</td>' +
+                               '<td>' + (item['Enlace'] && item['Enlace'] !== '--' ? '<span class="text-blue-600 underline">Ver</span>' : '-') + '</td>' +
                                '<td class="text-xs italic">' + (item['Recomendación'] || '-') + '</td>';
+                
+                // Evento para abrir el modal al hacer clic en la fila
+                (function(currentItem) {
+                    tr.addEventListener('click', function(e) {
+                        // Si hace clic directamente en el texto "Ver" del enlace, dejamos que abra la pestaña de inmediato o abrimos el modal. 
+                        // Aquí abriremos el modal para una visualización completa, donde también tendrá su botón de enlace directo.
+                        openModal(currentItem);
+                    });
+                })(item);
+
                 tbody.appendChild(tr);
             }
+        }
+
+        function openModal(item) {
+            document.getElementById('modalFecha').textContent = item.fEstandar || item['Fecha'] || '-';
+            document.getElementById('modalNorma').textContent = item['Norma'] || '-';
+            document.getElementById('modalPilar').textContent = item['Pilar del SIG'] || '-';
+            document.getElementById('modalTipo').textContent = item['Tipo de norma'] || '-';
+            document.getElementById('modalAutoridad').textContent = item['Autoridad'] || '-';
+            document.getElementById('modalSumilla').textContent = item['Sumilla / Descripción'] || '-';
+            document.getElementById('modalRecomendacion').textContent = item['Recomendación'] || '-';
+            
+            var enlaceContainer = document.getElementById('modalEnlaceContainer');
+            var enlaceBtn = document.getElementById('modalEnlace');
+            if (item['Enlace'] && item['Enlace'] !== '--') {
+                enlaceBtn.href = item['Enlace'];
+                enlaceContainer.style.display = 'block';
+            } else {
+                enlaceContainer.style.display = 'none';
+            }
+            
+            document.getElementById('normaModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('normaModal').classList.add('hidden');
         }
 
         function applyFilters() {
