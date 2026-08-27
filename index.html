@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicadores - Portal de Requisitos Legales</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    
+    <style>
+        .chart-container { position: relative; height: 350px; width: 100%; }
+        .main-container { max-width: 95%; margin: 0 auto; padding: 2rem 1rem; }
+        .spacer-20 { height: 20px; }
+    </style>
+</head>
+<body class="bg-blue-50 text-blue-900 font-sans min-h-screen">
+
+    <!-- Header con navegación -->
+    <header class="bg-blue-900 text-white shadow-md py-6 px-8 flex justify-between items-center relative">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-2xl font-bold tracking-tight">Portal de Requisitos Legales - Indicadores</h1>
+        </div>
+        <nav class="space-x-6 text-sm font-semibold">
+            <a href="index.html" class="underline underline-offset-4">Indicadores</a>
+            <a href="normas.html" class="opacity-75 hover:opacity-100 transition">Ver Normas (Tabla)</a>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <!-- KPIs -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-blue-900 p-6 rounded-xl text-white shadow-lg">
+                <span class="text-xs uppercase opacity-75">Total Normas</span>
+                <div class="text-4xl font-bold mt-2" id="kpi-total">0</div>
+            </div>
+            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                <span class="text-xs uppercase font-bold text-emerald-600">Obligatorias</span>
+                <div class="text-3xl font-bold mt-2" id="kpi-obli">0</div>
+            </div>
+            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                <span class="text-xs uppercase font-bold text-blue-600">Informativas</span>
+                <div class="text-3xl font-bold mt-2" id="kpi-info">0</div>
+            </div>
+            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                <span class="text-xs uppercase font-bold text-amber-600">Referenciales</span>
+                <div class="text-3xl font-bold mt-2" id="kpi-refe">0</div>
+            </div>
+        </div>
+
+        <div class="spacer-20"></div>
+
+        <!-- Gráficos -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white p-5 rounded-xl border shadow-sm">
+                <div class="chart-container"><canvas id="chartYears"></canvas></div>
+            </div>
+            <div class="bg-white p-5 rounded-xl border shadow-sm">
+                <div class="chart-container"><canvas id="chartPillars"></canvas></div>
+            </div>
+            <div class="bg-white p-5 rounded-xl border shadow-sm">
+                <div class="chart-container"><canvas id="chartAuthorities"></canvas></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        Chart.register(ChartDataLabels);
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
+        var rawData = []; var charts = {};
+
+        window.addEventListener('DOMContentLoaded', function() {
+            Papa.parse(csvUrl, {
+                download: true, header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    rawData = [];
+                    for(var i = 0; i < results.data.length; i++) {
+                        var row = results.data[i];
+                        var normaText = (row['Norma'] || '').trim().toUpperCase();
+                        if(normaText !== "" && normaText !== "SIN NOVEDAD") {
+                            var partes = (row['Fecha'] || '').split('/');
+                            if(partes.length === 3) {
+                                row.a = partes[2];
+                            }
+                            rawData.push(row);
+                        }
+                    }
+                    renderIndicators(rawData);
+                }
+            });
+        });
+
+        function renderIndicators(data) {
+            var obli = 0, info = 0, refe = 0;
+            for(var j = 0; j < data.length; j++) {
+                var tipo = (data[j]['Tipo de norma'] || '').toUpperCase();
+                if(tipo.includes('OBLIGATORIO')) obli++;
+                else if(tipo.includes('INFORMATIVO')) info++;
+                else if(tipo.includes('REFERENCIAL')) refe++;
+            }
+            
+            document.getElementById('kpi-total').textContent = data.length;
+            document.getElementById('kpi-obli').textContent = obli;
+            document.getElementById('kpi-info').textContent = info;
+            document.getElementById('kpi-refe').textContent = refe;
+
+            // Renderizar gráficos con la lógica original
+            if(charts.chartYears) charts.chartYears.destroy();
+            if(charts.chartPillars) charts.chartPillars.destroy();
+            if(charts.chartAuthorities) charts.chartAuthorities.destroy();
+
+            // 1. Gráfico Anual
+            var currentYear = "2026";
+            var yearsSet = new Set([currentYear]);
+            for(var i = 0; i < data.length; i++) { if(data[i].a) yearsSet.add(data[i].a); }
+            var dataSeries = { 'ISO 45001': {}, 'ISO 14001': {}, 'ISO 37001': {}, 'Otras Normas': {} };
+            for(var i = 0; i < data.length; i++) {
+                var y = data[i].a; if(!y) continue;
+                var raw = data[i]['Pilar del SIG'] || '';
+                var p = 'Otras Normas';
+                if(raw === 'SST') p = 'ISO 45001';
+                else if(raw === 'Medio Ambiente') p = 'ISO 14001';
+                else if(raw === 'Antisoborno y Compliance') p = 'ISO 37001';
+                if(!dataSeries[p][y]) dataSeries[p][y] = 0;
+                dataSeries[p][y]++;
+            }
+            var sortedYears = Array.from(yearsSet).sort();
+            var datasets = Object.keys(dataSeries).map(function(key) {
+                var runningTotal = 0;
+                var dataPoints = sortedYears.map(function(y) {
+                    runningTotal += (dataSeries[key][y] || 0);
+                    return runningTotal;
+                });
+                return { label: key, data: dataPoints, fill: false, tension: 0.3 };
+            });
+
+            charts.chartYears = new Chart(document.getElementById('chartYears'), {
+                type: 'line', data: { labels: sortedYears, datasets: datasets },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Evolución Acumulada' } } }
+            });
+
+            // 2. Gráfico Pilares
+            var pData = { 'ISO 45001': { O: 0, I: 0, R: 0 }, 'ISO 14001': { O: 0, I: 0, R: 0 }, 'ISO 37001': { O: 0, I: 0, R: 0 }, 'Otras Normas': { O: 0, I: 0, R: 0 } };
+            for(var i = 0; i < data.length; i++) {
+                var raw = data[i]['Pilar del SIG'] || '';
+                var p = 'Otras Normas';
+                if(raw === 'SST') p = 'ISO 45001';
+                else if(raw === 'Medio Ambiente') p = 'ISO 14001';
+                else if(raw === 'Antisoborno y Compliance') p = 'ISO 37001';
+                var tipo = (data[i]['Tipo de norma'] || '').toUpperCase();
+                if(tipo.includes('OBLIGATORIO')) pData[p].O++;
+                else if(tipo.includes('INFORMATIVO')) pData[p].I++;
+                else if(tipo.includes('REFERENCIAL')) pData[p].R++;
+            }
+            charts.chartPillars = new Chart(document.getElementById('chartPillars'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(pData),
+                    datasets: [
+                        { label: 'Obligatoria', data: Object.values(pData).map(x => x.O), backgroundColor: '#fbbf24' },
+                        { label: 'Informativa', data: Object.values(pData).map(x => x.I), backgroundColor: '#818cf8' },
+                        { label: 'Referencial', data: Object.values(pData).map(x => x.R), backgroundColor: '#2dd4bf' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { title: { display: true, text: 'Distribución por Pilares' } } }
+            });
+
+            // 3. Gráfico Autoridades (Con fix de multilínea integrado)
+            var counts = {};
+            for(var i = 0; i < data.length; i++) { var val = data[i]['Autoridad'] || 'N/A'; counts[val] = (counts[val] || 0) + 1; }
+            var sortable = []; for(var key in counts) { sortable.push([key, counts[key]]); }
+            sortable.sort((a, b) => b[1] - a[1]);
+            var top10 = sortable.slice(0, 10);
+            var others = 0; for(var i = 10; i < sortable.length; i++) { others += sortable[i][1]; }
+            var finalLabels = []; var finalData = [];
+            for(var k = 0; k < top10.length; k++) { finalLabels.push(top10[k][0]); finalData.push(top10[k][1]); }
+            if (others > 0) { finalLabels.push('Otros'); finalData.push(others); }
+
+            charts.chartAuthorities = new Chart(document.getElementById('chartAuthorities'), {
+                type: 'bar',
+                data: { labels: finalLabels, datasets: [{ label: 'Normas', data: finalData, backgroundColor: '#1e3a8a' }] },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    layout: { padding: { left: 180 } },
+                    plugins: { title: { display: true, text: 'Top 10 Autoridades' }, legend: { display: false } },
+                    scales: { 
+                        x: { beginAtZero: true, display: false }, 
+                        y: { 
+                            ticks: { 
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    var label = this.getLabelForValue(value);
+                                    if (label && label.length > 25) {
+                                        var words = label.split(' ');
+                                        var lines = []; var line = '';
+                                        words.forEach(w => { if((line + w).length > 20) { lines.push(line); line = w + ' '; } else { line += w + ' '; } });
+                                        lines.push(line);
+                                        return lines;
+                                    }
+                                    return label;
+                                }
+                            }
+                        } 
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
