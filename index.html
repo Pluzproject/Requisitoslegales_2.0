@@ -6,311 +6,265 @@
     <title>Indicadores - Portal de Requisitos Legales</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        .chart-container { position: relative; height: 350px; width: 100%; }
-        .main-container { max-width: 95%; margin: 0 auto; padding: 2rem 1rem; }
-        .spacer-20 { height: 20px; }
+        .main-container { max-width: 95%; margin: 0 auto; padding: 2.5rem 1rem; }
     </style>
 </head>
 <body class="bg-blue-50 text-blue-900 font-sans min-h-screen">
 
-    <!-- Header con navegación -->
-    <header class="bg-blue-900 text-white shadow-md py-6 px-8 flex justify-between items-center relative">
+    <!-- Header con navegación y botón de cumplimiento -->
+    <header class="bg-blue-900 text-white shadow-md py-6 px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
         <div class="flex items-center space-x-4">
-            <h1 class="text-2xl font-bold tracking-tight">Portal de Requisitos Legales - Indicadores</h1>
+            <h1 class="text-2xl font-bold tracking-tight">Portal de Requisitos Legales - Indicadores y Métricas</h1>
         </div>
-        <nav class="space-x-6 text-sm font-semibold">
-            <a href="index.html" class="underline underline-offset-4">Indicadores</a>
-            <a href="normas.html" class="opacity-75 hover:opacity-100 transition">Ver Normas (Tabla)</a>
-        </nav>
+        <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
+            <nav class="space-x-6 text-sm font-semibold">
+                <a href="index.html" class="underline underline-offset-4">Indicadores</a>
+                <a href="normas.html" class="opacity-75 hover:opacity-100 transition">Ver Normas (Tabla)</a>
+            </nav>
+            <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-sm flex items-center gap-2">
+                Cumplimiento de normas
+            </a>
+        </div>
     </header>
 
-    <main class="main-container">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            
-            <!-- Zona Principal: KPIs y Gráficos (Ocupa 3 columnas) -->
-            <div class="lg:col-span-3 space-y-8">
-                <!-- KPIs -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-blue-900 p-6 rounded-xl text-white shadow-lg">
-                        <span class="text-xs uppercase opacity-75">Total Normas</span>
-                        <div class="text-4xl font-bold mt-2" id="kpi-total">0</div>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl border shadow-sm">
-                        <span class="text-xs uppercase font-bold text-emerald-600">Obligatorias</span>
-                        <div class="text-3xl font-bold mt-2" id="kpi-obli">0</div>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl border shadow-sm">
-                        <span class="text-xs uppercase font-bold text-blue-600">Informativas</span>
-                        <div class="text-3xl font-bold mt-2" id="kpi-info">0</div>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl border shadow-sm">
-                        <span class="text-xs uppercase font-bold text-amber-600">Referenciales</span>
-                        <div class="text-3xl font-bold mt-2" id="kpi-refe">0</div>
-                    </div>
+    <main class="main-container space-y-8">
+        
+        <!-- Tarjetas KPI / Resumen Ejecutivo -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Total Normas</p>
+                    <h3 id="kpiTotalNormas" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
                 </div>
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl text-xl">📄</div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Pilares SIG</p>
+                    <h3 id="kpiPilares" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
+                </div>
+                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl text-xl">🏛️</div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Autoridades</p>
+                    <h3 id="kpiAutoridades" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
+                </div>
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-xl">⚖️</div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Última Actualización</p>
+                    <h3 id="kpiUltimaFecha" class="text-base font-bold text-blue-900 mt-1">-</h3>
+                </div>
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl text-xl">📅</div>
+            </div>
+        </div>
 
-                <div class="spacer-20"></div>
-
-                <!-- Gráficos -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-white p-5 rounded-xl border shadow-sm">
-                        <div class="chart-container"><canvas id="chartYears"></canvas></div>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl border shadow-sm">
-                        <div class="chart-container"><canvas id="chartPillars"></canvas></div>
-                    </div>
-                    <div class="bg-white p-5 rounded-xl border shadow-sm">
-                        <div class="chart-container"><canvas id="chartAuthorities"></canvas></div>
-                    </div>
+        <!-- Gráficos Estadísticos Espaciosos y Grandes -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Gráfico: Normas por Pilar del SIG -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 flex flex-col justify-between">
+                <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
+                    <span>📊 Normas por Pilar del SIG</span>
+                </h3>
+                <div class="relative h-[400px] w-full flex items-center justify-center">
+                    <canvas id="chartPilares"></canvas>
                 </div>
             </div>
 
-            <!-- Panel de Filtros para los Indicadores (Ocupa 1 columna) -->
-            <aside class="bg-white p-6 rounded-xl border shadow-sm h-fit sticky top-6 space-y-4">
-                <h2 class="font-bold text-blue-900 border-b pb-2">Filtros de Indicadores</h2>
-                
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500">Periodo (Mes/Año)</label>
-                    <select id="filterMesAnio" class="w-full border rounded-lg text-sm px-3 py-2">
-                        <option value="">Todos los Periodos</option>
-                    </select>
+            <!-- Gráfico: Normas por Tipo de Norma -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 flex flex-col justify-between">
+                <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
+                    <span>📋 Distribución por Tipo de Norma</span>
+                </h3>
+                <div class="relative h-[400px] w-full flex items-center justify-center">
+                    <canvas id="chartTipos"></canvas>
                 </div>
-                
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500">Año Específico</label>
-                    <select id="filterAnio" class="w-full border rounded-lg text-sm px-3 py-2">
-                        <option value="">Todos los Años</option>
-                    </select>
-                </div>
+            </div>
 
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500">Categorización</label>
-                    <select id="filterPilar" class="w-full border rounded-lg text-sm px-3 py-2 mb-2">
-                        <option value="">Todos los Pilares</option>
-                    </select>
-                    <select id="filterTipo" class="w-full border rounded-lg text-sm px-3 py-2">
-                        <option value="">Todos los Tipos</option>
-                    </select>
+            <!-- Gráfico: Normas por Autoridad Reguladora (Ancho completo y alto extendido) -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 lg:col-span-2 flex flex-col justify-between">
+                <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
+                    <span>🏛️ Concentración por Autoridad Reguladora</span>
+                </h3>
+                <div class="relative h-[420px] w-full">
+                    <canvas id="chartAutoridades"></canvas>
                 </div>
-                
-                <button id="btnReset" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-bold text-sm transition">RESET FILTROS</button>
-            </aside>
+            </div>
 
         </div>
+
     </main>
 
     <script>
-        Chart.register(ChartDataLabels);
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
-        var rawData = []; var charts = {};
 
         window.addEventListener('DOMContentLoaded', function() {
+            fetchDataAndRenderDashboard();
+        });
+
+        function fetchDataAndRenderDashboard() {
             Papa.parse(csvUrl, {
-                download: true, header: true, skipEmptyLines: true,
+                download: true,
+                header: true,
+                skipEmptyLines: true,
                 complete: function(results) {
-                    rawData = [];
-                    for(var i = 0; i < results.data.length; i++) {
+                    var rawData = [];
+                    var lastUpdate = "-";
+
+                    if (results.data.length > 0) {
+                        lastUpdate = results.data[results.data.length - 1]['Fecha'] || "-";
+                    }
+
+                    for (var i = 0; i < results.data.length; i++) {
                         var row = results.data[i];
                         var normaText = (row['Norma'] || '').trim().toUpperCase();
-                        if(normaText !== "" && normaText !== "SIN NOVEDAD") {
-                            var partes = (row['Fecha'] || '').split('/');
-                            if(partes.length === 3) {
-                                var mes = partes[1].padStart(2, '0');
-                                var anio = partes[2];
-                                row.mesAnio = mes + '/' + anio;
-                                row.a = anio;
-                            }
+                        if (normaText !== "" && normaText !== "SIN NOVEDAD") {
                             rawData.push(row);
                         }
                     }
-                    populateFilters();
-                    renderIndicators(rawData);
+
+                    // Actualizar KPIs
+                    document.getElementById('kpiTotalNormas').textContent = rawData.length;
+                    document.getElementById('kpiUltimaFecha').textContent = lastUpdate;
+
+                    // Agrupaciones para métricas
+                    var pilaresCounts = {};
+                    var tiposCounts = {};
+                    var autoridadesCounts = {};
+
+                    for (var i = 0; i < rawData.length; i++) {
+                        var item = rawData[i];
+                        
+                        var pilar = (item['Pilar del SIG'] || 'No especificado').trim();
+                        pilaresCounts[pilar] = (pilaresCounts[pilar] || 0) + 1;
+
+                        var tipo = (item['Tipo de norma'] || 'No especificado').trim();
+                        tiposCounts[tipo] = (tiposCounts[tipo] || 0) + 1;
+
+                        var autoridad = (item['Autoridad'] || 'No especificada').trim();
+                        autoridadesCounts[autoridad] = (autoridadesCounts[autoridad] || 0) + 1;
+                    }
+
+                    document.getElementById('kpiPilares').textContent = Object.keys(pilaresCounts).length;
+                    document.getElementById('kpiAutoridades').textContent = Object.keys(autoridadesCounts).length;
+
+                    // Renderizar gráficos grandes y despejados
+                    renderPilaresChart(pilaresCounts);
+                    renderTiposChart(tiposCounts);
+                    renderAutoridadesChart(autoridadesCounts);
                 }
             });
-
-            var filterIds = ['filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo'];
-            for(var i = 0; i < filterIds.length; i++) {
-                var el = document.getElementById(filterIds[i]);
-                if(el) { el.addEventListener('change', applyFilters); }
-            }
-            document.getElementById('btnReset').addEventListener('click', resetFilters);
-        });
-
-        function populateFilters() {
-            function getUniqueValues(key) {
-                var values = [];
-                for(var i = 0; i < rawData.length; i++) {
-                    var val = rawData[i][key];
-                    if(val && values.indexOf(val) === -1) values.push(val);
-                }
-                return values;
-            }
-            function fillSelect(id, data, sortDesc) {
-                var select = document.getElementById(id);
-                if(sortDesc) {
-                    data.sort((a, b) => {
-                        var p1 = a.split('/'); var p2 = b.split('/');
-                        return new Date(p2[1], p2[0] - 1) - new Date(p1[1], p1[0] - 1);
-                    });
-                } else { data.sort(); }
-                for(var i = 0; i < data.length; i++) {
-                    var opt = document.createElement('option');
-                    opt.value = data[i]; opt.textContent = data[i];
-                    select.appendChild(opt);
-                }
-            }
-            fillSelect('filterMesAnio', getUniqueValues('mesAnio'), true);
-            fillSelect('filterAnio', getUniqueValues('a'), false);
-            fillSelect('filterPilar', getUniqueValues('Pilar del SIG'), false);
-            fillSelect('filterTipo', getUniqueValues('Tipo de norma'), false);
         }
 
-        function applyFilters() {
-            var ma = document.getElementById('filterMesAnio').value;
-            var an = document.getElementById('filterAnio').value;
-            var pi = document.getElementById('filterPilar').value;
-            var ti = document.getElementById('filterTipo').value;
+        function renderPilaresChart(dataObj) {
+            var labels = Object.keys(dataObj);
+            var values = Object.values(dataObj);
 
-            var filtered = [];
-            for(var i = 0; i < rawData.length; i++) {
-                var item = rawData[i];
-                var matchMA = (!ma || item.mesAnio === ma);
-                var matchAN = (!an || item.a === an);
-                var matchPI = (!pi || item['Pilar del SIG'] === pi);
-                var matchTI = (!ti || item['Tipo de norma'] === ti);
-                
-                if(matchMA && matchAN && matchPI && matchTI) {
-                    filtered.push(item);
+            var ctx = document.getElementById('chartPilares').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#1e40af', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#1d4ed8', '#2563eb'
+                        ],
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'right', 
+                            labels: { boxWidth: 16, padding: 20, font: { size: 13, weight: '500' } } 
+                        }
+                    },
+                    layout: { padding: 10 }
                 }
-            }
-            renderIndicators(filtered);
-        }
-
-        function resetFilters() {
-            document.getElementById('filterMesAnio').value = '';
-            document.getElementById('filterAnio').value = '';
-            document.getElementById('filterPilar').value = '';
-            document.getElementById('filterTipo').value = '';
-            renderIndicators(rawData);
-        }
-
-        function renderIndicators(data) {
-            var obli = 0, info = 0, refe = 0;
-            for(var j = 0; j < data.length; j++) {
-                var tipo = (data[j]['Tipo de norma'] || '').toUpperCase();
-                if(tipo.includes('OBLIGATORIO')) obli++;
-                else if(tipo.includes('INFORMATIVO')) info++;
-                else if(tipo.includes('REFERENCIAL')) refe++;
-            }
-            
-            document.getElementById('kpi-total').textContent = data.length;
-            document.getElementById('kpi-obli').textContent = obli;
-            document.getElementById('kpi-info').textContent = info;
-            document.getElementById('kpi-refe').textContent = refe;
-
-            // Limpiar gráficos anteriores
-            if(charts.chartYears) charts.chartYears.destroy();
-            if(charts.chartPillars) charts.chartPillars.destroy();
-            if(charts.chartAuthorities) charts.chartAuthorities.destroy();
-
-            // 1. Gráfico Anual
-            var currentYear = "2026";
-            var yearsSet = new Set([currentYear]);
-            for(var i = 0; i < data.length; i++) { if(data[i].a) yearsSet.add(data[i].a); }
-            var dataSeries = { 'ISO 45001': {}, 'ISO 14001': {}, 'ISO 37001': {}, 'Otras Normas': {} };
-            for(var i = 0; i < data.length; i++) {
-                var y = data[i].a; if(!y) continue;
-                var raw = data[i]['Pilar del SIG'] || '';
-                var p = 'Otras Normas';
-                if(raw === 'SST') p = 'ISO 45001';
-                else if(raw === 'Medio Ambiente') p = 'ISO 14001';
-                else if(raw === 'Antisoborno y Compliance') p = 'ISO 37001';
-                if(!dataSeries[p][y]) dataSeries[p][y] = 0;
-                dataSeries[p][y]++;
-            }
-            var sortedYears = Array.from(yearsSet).sort();
-            var datasets = Object.keys(dataSeries).map(function(key) {
-                var runningTotal = 0;
-                var dataPoints = sortedYears.map(function(y) {
-                    runningTotal += (dataSeries[key][y] || 0);
-                    return runningTotal;
-                });
-                return { label: key, data: dataPoints, fill: false, tension: 0.3 };
             });
+        }
 
-            charts.chartYears = new Chart(document.getElementById('chartYears'), {
-                type: 'line', data: { labels: sortedYears, datasets: datasets },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Evolución Acumulada' } } }
+        function renderTiposChart(dataObj) {
+            var labels = Object.keys(dataObj);
+            var values = Object.values(dataObj);
+
+            var ctx = document.getElementById('chartTipos').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#0f172a', '#1e3a8a', '#334155', '#475569', '#64748b', '#94a3b8'
+                        ],
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'right', 
+                            labels: { boxWidth: 16, padding: 20, font: { size: 13, weight: '500' } } 
+                        }
+                    },
+                    layout: { padding: 10 }
+                }
             });
+        }
 
-            // 2. Gráfico Pilares
-            var pData = { 'ISO 45001': { O: 0, I: 0, R: 0 }, 'ISO 14001': { O: 0, I: 0, R: 0 }, 'ISO 37001': { O: 0, I: 0, R: 0 }, 'Otras Normas': { O: 0, I: 0, R: 0 } };
-            for(var i = 0; i < data.length; i++) {
-                var raw = data[i]['Pilar del SIG'] || '';
-                var p = 'Otras Normas';
-                if(raw === 'SST') p = 'ISO 45001';
-                else if(raw === 'Medio Ambiente') p = 'ISO 14001';
-                else if(raw === 'Antisoborno y Compliance') p = 'ISO 37001';
-                var tipo = (data[i]['Tipo de norma'] || '').toUpperCase();
-                if(tipo.includes('OBLIGATORIO')) pData[p].O++;
-                else if(tipo.includes('INFORMATIVO')) pData[p].I++;
-                else if(tipo.includes('REFERENCIAL')) pData[p].R++;
-            }
-            charts.chartPillars = new Chart(document.getElementById('chartPillars'), {
+        function renderAutoridadesChart(dataObj) {
+            var labels = Object.keys(dataObj);
+            var values = Object.values(dataObj);
+
+            var ctx = document.getElementById('chartAutoridades').getContext('2d');
+            new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(pData),
-                    datasets: [
-                        { label: 'Obligatoria', data: Object.values(pData).map(x => x.O), backgroundColor: '#fbbf24' },
-                        { label: 'Informativa', data: Object.values(pData).map(x => x.I), backgroundColor: '#818cf8' },
-                        { label: 'Referencial', data: Object.values(pData).map(x => x.R), backgroundColor: '#2dd4bf' }
-                    ]
+                    labels: labels,
+                    datasets: [{
+                        label: 'Número de Normas',
+                        data: values,
+                        backgroundColor: '#1e3a8a',
+                        borderRadius: 8,
+                        barThickness: 'flex',
+                        maxBarThickness: 50
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { title: { display: true, text: 'Distribución por Pilares' } } }
-            });
-
-            // 3. Gráfico Autoridades
-            var counts = {};
-            for(var i = 0; i < data.length; i++) { var val = data[i]['Autoridad'] || 'N/A'; counts[val] = (counts[val] || 0) + 1; }
-            var sortable = []; for(var key in counts) { sortable.push([key, counts[key]]); }
-            sortable.sort((a, b) => b[1] - a[1]);
-            var top10 = sortable.slice(0, 10);
-            var others = 0; for(var i = 10; i < sortable.length; i++) { others += sortable[i][1]; }
-            var finalLabels = []; var finalData = [];
-            for(var k = 0; k < top10.length; k++) { finalLabels.push(top10[k][0]); finalData.push(top10[k][1]); }
-            if (others > 0) { finalLabels.push('Otros'); finalData.push(others); }
-
-            charts.chartAuthorities = new Chart(document.getElementById('chartAuthorities'), {
-                type: 'bar',
-                data: { labels: finalLabels, datasets: [{ label: 'Normas', data: finalData, backgroundColor: '#1e3a8a' }] },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-                    layout: { padding: { left: 180 } },
-                    plugins: { title: { display: true, text: 'Top 10 Autoridades' }, legend: { display: false } },
-                    scales: { 
-                        x: { beginAtZero: true, display: false }, 
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
                         y: { 
-                            ticks: { 
-                                font: { size: 10 },
-                                callback: function(value) {
-                                    var label = this.getLabelForValue(value);
-                                    if (label && label.length > 25) {
-                                        var words = label.split(' ');
-                                        var lines = []; var line = '';
-                                        words.forEach(w => { if((line + w).length > 20) { lines.push(line); line = w + ' '; } else { line += w + ' '; } });
-                                        lines.push(line);
-                                        return lines;
-                                    }
-                                    return label;
-                                }
-                            }
-                        } 
-                    }
+                            beginAtZero: true, 
+                            ticks: { precision: 0, font: { size: 12 } },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: { 
+                            ticks: { font: { size: 12, weight: '500' } },
+                            grid: { display: false }
+                        }
+                    },
+                    layout: { padding: 10 }
                 }
             });
         }
