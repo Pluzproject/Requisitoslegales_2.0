@@ -12,22 +12,30 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #2c3e50;
+        }
         .main-container { max-width: 95%; margin: 0 auto; padding: 2.5rem 1rem; }
+        .bg-corporate-blue { background-color: #3B599F; }
+        .text-corporate-blue { color: #3B599F; }
+        .border-corporate-blue { border-color: #3B599F; }
     </style>
 </head>
-<body class="bg-blue-50 text-blue-900 font-sans min-h-screen">
+<body class="min-h-screen">
 
     <!-- Header con navegación y botón de cumplimiento -->
-    <header class="bg-blue-900 text-white shadow-md py-6 px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
+    <header class="bg-corporate-blue text-white shadow-md py-6 px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
         <div class="flex items-center space-x-4">
-            <h1 class="text-2xl font-bold tracking-tight">Portal de Requisitos Legales - Indicadores y Métricas</h1>
+            <h1 class="text-2xl font-bold tracking-tight" style="font-family: Arial, sans-serif;">Portal de Requisitos Legales - Indicadores y Métricas</h1>
         </div>
         <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
             <nav class="space-x-6 text-sm font-semibold">
                 <a href="index.html" class="underline underline-offset-4">Indicadores</a>
-                <a href="normas.html" class="opacity-75 hover:opacity-100 transition">Ver Normas (Tabla)</a>
+                <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas (Tabla)</a>
             </nav>
-            <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-sm flex items-center gap-2">
+            <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
                 Cumplimiento de normas
             </a>
         </div>
@@ -38,10 +46,10 @@
             
             <!-- Panel de Filtros Lateral -->
             <aside class="bg-white p-6 rounded-2xl border shadow-sm h-fit sticky top-6 space-y-4 lg:col-span-1">
-                <div id="lastUpdateDisplay" class="text-xs text-blue-600 font-medium italic border-b pb-2 mb-2"></div>
-                <h2 class="font-bold text-blue-900 border-b pb-2">Filtros de Métricas</h2>
+                <div id="lastUpdateDisplay" class="text-xs font-medium italic border-b pb-2 mb-2" style="color: #3B599F;"></div>
+                <h2 class="font-bold border-b pb-2" style="color: #3B599F;">Filtros de Métricas</h2>
                 
-                <input type="text" id="searchInput" placeholder="Buscar norma o sumilla..." class="w-full px-4 py-2 border rounded-lg text-sm">
+                <input type="text" id="searchInput" placeholder="Buscar norma o sumilla..." class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
                 
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Periodo (Mes/Año)</label>
@@ -70,7 +78,7 @@
                     </select>
                 </div>
                 
-                <button id="btnReset" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-bold text-sm transition">RESET FILTROS</button>
+                <button id="btnReset" class="w-full px-4 py-2 rounded-lg text-white font-bold text-sm transition shadow-sm" style="background-color: #E06D6D;">RESET FILTROS</button>
             </aside>
 
             <!-- Contenido Principal: KPIs y Gráficos -->
@@ -78,35 +86,35 @@
                 
                 <!-- Tarjetas KPI / Resumen Ejecutivo -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Normas Filtradas</p>
-                            <h3 id="kpiTotalNormas" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
+                            <h3 id="kpiTotalNormas" class="text-3xl font-extrabold mt-1" style="color: #3B599F;">0</h3>
                         </div>
-                        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl text-xl">📄</div>
+                        <div class="p-3 rounded-xl text-xl" style="background-color: #eef2f8; color: #3B599F;">📄</div>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Pilares Activos</p>
-                            <h3 id="kpiPilares" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
+                            <h3 id="kpiPilares" class="text-3xl font-extrabold mt-1" style="color: #6CAC5E;">0</h3>
                         </div>
-                        <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl text-xl">🏛️</div>
+                        <div class="p-3 rounded-xl text-xl" style="background-color: #f1f8ee; color: #6CAC5E;">🏛️</div>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Autoridades</p>
-                            <h3 id="kpiAutoridades" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
+                            <h3 id="kpiAutoridades" class="text-3xl font-extrabold mt-1" style="color: #d99b1a;">0</h3>
                         </div>
-                        <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-xl">⚖️</div>
+                        <div class="p-3 rounded-xl text-xl" style="background-color: #fef8e7; color: #FBC13F;">⚖️</div>
                     </div>
                 </div>
 
-                <!-- Gráficos Estadísticos Con Vida y Contraste -->
+                <!-- Gráficos Estadísticos con Paleta Corporativa -->
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     
                     <!-- Gráfico: Normas por Pilar del SIG -->
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 flex flex-col justify-between">
-                        <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                        <h3 class="font-bold text-lg mb-6 flex items-center gap-2" style="color: #3B599F;">
                             <span>📊 Normas por Pilar del SIG</span>
                         </h3>
                         <div class="relative h-[400px] w-full flex items-center justify-center">
@@ -115,8 +123,8 @@
                     </div>
 
                     <!-- Gráfico: Normas por Tipo de Norma -->
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 flex flex-col justify-between">
-                        <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                        <h3 class="font-bold text-lg mb-6 flex items-center gap-2" style="color: #3B599F;">
                             <span>📋 Distribución por Tipo de Norma</span>
                         </h3>
                         <div class="relative h-[400px] w-full flex items-center justify-center">
@@ -125,8 +133,8 @@
                     </div>
 
                     <!-- Gráfico: Normas por Autoridad Reguladora (Ancho completo) -->
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 xl:col-span-2 flex flex-col justify-between">
-                        <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 xl:col-span-2 flex flex-col justify-between">
+                        <h3 class="font-bold text-lg mb-6 flex items-center gap-2" style="color: #3B599F;">
                             <span>🏛️ Concentración por Autoridad Reguladora</span>
                         </h3>
                         <div class="relative h-[420px] w-full">
@@ -150,17 +158,15 @@
         let chartTiposInstance = null;
         let chartAutoridadesInstance = null;
 
-        // Paleta de colores vibrantes con alta vida y contraste
-        const vibrantColors = [
-            '#1e3a8a', // Azul Marino Profundo
-            '#2563eb', // Azul Real
-            '#0d9488', // Verde Teal
-            '#4f46e5', // Índigo Vibrante
-            '#059669', // Esmeralda Vivo
-            '#7c3aed', // Púrpura Intenso
-            '#d97706', // Ámbar Fuerte
-            '#dc2626', // Rojo Vivo
-            '#0284c7'  // Azul Cielo Oscuro
+        // Paleta Corporativa Exacta: Azul, Verde, Amarillo, Rojo Suave, Plomo
+        const corporateColors = [
+            '#3B599F', // Azul Corporativo
+            '#6CAC5E', // Verde Corporativo
+            '#FBC13F', // Amarillo Corporativo
+            '#E06D6D', // Rojo Suave
+            '#7A8B99', // Plomo Neutral
+            '#5272B5', // Tono azul secundario
+            '#84BD74'  // Tono verde secundario
         ];
 
         window.addEventListener('DOMContentLoaded', function() {
@@ -310,7 +316,7 @@
                     labels: labels,
                     datasets: [{
                         data: values,
-                        backgroundColor: vibrantColors,
+                        backgroundColor: corporateColors,
                         borderWidth: 3,
                         borderColor: '#ffffff',
                         hoverOffset: 6
@@ -322,11 +328,11 @@
                     plugins: {
                         legend: { 
                             position: 'right', 
-                            labels: { boxWidth: 16, padding: 15, font: { size: 12, weight: '600' } } 
+                            labels: { boxWidth: 16, padding: 15, font: { family: 'Arial', size: 12, weight: '600' } } 
                         },
                         datalabels: {
                             color: '#ffffff',
-                            font: { weight: 'bold', size: 13 },
+                            font: { family: 'Arial', weight: 'bold', size: 13 },
                             formatter: (value) => value > 0 ? value : ''
                         }
                     },
@@ -349,7 +355,7 @@
                     labels: labels,
                     datasets: [{
                         data: values,
-                        backgroundColor: vibrantColors.slice().reverse(),
+                        backgroundColor: corporateColors.slice().reverse(),
                         borderWidth: 3,
                         borderColor: '#ffffff',
                         hoverOffset: 6
@@ -361,11 +367,11 @@
                     plugins: {
                         legend: { 
                             position: 'right', 
-                            labels: { boxWidth: 16, padding: 15, font: { size: 12, weight: '600' } } 
+                            labels: { boxWidth: 16, padding: 15, font: { family: 'Arial', size: 12, weight: '600' } } 
                         },
                         datalabels: {
                             color: '#ffffff',
-                            font: { weight: 'bold', size: 13 },
+                            font: { family: 'Arial', weight: 'bold', size: 13 },
                             formatter: (value) => value > 0 ? value : ''
                         }
                     },
@@ -388,7 +394,7 @@
                     datasets: [{
                         label: 'Número de Normas',
                         data: values,
-                        backgroundColor: '#2563eb',
+                        backgroundColor: '#3B599F',
                         borderRadius: 8,
                         barThickness: 'flex',
                         maxBarThickness: 50
@@ -403,11 +409,11 @@
                     scales: {
                         y: { 
                             beginAtZero: true, 
-                            ticks: { precision: 0, font: { size: 12, weight: '600' } },
+                            ticks: { precision: 0, font: { family: 'Arial', size: 12, weight: '600' } },
                             grid: { color: '#f1f5f9' }
                         },
                         x: { 
-                            ticks: { font: { size: 12, weight: '600' } },
+                            ticks: { font: { family: 'Arial', size: 12, weight: '600' } },
                             grid: { display: false }
                         }
                     },
