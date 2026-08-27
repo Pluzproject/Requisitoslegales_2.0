@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Plugin para mostrar números dentro de los gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     
     <style>
         .main-container { max-width: 95%; margin: 0 auto; padding: 2.5rem 1rem; }
@@ -31,145 +33,255 @@
         </div>
     </header>
 
-    <main class="main-container space-y-8">
-        
-        <!-- Tarjetas KPI / Resumen Ejecutivo -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Total Normas</p>
-                    <h3 id="kpiTotalNormas" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
-                </div>
-                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl text-xl">📄</div>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Pilares SIG</p>
-                    <h3 id="kpiPilares" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
-                </div>
-                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl text-xl">🏛️</div>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Autoridades</p>
-                    <h3 id="kpiAutoridades" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
-                </div>
-                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-xl">⚖️</div>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Última Actualización</p>
-                    <h3 id="kpiUltimaFecha" class="text-base font-bold text-blue-900 mt-1">-</h3>
-                </div>
-                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl text-xl">📅</div>
-            </div>
-        </div>
-
-        <!-- Gráficos Estadísticos Espaciosos y Grandes -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <main class="main-container">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
-            <!-- Gráfico: Normas por Pilar del SIG -->
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 flex flex-col justify-between">
-                <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
-                    <span>📊 Normas por Pilar del SIG</span>
-                </h3>
-                <div class="relative h-[400px] w-full flex items-center justify-center">
-                    <canvas id="chartPilares"></canvas>
+            <!-- Panel de Filtros Lateral -->
+            <aside class="bg-white p-6 rounded-2xl border shadow-sm h-fit sticky top-6 space-y-4 lg:col-span-1">
+                <div id="lastUpdateDisplay" class="text-xs text-blue-600 font-medium italic border-b pb-2 mb-2"></div>
+                <h2 class="font-bold text-blue-900 border-b pb-2">Filtros de Métricas</h2>
+                
+                <input type="text" id="searchInput" placeholder="Buscar norma o sumilla..." class="w-full px-4 py-2 border rounded-lg text-sm">
+                
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Año Específico</label>
+                    <select id="filterAnio" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todos los Años</option>
+                    </select>
                 </div>
-            </div>
 
-            <!-- Gráfico: Normas por Tipo de Norma -->
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 flex flex-col justify-between">
-                <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
-                    <span>📋 Distribución por Tipo de Norma</span>
-                </h3>
-                <div class="relative h-[400px] w-full flex items-center justify-center">
-                    <canvas id="chartTipos"></canvas>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Categorización</label>
+                    <select id="filterPilar" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todos los Pilares</option>
+                    </select>
+                    <select id="filterTipo" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todos los Tipos</option>
+                    </select>
+                    <select id="filterAutoridad" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todas las Autoridades</option>
+                    </select>
                 </div>
-            </div>
+                
+                <button id="btnReset" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-bold text-sm transition">RESET FILTROS</button>
+            </aside>
 
-            <!-- Gráfico: Normas por Autoridad Reguladora (Ancho completo y alto extendido) -->
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 lg:col-span-2 flex flex-col justify-between">
-                <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
-                    <span>🏛️ Concentración por Autoridad Reguladora</span>
-                </h3>
-                <div class="relative h-[420px] w-full">
-                    <canvas id="chartAutoridades"></canvas>
+            <!-- Contenido Principal: KPIs y Gráficos -->
+            <div class="lg:col-span-3 space-y-8">
+                
+                <!-- Tarjetas KPI / Resumen Ejecutivo -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Normas Filtradas</p>
+                            <h3 id="kpiTotalNormas" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
+                        </div>
+                        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl text-xl">📄</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Pilares Activos</p>
+                            <h3 id="kpiPilares" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
+                        </div>
+                        <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl text-xl">🏛️</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Autoridades</p>
+                            <h3 id="kpiAutoridades" class="text-3xl font-extrabold text-blue-900 mt-1">0</h3>
+                        </div>
+                        <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-xl">⚖️</div>
+                    </div>
                 </div>
+
+                <!-- Gráficos Estadísticos Espaciosos -->
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    
+                    <!-- Gráfico: Normas por Pilar del SIG -->
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 flex flex-col justify-between">
+                        <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
+                            <span>📊 Normas por Pilar del SIG</span>
+                        </h3>
+                        <div class="relative h-[400px] w-full flex items-center justify-center">
+                            <canvas id="chartPilares"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico: Normas por Tipo de Norma -->
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 flex flex-col justify-between">
+                        <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
+                            <span>📋 Distribución por Tipo de Norma</span>
+                        </h3>
+                        <div class="relative h-[400px] w-full flex items-center justify-center">
+                            <canvas id="chartTipos"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico: Normas por Autoridad Reguladora (Ancho completo) -->
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 xl:col-span-2 flex flex-col justify-between">
+                        <h3 class="font-bold text-blue-900 text-lg mb-6 flex items-center gap-2">
+                            <span>🏛️ Concentración por Autoridad Reguladora</span>
+                        </h3>
+                        <div class="relative h-[420px] w-full">
+                            <canvas id="chartAutoridades"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
 
         </div>
-
     </main>
 
     <script>
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
+        var rawData = [];
+        var lastUpdateRawDate = "";
+
+        // Instancias globales de gráficos para actualización dinámica
+        let chartPilaresInstance = null;
+        let chartTiposInstance = null;
+        let chartAutoridadesInstance = null;
 
         window.addEventListener('DOMContentLoaded', function() {
-            fetchDataAndRenderDashboard();
+            fetchData();
+
+            var filterIds = ['searchInput', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
+            for(var i = 0; i < filterIds.length; i++) {
+                var el = document.getElementById(filterIds[i]);
+                if(el) { 
+                    el.addEventListener('change', applyFilters); 
+                    el.addEventListener('input', applyFilters); 
+                }
+            }
+            document.getElementById('btnReset').addEventListener('click', resetDashboard);
         });
 
-        function fetchDataAndRenderDashboard() {
+        function fetchData() {
             Papa.parse(csvUrl, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    var rawData = [];
-                    var lastUpdate = "-";
-
                     if (results.data.length > 0) {
-                        lastUpdate = results.data[results.data.length - 1]['Fecha'] || "-";
+                        lastUpdateRawDate = results.data[results.data.length - 1]['Fecha'] || "";
+                        document.getElementById('lastUpdateDisplay').textContent = "Última act: " + lastUpdateRawDate;
                     }
-
+                    rawData = [];
                     for (var i = 0; i < results.data.length; i++) {
                         var row = results.data[i];
                         var normaText = (row['Norma'] || '').trim().toUpperCase();
                         if (normaText !== "" && normaText !== "SIN NOVEDAD") {
+                            var partes = (row['Fecha'] || '').split('/');
+                            if(partes.length === 3) {
+                                row.a = partes[2];
+                            }
                             rawData.push(row);
                         }
                     }
-
-                    // Actualizar KPIs
-                    document.getElementById('kpiTotalNormas').textContent = rawData.length;
-                    document.getElementById('kpiUltimaFecha').textContent = lastUpdate;
-
-                    // Agrupaciones para métricas
-                    var pilaresCounts = {};
-                    var tiposCounts = {};
-                    var autoridadesCounts = {};
-
-                    for (var i = 0; i < rawData.length; i++) {
-                        var item = rawData[i];
-                        
-                        var pilar = (item['Pilar del SIG'] || 'No especificado').trim();
-                        pilaresCounts[pilar] = (pilaresCounts[pilar] || 0) + 1;
-
-                        var tipo = (item['Tipo de norma'] || 'No especificado').trim();
-                        tiposCounts[tipo] = (tiposCounts[tipo] || 0) + 1;
-
-                        var autoridad = (item['Autoridad'] || 'No especificada').trim();
-                        autoridadesCounts[autoridad] = (autoridadesCounts[autoridad] || 0) + 1;
-                    }
-
-                    document.getElementById('kpiPilares').textContent = Object.keys(pilaresCounts).length;
-                    document.getElementById('kpiAutoridades').textContent = Object.keys(autoridadesCounts).length;
-
-                    // Renderizar gráficos grandes y despejados
-                    renderPilaresChart(pilaresCounts);
-                    renderTiposChart(tiposCounts);
-                    renderAutoridadesChart(autoridadesCounts);
+                    populateFilters();
+                    updateDashboard(rawData);
                 }
             });
+        }
+
+        function populateFilters() {
+            function getUniqueValues(key) {
+                var values = [];
+                for(var i = 0; i < rawData.length; i++) {
+                    var val = rawData[i][key];
+                    if(val && values.indexOf(val) === -1) values.push(val.trim());
+                }
+                return values;
+            }
+            function fillSelect(id, data, sortDesc) {
+                var select = document.getElementById(id);
+                if(sortDesc) {
+                    data.sort((a, b) => b.localeCompare(a));
+                } else { data.sort(); }
+                for(var i = 0; i < data.length; i++) {
+                    var opt = document.createElement('option');
+                    opt.value = data[i]; opt.textContent = data[i];
+                    select.appendChild(opt);
+                }
+            }
+            fillSelect('filterAnio', getUniqueValues('a'), true);
+            fillSelect('filterPilar', getUniqueValues('Pilar del SIG'), false);
+            fillSelect('filterTipo', getUniqueValues('Tipo de norma'), false);
+            fillSelect('filterAutoridad', getUniqueValues('Autoridad'), false);
+        }
+
+        function applyFilters() {
+            var s = document.getElementById('searchInput').value.toLowerCase();
+            var an = document.getElementById('filterAnio').value;
+            var pi = document.getElementById('filterPilar').value;
+            var ti = document.getElementById('filterTipo').value;
+            var au = document.getElementById('filterAutoridad').value;
+
+            var filtered = [];
+            for(var i = 0; i < rawData.length; i++) {
+                var item = rawData[i];
+                var matchS = !s || (item['Norma'] && item['Norma'].toLowerCase().includes(s)) || (item['Sumilla / Descripción'] && item['Sumilla / Descripción'].toLowerCase().includes(s));
+                var matchAN = !an || item.a === an;
+                var matchPI = !pi || (item['Pilar del SIG'] && item['Pilar del SIG'].trim() === pi);
+                var matchTI = !ti || (item['Tipo de norma'] && item['Tipo de norma'].trim() === ti);
+                var matchAU = !au || (item['Autoridad'] && item['Autoridad'].trim() === au);
+                
+                if(matchS && matchAN && matchPI && matchTI && matchAU) {
+                    filtered.push(item);
+                }
+            }
+            updateDashboard(filtered);
+        }
+
+        function resetDashboard() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterAnio').value = '';
+            document.getElementById('filterPilar').value = '';
+            document.getElementById('filterTipo').value = '';
+            document.getElementById('filterAutoridad').value = '';
+            updateDashboard(rawData);
+        }
+
+        function updateDashboard(data) {
+            document.getElementById('kpiTotalNormas').textContent = data.length;
+
+            var pilaresCounts = {};
+            var tiposCounts = {};
+            var autoridadesCounts = {};
+
+            for (var i = 0; i < data.length; i++) {
+                var item = data[i];
+                
+                var pilar = (item['Pilar del SIG'] || 'No especificado').trim();
+                pilaresCounts[pilar] = (pilaresCounts[pilar] || 0) + 1;
+
+                var tipo = (item['Tipo de norma'] || 'No especificado').trim();
+                tiposCounts[tipo] = (tiposCounts[tipo] || 0) + 1;
+
+                var autoridad = (item['Autoridad'] || 'No especificada').trim();
+                autoridadesCounts[autoridad] = (autoridadesCounts[autoridad] || 0) + 1;
+            }
+
+            document.getElementById('kpiPilares').textContent = Object.keys(pilaresCounts).length;
+            document.getElementById('kpiAutoridades').textContent = Object.keys(autoridadesCounts).length;
+
+            renderPilaresChart(pilaresCounts);
+            renderTiposChart(tiposCounts);
+            renderAutoridadesChart(autoridadesCounts);
         }
 
         function renderPilaresChart(dataObj) {
             var labels = Object.keys(dataObj);
             var values = Object.values(dataObj);
 
+            if (chartPilaresInstance) chartPilaresInstance.destroy();
+
             var ctx = document.getElementById('chartPilares').getContext('2d');
-            new Chart(ctx, {
+            chartPilaresInstance = new Chart(ctx, {
                 type: 'doughnut',
+                plugins: [ChartDataLabels],
                 data: {
                     labels: labels,
                     datasets: [{
@@ -188,7 +300,12 @@
                     plugins: {
                         legend: { 
                             position: 'right', 
-                            labels: { boxWidth: 16, padding: 20, font: { size: 13, weight: '500' } } 
+                            labels: { boxWidth: 16, padding: 15, font: { size: 12, weight: '500' } } 
+                        },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 13 },
+                            formatter: (value) => value > 0 ? value : ''
                         }
                     },
                     layout: { padding: 10 }
@@ -200,9 +317,12 @@
             var labels = Object.keys(dataObj);
             var values = Object.values(dataObj);
 
+            if (chartTiposInstance) chartTiposInstance.destroy();
+
             var ctx = document.getElementById('chartTipos').getContext('2d');
-            new Chart(ctx, {
+            chartTiposInstance = new Chart(ctx, {
                 type: 'pie',
+                plugins: [ChartDataLabels],
                 data: {
                     labels: labels,
                     datasets: [{
@@ -221,7 +341,12 @@
                     plugins: {
                         legend: { 
                             position: 'right', 
-                            labels: { boxWidth: 16, padding: 20, font: { size: 13, weight: '500' } } 
+                            labels: { boxWidth: 16, padding: 15, font: { size: 12, weight: '500' } } 
+                        },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 13 },
+                            formatter: (value) => value > 0 ? value : ''
                         }
                     },
                     layout: { padding: 10 }
@@ -233,8 +358,10 @@
             var labels = Object.keys(dataObj);
             var values = Object.values(dataObj);
 
+            if (chartAutoridadesInstance) chartAutoridadesInstance.destroy();
+
             var ctx = document.getElementById('chartAutoridades').getContext('2d');
-            new Chart(ctx, {
+            chartAutoridadesInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
