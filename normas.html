@@ -132,7 +132,7 @@
                     <p id="modalSumilla" class="p-3 bg-gray-50 rounded-xl border text-gray-700 leading-relaxed"></p>
                 </div>
 
-                <!-- Nuevos campos añadidos -->
+                <!-- Campos de Artículos y Evidencia -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <strong class="text-blue-900 block text-xs uppercase mb-1">Artículos Importantes:</strong>
@@ -259,6 +259,20 @@
             }
         }
 
+        // Función inteligente para buscar columnas ignorando tildes, mayúsculas y espacios
+        function findColumnValue(item, possibleNames) {
+            for (var key in item) {
+                var cleanKey = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                for (var i = 0; i < possibleNames.length; i++) {
+                    var cleanTarget = possibleNames[i].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                    if (cleanKey === cleanTarget || cleanKey.includes(cleanTarget)) {
+                        return item[key] || '-';
+                    }
+                }
+            }
+            return '-';
+        }
+
         function openModal(item) {
             document.getElementById('modalFecha').textContent = item.fEstandar || item['Fecha'] || '-';
             document.getElementById('modalNorma').textContent = item['Norma'] || '-';
@@ -267,9 +281,9 @@
             document.getElementById('modalAutoridad').textContent = item['Autoridad'] || '-';
             document.getElementById('modalSumilla').textContent = item['Sumilla / Descripción'] || '-';
             
-            // Asignación de Artículos importantes y Evidencia (buscando por nombres comunes de columnas)
-            document.getElementById('modalArticulos').textContent = item['Artículos importantes'] || item['Articulos importantes'] || '-';
-            document.getElementById('modalEvidencia').textContent = item['Evidencia'] || '-';
+            // Búsqueda robusta para Artículos y Evidencia
+            document.getElementById('modalArticulos').textContent = findColumnValue(item, ['articulos importantes', 'articulo', 'articulos']);
+            document.getElementById('modalEvidencia').textContent = findColumnValue(item, ['evidencia', 'evidencias']);
             
             document.getElementById('modalRecomendacion').textContent = item['Recomendación'] || '-';
             
