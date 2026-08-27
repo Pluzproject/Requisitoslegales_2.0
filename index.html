@@ -30,39 +30,77 @@
     </header>
 
     <main class="main-container">
-        <!-- KPIs -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-blue-900 p-6 rounded-xl text-white shadow-lg">
-                <span class="text-xs uppercase opacity-75">Total Normas</span>
-                <div class="text-4xl font-bold mt-2" id="kpi-total">0</div>
-            </div>
-            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                <span class="text-xs uppercase font-bold text-emerald-600">Obligatorias</span>
-                <div class="text-3xl font-bold mt-2" id="kpi-obli">0</div>
-            </div>
-            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                <span class="text-xs uppercase font-bold text-blue-600">Informativas</span>
-                <div class="text-3xl font-bold mt-2" id="kpi-info">0</div>
-            </div>
-            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                <span class="text-xs uppercase font-bold text-amber-600">Referenciales</span>
-                <div class="text-3xl font-bold mt-2" id="kpi-refe">0</div>
-            </div>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Zona Principal: KPIs y Gráficos (Ocupa 3 columnas) -->
+            <div class="lg:col-span-3 space-y-8">
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-blue-900 p-6 rounded-xl text-white shadow-lg">
+                        <span class="text-xs uppercase opacity-75">Total Normas</span>
+                        <div class="text-4xl font-bold mt-2" id="kpi-total">0</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm">
+                        <span class="text-xs uppercase font-bold text-emerald-600">Obligatorias</span>
+                        <div class="text-3xl font-bold mt-2" id="kpi-obli">0</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm">
+                        <span class="text-xs uppercase font-bold text-blue-600">Informativas</span>
+                        <div class="text-3xl font-bold mt-2" id="kpi-info">0</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm">
+                        <span class="text-xs uppercase font-bold text-amber-600">Referenciales</span>
+                        <div class="text-3xl font-bold mt-2" id="kpi-refe">0</div>
+                    </div>
+                </div>
 
-        <div class="spacer-20"></div>
+                <div class="spacer-20"></div>
 
-        <!-- Gráficos -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-white p-5 rounded-xl border shadow-sm">
-                <div class="chart-container"><canvas id="chartYears"></canvas></div>
+                <!-- Gráficos -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <div class="chart-container"><canvas id="chartYears"></canvas></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <div class="chart-container"><canvas id="chartPillars"></canvas></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <div class="chart-container"><canvas id="chartAuthorities"></canvas></div>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white p-5 rounded-xl border shadow-sm">
-                <div class="chart-container"><canvas id="chartPillars"></canvas></div>
-            </div>
-            <div class="bg-white p-5 rounded-xl border shadow-sm">
-                <div class="chart-container"><canvas id="chartAuthorities"></canvas></div>
-            </div>
+
+            <!-- Panel de Filtros para los Indicadores (Ocupa 1 columna) -->
+            <aside class="bg-white p-6 rounded-xl border shadow-sm h-fit sticky top-6 space-y-4">
+                <h2 class="font-bold text-blue-900 border-b pb-2">Filtros de Indicadores</h2>
+                
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Periodo (Mes/Año)</label>
+                    <select id="filterMesAnio" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todos los Periodos</option>
+                    </select>
+                </div>
+                
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Año Específico</label>
+                    <select id="filterAnio" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todos los Años</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Categorización</label>
+                    <select id="filterPilar" class="w-full border rounded-lg text-sm px-3 py-2 mb-2">
+                        <option value="">Todos los Pilares</option>
+                    </select>
+                    <select id="filterTipo" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todos los Tipos</option>
+                    </select>
+                </div>
+                
+                <button id="btnReset" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-bold text-sm transition">RESET FILTROS</button>
+            </aside>
+
         </div>
     </main>
 
@@ -82,15 +120,84 @@
                         if(normaText !== "" && normaText !== "SIN NOVEDAD") {
                             var partes = (row['Fecha'] || '').split('/');
                             if(partes.length === 3) {
-                                row.a = partes[2];
+                                var mes = partes[1].padStart(2, '0');
+                                var anio = partes[2];
+                                row.mesAnio = mes + '/' + anio;
+                                row.a = anio;
                             }
                             rawData.push(row);
                         }
                     }
+                    populateFilters();
                     renderIndicators(rawData);
                 }
             });
+
+            var filterIds = ['filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo'];
+            for(var i = 0; i < filterIds.length; i++) {
+                var el = document.getElementById(filterIds[i]);
+                if(el) { el.addEventListener('change', applyFilters); }
+            }
+            document.getElementById('btnReset').addEventListener('click', resetFilters);
         });
+
+        function populateFilters() {
+            function getUniqueValues(key) {
+                var values = [];
+                for(var i = 0; i < rawData.length; i++) {
+                    var val = rawData[i][key];
+                    if(val && values.indexOf(val) === -1) values.push(val);
+                }
+                return values;
+            }
+            function fillSelect(id, data, sortDesc) {
+                var select = document.getElementById(id);
+                if(sortDesc) {
+                    data.sort((a, b) => {
+                        var p1 = a.split('/'); var p2 = b.split('/');
+                        return new Date(p2[1], p2[0] - 1) - new Date(p1[1], p1[0] - 1);
+                    });
+                } else { data.sort(); }
+                for(var i = 0; i < data.length; i++) {
+                    var opt = document.createElement('option');
+                    opt.value = data[i]; opt.textContent = data[i];
+                    select.appendChild(opt);
+                }
+            }
+            fillSelect('filterMesAnio', getUniqueValues('mesAnio'), true);
+            fillSelect('filterAnio', getUniqueValues('a'), false);
+            fillSelect('filterPilar', getUniqueValues('Pilar del SIG'), false);
+            fillSelect('filterTipo', getUniqueValues('Tipo de norma'), false);
+        }
+
+        function applyFilters() {
+            var ma = document.getElementById('filterMesAnio').value;
+            var an = document.getElementById('filterAnio').value;
+            var pi = document.getElementById('filterPilar').value;
+            var ti = document.getElementById('filterTipo').value;
+
+            var filtered = [];
+            for(var i = 0; i < rawData.length; i++) {
+                var item = rawData[i];
+                var matchMA = (!ma || item.mesAnio === ma);
+                var matchAN = (!an || item.a === an);
+                var matchPI = (!pi || item['Pilar del SIG'] === pi);
+                var matchTI = (!ti || item['Tipo de norma'] === ti);
+                
+                if(matchMA && matchAN && matchPI && matchTI) {
+                    filtered.push(item);
+                }
+            }
+            renderIndicators(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('filterMesAnio').value = '';
+            document.getElementById('filterAnio').value = '';
+            document.getElementById('filterPilar').value = '';
+            document.getElementById('filterTipo').value = '';
+            renderIndicators(rawData);
+        }
 
         function renderIndicators(data) {
             var obli = 0, info = 0, refe = 0;
@@ -106,7 +213,7 @@
             document.getElementById('kpi-info').textContent = info;
             document.getElementById('kpi-refe').textContent = refe;
 
-            // Renderizar gráficos con la lógica original
+            // Limpiar gráficos anteriores
             if(charts.chartYears) charts.chartYears.destroy();
             if(charts.chartPillars) charts.chartPillars.destroy();
             if(charts.chartAuthorities) charts.chartAuthorities.destroy();
@@ -167,7 +274,7 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { title: { display: true, text: 'Distribución por Pilares' } } }
             });
 
-            // 3. Gráfico Autoridades (Con fix de multilínea integrado)
+            // 3. Gráfico Autoridades
             var counts = {};
             for(var i = 0; i < data.length; i++) { var val = data[i]['Autoridad'] || 'N/A'; counts[val] = (counts[val] || 0) + 1; }
             var sortable = []; for(var key in counts) { sortable.push([key, counts[key]]); }
