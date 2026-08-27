@@ -108,7 +108,7 @@
 
     <!-- MODAL / GLOBO DE DETALLE DE NORMA -->
     <div id="normaModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto animate-fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold leading-none">&times;</button>
             
             <h3 class="text-xl font-bold text-blue-900 mb-4 border-b pb-2 flex items-center gap-2">
@@ -130,6 +130,18 @@
                 <div>
                     <strong class="text-blue-900 block text-xs uppercase mb-1">Sumilla / Descripción:</strong>
                     <p id="modalSumilla" class="p-3 bg-gray-50 rounded-xl border text-gray-700 leading-relaxed"></p>
+                </div>
+
+                <!-- Nuevos campos añadidos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <strong class="text-blue-900 block text-xs uppercase mb-1">Artículos Importantes:</strong>
+                        <p id="modalArticulos" class="p-3 bg-gray-50 rounded-xl border text-gray-700 leading-relaxed h-full"></p>
+                    </div>
+                    <div>
+                        <strong class="text-blue-900 block text-xs uppercase mb-1">Evidencia:</strong>
+                        <p id="modalEvidencia" class="p-3 bg-gray-50 rounded-xl border text-gray-700 leading-relaxed h-full"></p>
+                    </div>
                 </div>
 
                 <div>
@@ -159,7 +171,6 @@
             }
             document.getElementById('btnReset').addEventListener('click', resetDashboard);
 
-            // Cerrar modal haciendo clic fuera de la caja blanca
             document.getElementById('normaModal').addEventListener('click', function(e) {
                 if (e.target === this) closeModal();
             });
@@ -228,7 +239,6 @@
             for(var i = 0; i < reversed.length; i++) {
                 var item = reversed[i];
                 var tr = document.createElement('tr');
-                // Indicamos visualmente que la fila se puede presionar
                 tr.className = "cursor-pointer transition-colors";
                 tr.innerHTML = '<td>' + (item.fEstandar || item['Fecha'] || '-') + '</td>' +
                                '<td class="font-bold">' + (item['Norma'] || '-') + '</td>' +
@@ -239,11 +249,8 @@
                                '<td>' + (item['Enlace'] && item['Enlace'] !== '--' ? '<span class="text-blue-600 underline">Ver</span>' : '-') + '</td>' +
                                '<td class="text-xs italic">' + (item['Recomendación'] || '-') + '</td>';
                 
-                // Evento para abrir el modal al hacer clic en la fila
                 (function(currentItem) {
                     tr.addEventListener('click', function(e) {
-                        // Si hace clic directamente en el texto "Ver" del enlace, dejamos que abra la pestaña de inmediato o abrimos el modal. 
-                        // Aquí abriremos el modal para una visualización completa, donde también tendrá su botón de enlace directo.
                         openModal(currentItem);
                     });
                 })(item);
@@ -259,6 +266,11 @@
             document.getElementById('modalTipo').textContent = item['Tipo de norma'] || '-';
             document.getElementById('modalAutoridad').textContent = item['Autoridad'] || '-';
             document.getElementById('modalSumilla').textContent = item['Sumilla / Descripción'] || '-';
+            
+            // Asignación de Artículos importantes y Evidencia (buscando por nombres comunes de columnas)
+            document.getElementById('modalArticulos').textContent = item['Artículos importantes'] || item['Articulos importantes'] || '-';
+            document.getElementById('modalEvidencia').textContent = item['Evidencia'] || '-';
+            
             document.getElementById('modalRecomendacion').textContent = item['Recomendación'] || '-';
             
             var enlaceContainer = document.getElementById('modalEnlaceContainer');
