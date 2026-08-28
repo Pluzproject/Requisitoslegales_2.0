@@ -41,7 +41,7 @@
     <main class="main-container">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
-            <!-- Panel de Filtros Lateral (Recuperado y Completo) -->
+            <!-- Panel de Filtros Lateral -->
             <aside class="bg-white p-6 rounded-2xl border shadow-sm h-fit sticky top-6 space-y-4 lg:col-span-1">
                 <div id="lastUpdateDisplay" class="text-xs font-medium italic border-b pb-2 mb-2" style="color: #3B599F;"></div>
                 <h2 class="font-bold border-b pb-2" style="color: #3B599F;">Filtros de Búsqueda</h2>
@@ -89,7 +89,7 @@
                         <div id="rowCountDisplay" class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">Mostrando 0 registros</div>
                     </div>
 
-                    <!-- Tabla de Datos -->
+                    <!-- Tabla de Datos (Columna F en lugar de Revisado) -->
                     <div class="overflow-x-auto rounded-xl border border-slate-200">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -100,7 +100,7 @@
                                     <th class="p-3">Pilar del SIG</th>
                                     <th class="p-3">Tipo</th>
                                     <th class="p-3">Autoridad</th>
-                                    <th class="p-3 text-center">Revisado</th>
+                                    <th class="p-3" id="thColumnaF">Columna F</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
@@ -114,7 +114,7 @@
         </div>
     </main>
 
-    <!-- Ventana Flotante (Modal) de Detalle con Estado de Validación -->
+    <!-- Ventana Flotante (Modal) Completa con todos los campos y Estado de Validación -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all">
             
@@ -124,7 +124,7 @@
                 <button onclick="closeModal()" class="text-white hover:opacity-80 text-xl font-bold px-2">&times;</button>
             </div>
 
-            <!-- Contenido del Modal -->
+            <!-- Contenido del Modal con todos los campos -->
             <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                 <div>
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Norma</span>
@@ -146,9 +146,15 @@
                     </div>
                 </div>
 
-                <div>
-                    <span class="text-xs font-bold text-slate-400 block mb-1">Autoridad Reguladora</span>
-                    <span id="modalAutoridad" class="font-semibold px-3 py-1 bg-blue-50 text-blue-800 rounded-lg inline-block text-xs">-</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block mb-1">Autoridad Reguladora</span>
+                        <span id="modalAutoridad" class="font-semibold px-3 py-1 bg-blue-50 text-blue-800 rounded-lg inline-block text-xs">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block mb-1" id="modalLabelColumnaF">Columna F</span>
+                        <span id="modalColumnaF" class="font-semibold px-3 py-1 bg-slate-100 text-slate-700 rounded-lg inline-block text-xs">-</span>
+                    </div>
                 </div>
 
                 <div>
@@ -168,6 +174,7 @@
     <script>
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
         var rawData = [];
+        var headersList = [];
 
         window.addEventListener('DOMContentLoaded', function() {
             fetchData();
@@ -189,6 +196,9 @@
                 header: true,
                 skipEmptyLines: true,
                 complete: function(results) {
+                    if (results.meta && results.meta.fields) {
+                        headersList = results.meta.fields;
+                    }
                     if (results.data.length > 0) {
                         var lastDate = results.data[results.data.length - 1]['Fecha'] || "";
                         document.getElementById('lastUpdateDisplay').textContent = "Última act: " + lastDate;
@@ -202,10 +212,25 @@
                             if(partes.length === 3) {
                                 row.mesAnio = partes[1].padStart(2, '0') + '/' + partes[2];
                                 row.a = partes[2];
+                                // Crear un valor numérico para ordenar de más reciente a más antiguo (AAAAMMDD)
+                                row.sortDate = partes[2] + partes[1].padStart(2, '0') + partes[0].padStart(2, '0');
+                            } else {
+                                row.sortDate = '00000000';
                             }
                             rawData.push(row);
                         }
                     }
+
+                    // Ordenar de más reciente a más antiguo por defecto
+                    rawData.sort(function(a, b) {
+                        return b.sortDate.localeCompare(a.sortDate);
+                    });
+
+                    // Configurar el nombre de la Columna F dinámicamente si existe en el CSV (índice 5 o la 6ª columna)
+                    var colFName = headersList.length > 5 ? headersList[5] : 'Columna F';
+                    document.getElementById('thColumnaF').textContent = colFName;
+                    document.getElementById('modalLabelColumnaF').textContent = colFName;
+
                     populateFilters();
                     renderTable(rawData);
                 }
@@ -235,6 +260,7 @@
                     data.sort((a, b) => a.localeCompare(b));
                 }
                 var select = document.getElementById(id);
+                select.innerHTML = select.options[0].outerHTML; // Mantener opción por defecto
                 for(var i = 0; i < data.length; i++) {
                     var opt = document.createElement('option');
                     opt.value = data[i];
@@ -290,18 +316,15 @@
             var tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
+            // Obtener el nombre de la Columna F dinámicamente
+            var colFKey = headersList.length > 5 ? headersList[5] : '';
+
             for (var i = 0; i < data.length; i++) {
                 var item = data[i];
                 var tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 cursor-pointer transition";
                 
-                var revisado = (item['Revisado'] || '').trim().toLowerCase();
-                var badgeHtml = '';
-                if(revisado === 'si' || revisado === 'sí' || revisado === '1' || revisado === 'x') {
-                    badgeHtml = '<span class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">Sí</span>';
-                } else {
-                    badgeHtml = '<span class="px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">Pendiente</span>';
-                }
+                var valColF = colFKey ? (item[colFKey] || '') : '';
 
                 tr.innerHTML = `
                     <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
@@ -310,7 +333,7 @@
                     <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${item['Pilar del SIG'] || ''}</span></td>
                     <td class="p-3 text-xs">${item['Tipo de norma'] || ''}</td>
                     <td class="p-3 text-xs">${item['Autoridad'] || ''}</td>
-                    <td class="p-3 text-center">${badgeHtml}</td>
+                    <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
                 `;
 
                 (function(rowObj) {
@@ -333,16 +356,20 @@
             document.getElementById('modalAutoridad').textContent = item['Autoridad'] || '-';
             document.getElementById('modalSumilla').textContent = item['Sumilla / Descripción'] || 'Sin descripción disponible.';
 
+            var colFKey = headersList.length > 5 ? headersList[5] : '';
+            document.getElementById('modalColumnaF').textContent = colFKey ? (item[colFKey] || '-') : '-';
+
+            // Lógica de validación con la columna Revisado
             var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
             var banner = document.getElementById('modalStatusBanner');
             var statusText = document.getElementById('modalStatusText');
 
             if (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x') {
-                banner.style.backgroundColor = '#6CAC5E';
+                banner.style.backgroundColor = '#6CAC5E'; // Verde
                 statusText.textContent = 'Validado';
                 statusText.style.color = '#ffffff';
             } else {
-                banner.style.backgroundColor = '#FBC13F';
+                banner.style.backgroundColor = '#FBC13F'; // Amarillo
                 statusText.textContent = 'Pendiente de validar';
                 statusText.style.color = '#2c3e50';
             }
