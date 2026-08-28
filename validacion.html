@@ -22,10 +22,10 @@
 </head>
 <body class="min-h-screen">
 
-    <!-- Header con navegación actualizada -->
+    <!-- Header con navegación -->
     <header class="bg-corporate-blue text-white shadow-md py-6 px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
         <div class="flex items-center space-x-4">
-            <h1 class="text-2xl font-bold tracking-tight" style="font-family: Arial, sans-serif;">Portal de Requisitos Legales - Validación de Normas</h1>
+            <h1 class="text-2xl font-bold tracking-tight">Portal de Requisitos Legales - Validación de Normas</h1>
         </div>
         <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
             <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
@@ -37,10 +37,42 @@
         </div>
     </header>
 
-    <main class="main-container">
+    <main class="main-container space-y-6">
+        
+        <!-- Tarjetas de Conteo / Resumen (KPIs) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Registros</span>
+                    <h3 id="kpiTotal" class="text-2xl font-extrabold text-slate-700">0</h3>
+                </div>
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-amber-500 uppercase tracking-wider">Faltan por Validar</span>
+                    <h3 id="kpiPendientes" class="text-2xl font-extrabold text-amber-600">0</h3>
+                </div>
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-green-500 uppercase tracking-wider">Validados</span>
+                    <h3 id="kpiValidados" class="text-2xl font-extrabold text-green-600">0</h3>
+                </div>
+                <div class="p-3 bg-green-50 text-green-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
-            <!-- Panel de Filtros Lateral con Borradorcitos -->
+            <!-- Panel de Filtros Lateral -->
             <aside class="bg-white p-6 rounded-2xl border shadow-sm h-fit sticky top-6 space-y-4 lg:col-span-1">
                 <div id="lastUpdateDisplay" class="text-xs font-medium italic border-b pb-2 mb-2" style="color: #3B599F;"></div>
                 <div class="flex justify-between items-center border-b pb-2">
@@ -48,12 +80,12 @@
                     <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline">Reset Todo</button>
                 </div>
                 
-                <!-- Filtro de Búsqueda de Texto -->
+                <!-- Buscar Texto -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Buscar Texto</label>
                     <div class="relative">
                         <input type="text" id="searchInput" placeholder="Norma o sumilla..." class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
-                        <button onclick="clearFilter('searchInput')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('searchInput')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
                     </div>
                 </div>
 
@@ -66,16 +98,16 @@
                             <option value="validado">Validado</option>
                             <option value="pendiente">Pendiente</option>
                         </select>
-                        <button onclick="clearFilter('filterEstado')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterEstado')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
                     </div>
                 </div>
                 
-                <!-- Fecha Específica con Calendario Interactivo -->
+                <!-- Fecha Específica -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Fecha Específica</label>
                     <div class="relative">
                         <input type="date" id="filterFecha" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
-                        <button onclick="clearFilter('filterFecha')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterFecha')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
                     </div>
                 </div>
 
@@ -86,7 +118,7 @@
                         <select id="filterMesAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Seleccionar...</option>
                         </select>
-                        <button onclick="clearFilter('filterMesAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterMesAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
                     </div>
                 </div>
 
@@ -97,7 +129,7 @@
                         <select id="filterAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todos los Años</option>
                         </select>
-                        <button onclick="clearFilter('filterAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
                     </div>
                 </div>
 
@@ -108,7 +140,7 @@
                         <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todos los Pilares</option>
                         </select>
-                        <button onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
                     </div>
                 </div>
 
@@ -119,7 +151,7 @@
                         <select id="filterTipo" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todos los Tipos</option>
                         </select>
-                        <button onclick="clearFilter('filterTipo')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterTipo')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
                     </div>
                 </div>
 
@@ -130,7 +162,7 @@
                         <select id="filterAutoridad" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todas las Autoridades</option>
                         </select>
-                        <button onclick="clearFilter('filterAutoridad')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterAutoridad')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
                     </div>
                 </div>
             </aside>
@@ -176,19 +208,13 @@
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all">
             
-            <!-- Barra de Estado Superior Dinámica -->
-            <div id="modalStatusBanner" class="px-6 py-3 flex items-center justify-between text-white font-bold transition-colors duration-300" style="background-color: #FBC13F;">
-                <span id="modalStatusText" class="text-sm tracking-wide uppercase">Pendiente de validar</span>
+            <div class="px-6 py-4 bg-corporate-blue text-white flex justify-between items-center">
+                <h3 id="modalNorma" class="text-lg font-bold">Detalle de la Norma</h3>
                 <button onclick="closeModal()" class="text-white hover:opacity-80 text-xl font-bold px-2">&times;</button>
             </div>
 
             <!-- Contenido del Modal -->
-            <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto text-left">
-                <div>
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Norma</span>
-                    <h3 id="modalNorma" class="text-xl font-extrabold text-left" style="color: #3B599F;">-</h3>
-                </div>
-
+            <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-left">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <div>
                         <span class="text-xs font-bold text-slate-400 block">Fecha</span>
@@ -221,27 +247,40 @@
                     </div>
                 </div>
 
-                <!-- Panel Complementario -->
-                <div id="modalExtraSection" class="hidden space-y-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Detalles Complementarios</span>
-                    <div id="modalExtraFields" class="space-y-3"></div>
-                </div>
-
                 <!-- Cajón de Enlace -->
                 <div id="modalLinkContainer" class="hidden pt-2">
-                    <a id="modalLinkColI" href="#" target="_blank" class="w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 hover:opacity-90" style="background-color: #3B599F;">
-                        <span>Ver norma aquí</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                        </svg>
+                    <a id="modalLinkColI" href="#" target="_blank" class="w-full py-2.5 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 hover:opacity-90" style="background-color: #3B599F;">
+                        <span>Ver norma original</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     </a>
                 </div>
 
-                <!-- Botón Interactivo para Cambiar Estado de Validación -->
-                <div class="pt-2 border-t">
-                    <button id="modalToggleBtn" onclick="toggleValidation()" class="w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2" style="background-color: #6CAC5E;">
-                        <span id="modalToggleBtnText">Cambiar a Validado</span>
+                <!-- Edición de Evidencia (Columna M) y Revisado (Columna N) -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Editar Campos (Columnas M y N)</span>
+                    
+                    <!-- Columna M: Evidencia -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 block">Evidencia (Columna M)</label>
+                        <textarea id="editEvidencia" rows="3" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;" placeholder="Ingrese o edite la evidencia..."></textarea>
+                    </div>
+
+                    <!-- Columna N: Revisado -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 block">Estado de Revisión (Columna N)</label>
+                        <select id="editRevisado" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
+                            <option value="">Pendiente (Vacío)</option>
+                            <option value="si">Validado (Sí)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botón de Guardado -->
+                <div class="pt-2">
+                    <button onclick="guardarCambiosSheet()" class="w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2" style="background-color: #6CAC5E;">
+                        <span>Guardar Cambios en Google Sheets</span>
                     </button>
+                    <p id="syncStatus" class="text-center text-xs text-slate-400 mt-2"></p>
                 </div>
             </div>
 
@@ -254,7 +293,9 @@
     </div>
 
     <script>
-        // Control de Seguridad y Navegación
+        // PEGA AQUÍ TU URL DE LA APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+        const scriptAppUrl = 'TU_URL_DE_WEB_APP_DE_APPS_SCRIPT';
+
         window.addEventListener('DOMContentLoaded', function() {
             var role = sessionStorage.getItem('userRole');
             
@@ -354,9 +395,26 @@
                     }
 
                     populateFilters();
+                    updateKPIs(rawData);
                     renderTable(rawData);
                 }
             });
+        }
+
+        function updateKPIs(data) {
+            var total = data.length;
+            var validados = 0;
+            for(var i = 0; i < total; i++) {
+                var rev = (data[i]['Revisado'] || '').trim().toLowerCase();
+                if(rev === 'si' || rev === 'sí' || rev === '1' || rev === 'x') {
+                    validados++;
+                }
+            }
+            var pendientes = total - validados;
+            
+            document.getElementById('kpiTotal').textContent = total;
+            document.getElementById('kpiPendientes').textContent = pendientes;
+            document.getElementById('kpiValidados').textContent = validados;
         }
 
         function populateFilters() {
@@ -501,39 +559,18 @@
             document.getElementById('modalTipo').textContent = decodeHtmlEntities(item['Tipo de norma'] || '-');
             document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || 'Sin descripción disponible.');
             document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
+            document.getElementById('syncStatus').textContent = '';
 
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            var extraFieldsContainer = document.getElementById('modalExtraFields');
-            var extraSection = document.getElementById('modalExtraSection');
-            extraFieldsContainer.innerHTML = '';
-            var hasExtra = false;
+            // Cargar valores en los inputs de edición (Columnas M y N)
+            var evidenciaVal = item['Evidencia'] || (headersList.length > 12 ? item[headersList[12]] : '') || '';
+            document.getElementById('editEvidencia').value = decodeHtmlEntities(evidenciaVal);
 
-            var indicesExtra = [9, 10, 11, 12, 13];
-            for(var idx = 0; idx < indicesExtra.length; idx++) {
-                var colIdx = indicesExtra[idx];
-                if(headersList.length > colIdx) {
-                    var headerName = decodeHtmlEntities(headersList[colIdx]);
-                    var cellVal = decodeHtmlEntities(item[headersList[colIdx]] || '').trim();
-                    if(cellVal) {
-                        hasExtra = true;
-                        var cardDiv = document.createElement('div');
-                        cardDiv.className = "bg-slate-50 p-4 rounded-xl border border-slate-100 text-left space-y-1";
-                        cardDiv.innerHTML = `
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">${headerName}</span>
-                            <p class="text-slate-700 text-sm leading-relaxed text-left whitespace-pre-line">${cellVal}</p>
-                        `;
-                        extraFieldsContainer.appendChild(cardDiv);
-                    }
-                }
-            }
-
-            if(hasExtra) {
-                extraSection.classList.remove('hidden');
-            } else {
-                extraSection.classList.add('hidden');
-            }
+            var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
+            var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
+            document.getElementById('editRevisado').value = isValido ? 'si' : '';
 
             var colIKey = headersList.length > 8 ? headersList[8] : '';
             var linkContainer = document.getElementById('modalLinkContainer');
@@ -547,46 +584,42 @@
                 linkContainer.classList.add('hidden');
             }
 
-            updateModalStatusBanner(item);
-
             document.getElementById('detailModal').classList.remove('hidden');
             document.getElementById('detailModal').classList.add('flex');
         }
 
-        function updateModalStatusBanner(item) {
-            var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
-            var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
-            var banner = document.getElementById('modalStatusBanner');
-            var statusText = document.getElementById('modalStatusText');
-            var toggleBtn = document.getElementById('modalToggleBtn');
-            var toggleBtnText = document.getElementById('modalToggleBtnText');
-
-            if (isValido) {
-                banner.style.backgroundColor = '#6CAC5E';
-                statusText.textContent = 'Validado';
-                statusText.style.color = '#ffffff';
-                toggleBtn.style.backgroundColor = '#E06D6D';
-                toggleBtnText.textContent = 'Marcar como Pendiente';
-            } else {
-                banner.style.backgroundColor = '#FBC13F';
-                statusText.textContent = 'Pendiente de validar';
-                statusText.style.color = '#2c3e50';
-                toggleBtn.style.backgroundColor = '#6CAC5E';
-                toggleBtnText.textContent = 'Marcar como Validado';
-            }
-        }
-
-        function toggleValidation() {
+        function guardarCambiosSheet() {
             if (!currentModalItem) return;
-            var revisadoVal = (currentModalItem['Revisado'] || '').trim().toLowerCase();
-            var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
-            
-            // Alternar valor
-            currentModalItem['Revisado'] = isValido ? '' : 'si';
-            
-            // Actualizar interfaz del modal y re-renderizar tabla/filtros
-            updateModalStatusBanner(currentModalItem);
-            applyFilters();
+
+            var nuevaEvidencia = document.getElementById('editEvidencia').value;
+            var nuevoRevisado = document.getElementById('editRevisado').value;
+            var nombreNorma = currentModalItem['Norma'];
+
+            document.getElementById('syncStatus').textContent = 'Sincronizando con Google Sheets...';
+
+            fetch(scriptAppUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    norma: nombreNorma,
+                    evidencia: nuevaEvidencia,
+                    revisado: nuevoRevisado
+                })
+            }).then(() => {
+                // Actualizar datos localmente de inmediato
+                currentModalItem['Evidencia'] = nuevaEvidencia;
+                currentModalItem['Revisado'] = nuevoRevisado;
+                
+                updateKPIs(rawData);
+                applyFilters();
+                
+                document.getElementById('syncStatus').textContent = '¡Modificaciones guardadas en M y N correctamente!';
+                setTimeout(() => { document.getElementById('syncStatus').textContent = ''; }, 3500);
+            }).catch(err => {
+                console.error(err);
+                document.getElementById('syncStatus').textContent = 'Error al sincronizar.';
+            });
         }
 
         function closeModal() {
