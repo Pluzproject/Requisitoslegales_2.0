@@ -56,6 +56,19 @@
                         <button onclick="clearFilter('searchInput')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
+
+                <!-- Estado de Validación -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Estado de Validación</label>
+                    <div class="relative">
+                        <select id="filterEstado" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todos los Estados</option>
+                            <option value="validado">Validado</option>
+                            <option value="pendiente">Pendiente</option>
+                        </select>
+                        <button onclick="clearFilter('filterEstado')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
                 
                 <!-- Fecha Específica con Calendario Interactivo -->
                 <div class="space-y-1">
@@ -138,6 +151,7 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr style="background-color: #3B599F; color: white;" class="text-xs uppercase tracking-wider">
+                                    <th class="p-3">Estado</th>
                                     <th class="p-3">Fecha</th>
                                     <th class="p-3">Norma</th>
                                     <th class="p-3">Sumilla / Descripción</th>
@@ -222,6 +236,13 @@
                         </svg>
                     </a>
                 </div>
+
+                <!-- Botón Interactivo para Cambiar Estado de Validación -->
+                <div class="pt-2 border-t">
+                    <button id="modalToggleBtn" onclick="toggleValidation()" class="w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2" style="background-color: #6CAC5E;">
+                        <span id="modalToggleBtnText">Cambiar a Validado</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Pie del Modal -->
@@ -255,7 +276,7 @@
 
             fetchData();
 
-            var filterIds = ['searchInput', 'filterFecha', 'filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
+            var filterIds = ['searchInput', 'filterEstado', 'filterFecha', 'filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
             for(var i = 0; i < filterIds.length; i++) {
                 var el = document.getElementById(filterIds[i]);
                 if(el) {
@@ -282,6 +303,7 @@
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
         var rawData = [];
         var headersList = [];
+        var currentModalItem = null;
 
         function decodeHtmlEntities(str) {
             if (!str) return '';
@@ -378,6 +400,7 @@
 
         function applyFilters() {
             var s = document.getElementById('searchInput').value.toLowerCase();
+            var est = document.getElementById('filterEstado').value;
             var fe = document.getElementById('filterFecha').value;
             var ma = document.getElementById('filterMesAnio').value;
             var an = document.getElementById('filterAnio').value;
@@ -396,7 +419,11 @@
                 var normaDec = decodeHtmlEntities(item['Norma'] || '').toLowerCase();
                 var sumillaDec = decodeHtmlEntities(item['Sumilla / Descripción'] || '').toLowerCase();
                 
+                var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
+                var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
+                
                 var matchS = !s || normaDec.includes(s) || sumillaDec.includes(s);
+                var matchEst = !est || (est === 'validado' && isValido) || (est === 'pendiente' && !isValido);
                 var matchFE = !filterSortDate || item.sortDate === filterSortDate;
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
@@ -405,7 +432,7 @@
                 var matchTI = !ti || decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase() === ti;
                 var matchAU = !au || decodeHtmlEntities(item['Autoridad'] || '').trim().toLowerCase() === au;
                 
-                if(matchS && matchFE && matchMA && matchAN && matchPI && matchTI && matchAU) {
+                if(matchS && matchEst && matchFE && matchMA && matchAN && matchPI && matchTI && matchAU) {
                     filtered.push(item);
                 }
             }
@@ -414,6 +441,7 @@
 
         function resetFilters() {
             document.getElementById('searchInput').value = '';
+            document.getElementById('filterEstado').value = '';
             document.getElementById('filterFecha').value = '';
             document.getElementById('filterMesAnio').value = '';
             document.getElementById('filterAnio').value = '';
@@ -435,8 +463,15 @@
                 tr.className = "hover:bg-slate-50 cursor-pointer transition";
                 
                 var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
+                var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
+                var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
+                
+                var statusBadge = isValido 
+                    ? '<span class="px-2.5 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-bold inline-block">Validado</span>'
+                    : '<span class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold inline-block">Pendiente</span>';
 
                 tr.innerHTML = `
+                    <td class="p-3 whitespace-nowrap">${statusBadge}</td>
                     <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
                     <td class="p-3 font-bold" style="color: #3B599F;">${decodeHtmlEntities(item['Norma'] || '')}</td>
                     <td class="p-3 text-slate-600 text-xs max-w-md whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
@@ -459,6 +494,7 @@
         }
 
         function openModal(item) {
+            currentModalItem = item;
             document.getElementById('modalNorma').textContent = decodeHtmlEntities(item['Norma'] || 'Sin Norma');
             document.getElementById('modalFecha').textContent = item['Fecha'] || '-';
             document.getElementById('modalPilar').textContent = decodeHtmlEntities(item['Pilar del SIG'] || '-');
@@ -511,27 +547,52 @@
                 linkContainer.classList.add('hidden');
             }
 
-            var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
-            var banner = document.getElementById('modalStatusBanner');
-            var statusText = document.getElementById('modalStatusText');
-
-            if (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x') {
-                banner.style.backgroundColor = '#6CAC5E';
-                statusText.textContent = 'Validado';
-                statusText.style.color = '#ffffff';
-            } else {
-                banner.style.backgroundColor = '#FBC13F';
-                statusText.textContent = 'Pendiente de validar';
-                statusText.style.color = '#2c3e50';
-            }
+            updateModalStatusBanner(item);
 
             document.getElementById('detailModal').classList.remove('hidden');
             document.getElementById('detailModal').classList.add('flex');
         }
 
+        function updateModalStatusBanner(item) {
+            var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
+            var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
+            var banner = document.getElementById('modalStatusBanner');
+            var statusText = document.getElementById('modalStatusText');
+            var toggleBtn = document.getElementById('modalToggleBtn');
+            var toggleBtnText = document.getElementById('modalToggleBtnText');
+
+            if (isValido) {
+                banner.style.backgroundColor = '#6CAC5E';
+                statusText.textContent = 'Validado';
+                statusText.style.color = '#ffffff';
+                toggleBtn.style.backgroundColor = '#E06D6D';
+                toggleBtnText.textContent = 'Marcar como Pendiente';
+            } else {
+                banner.style.backgroundColor = '#FBC13F';
+                statusText.textContent = 'Pendiente de validar';
+                statusText.style.color = '#2c3e50';
+                toggleBtn.style.backgroundColor = '#6CAC5E';
+                toggleBtnText.textContent = 'Marcar como Validado';
+            }
+        }
+
+        function toggleValidation() {
+            if (!currentModalItem) return;
+            var revisadoVal = (currentModalItem['Revisado'] || '').trim().toLowerCase();
+            var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
+            
+            // Alternar valor
+            currentModalItem['Revisado'] = isValido ? '' : 'si';
+            
+            // Actualizar interfaz del modal y re-renderizar tabla/filtros
+            updateModalStatusBanner(currentModalItem);
+            applyFilters();
+        }
+
         function closeModal() {
             document.getElementById('detailModal').classList.remove('flex');
             document.getElementById('detailModal').classList.add('hidden');
+            currentModalItem = null;
         }
     </script>
 </body>
