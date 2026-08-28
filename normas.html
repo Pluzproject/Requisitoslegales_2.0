@@ -28,9 +28,8 @@
             <h1 class="text-2xl font-bold tracking-tight" style="font-family: Arial, sans-serif;">Portal de Requisitos Legales - Listado de Normas</h1>
         </div>
         <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
-            <nav class="space-x-6 text-sm font-semibold">
-                <a href="index.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
-                <a href="normas.html" class="underline underline-offset-4">Ver Normas (Tabla)</a>
+            <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
+                <!-- Se rellena dinámicamente y restringe a usuarios públicos -->
             </nav>
             <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
                 Cumplimiento de normas
@@ -197,18 +196,25 @@
     </div>
 
     <script>
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
-        var rawData = [];
-        var headersList = [];
-
-        function decodeHtmlEntities(str) {
-            if (!str) return '';
-            var txt = document.createElement('textarea');
-            txt.innerHTML = str;
-            return txt.value;
-        }
-
+        // Control Estricto de Seguridad: Bloquea usuarios públicos en esta página
         window.addEventListener('DOMContentLoaded', function() {
+            var role = sessionStorage.getItem('userRole');
+            
+            if (role !== 'admin') {
+                alert("Acceso restringido. Esta sección es exclusiva para administradores.");
+                window.location.href = 'indicadores.html';
+                return;
+            }
+
+            var navContainer = document.getElementById('userNav');
+            if (navContainer) {
+                navContainer.innerHTML = `
+                    <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
+                    <a href="normas.html" class="underline underline-offset-4 font-bold">Ver Normas (Tabla)</a>
+                    <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
+                `;
+            }
+
             fetchData();
 
             var filterIds = ['searchInput', 'filterFecha', 'filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
@@ -221,6 +227,22 @@
             }
             document.getElementById('btnReset').addEventListener('click', resetFilters);
         });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
+        var rawData = [];
+        var headersList = [];
+
+        function decodeHtmlEntities(str) {
+            if (!str) return '';
+            var txt = document.createElement('textarea');
+            txt.innerHTML = str;
+            return txt.value;
+        }
 
         function fetchData() {
             Papa.parse(csvUrl, {
@@ -254,7 +276,6 @@
                         }
                     }
 
-                    // Orden cronológico inverso (más reciente arriba)
                     rawData.sort(function(a, b) {
                         return b.sortDate.localeCompare(a.sortDate);
                     });
@@ -302,7 +323,6 @@
                 }
             }
 
-            // filterFecha ya es un input date interactivo, por lo que se gestiona mediante calendario de navegador
             fillSelect('filterMesAnio', getUniqueValues('mesAnio'), true);
             fillSelect('filterAnio', getUniqueValues('a'), true);
             fillSelect('filterPilar', getUniqueValues('Pilar del SIG'), false);
@@ -312,14 +332,13 @@
 
         function applyFilters() {
             var s = document.getElementById('searchInput').value.toLowerCase();
-            var fe = document.getElementById('filterFecha').value; // Formato YYYY-MM-DD del input date
+            var fe = document.getElementById('filterFecha').value;
             var ma = document.getElementById('filterMesAnio').value;
             var an = document.getElementById('filterAnio').value;
             var pi = document.getElementById('filterPilar').value.toLowerCase();
             var ti = document.getElementById('filterTipo').value.toLowerCase();
             var au = document.getElementById('filterAutoridad').value.toLowerCase();
 
-            // Traducción de YYYY-MM-DD a YYYYMMDD para comparar con sortDate del registro
             var filterSortDate = '';
             if(fe) {
                 filterSortDate = fe.replace(/-/g, '');
@@ -404,13 +423,12 @@
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            // Generar dinámicamente las tarjetas de las columnas J(9), K(10), L(11), M(12), N(13)
             var extraFieldsContainer = document.getElementById('modalExtraFields');
             var extraSection = document.getElementById('modalExtraSection');
             extraFieldsContainer.innerHTML = '';
             var hasExtra = false;
 
-            var indicesExtra = [9, 10, 11, 12, 13]; // J, K, L, M, N explicítamente incluidos
+            var indicesExtra = [9, 10, 11, 12, 13];
             for(var idx = 0; idx < indicesExtra.length; idx++) {
                 var colIdx = indicesExtra[idx];
                 if(headersList.length > colIdx) {
@@ -435,7 +453,6 @@
                 extraSection.classList.add('hidden');
             }
 
-            // Columna I (Enlace) convertido en Cajón "Ver norma aquí"
             var colIKey = headersList.length > 8 ? headersList[8] : '';
             var linkContainer = document.getElementById('modalLinkContainer');
             var linkAnchor = document.getElementById('modalLinkColI');
@@ -448,17 +465,16 @@
                 linkContainer.classList.add('hidden');
             }
 
-            // Lógica de validación con la columna Revisado
             var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
             var banner = document.getElementById('modalStatusBanner');
             var statusText = document.getElementById('modalStatusText');
 
             if (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x') {
-                banner.style.backgroundColor = '#6CAC5E'; // Verde
+                banner.style.backgroundColor = '#6CAC5E';
                 statusText.textContent = 'Validado';
                 statusText.style.color = '#ffffff';
             } else {
-                banner.style.backgroundColor = '#FBC13F'; // Amarillo
+                banner.style.backgroundColor = '#FBC13F';
                 statusText.textContent = 'Pendiente de validar';
                 statusText.style.color = '#2c3e50';
             }
