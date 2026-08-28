@@ -44,7 +44,7 @@
 
             <div class="relative flex py-2 items-center">
                 <div class="flex-grow border-t border-slate-200"></div>
-                <span class="flex-shrink mx-4 text-xs text-slate-400 uppercase">o bien</span>
+                <span class="flex-shrink mx-4 text-xs text-slate-400 uppercase">O bien</span>
                 <div class="flex-grow border-t border-slate-200"></div>
             </div>
 
@@ -84,7 +84,7 @@
             if(autorizado) {
                 sessionStorage.setItem('userRole', 'admin');
                 sessionStorage.setItem('userName', user);
-                window.location.href = 'indicadores.html'; // El admin entra a indicadores y desde ahí navega a normas
+                window.location.href = 'indicadores.html'; 
             } else {
                 errorBox.textContent = "Credenciales incorrectas o usuario no registrado como administrador.";
                 errorBox.classList.remove('hidden');
