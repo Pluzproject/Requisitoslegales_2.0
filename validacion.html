@@ -273,7 +273,7 @@
                     </a>
                 </div>
 
-                <!-- Edición de Evidencia y Revisado -->
+                <!-- Edición de Evidencia y Revisado (Limpio de textos de columnas) -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Editar campos</span>
                     
@@ -626,7 +626,7 @@
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            // Cargar valores en los inputs de edición (Columnas M y N)
+            // Cargar valores en los inputs de edición
             var evidenciaVal = item['Evidencia'] || (headersList.length > 12 ? item[headersList[12]] : '') || '';
             document.getElementById('editEvidencia').value = decodeHtmlEntities(evidenciaVal);
 
@@ -669,7 +669,6 @@
                     revisado: nuevoRevisado
                 })
             }).then(() => {
-                // Actualizar datos localmente de inmediato
                 currentModalItem['Evidencia'] = nuevaEvidencia;
                 currentModalItem['Revisado'] = nuevoRevisado;
                 
