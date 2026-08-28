@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación de Normas - Portal de Requisitos Legales</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #2c3e50;
+        }
+        .main-container { max-width: 95%; margin: 0 auto; padding: 2.5rem 1rem; }
+        .bg-corporate-blue { background-color: #3B599F; }
+        .text-corporate-blue { color: #3B599F; }
+        .border-corporate-blue { border-color: #3B599F; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header con navegación actualizada -->
+    <header class="bg-corporate-blue text-white shadow-md py-6 px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-2xl font-bold tracking-tight" style="font-family: Arial, sans-serif;">Portal de Requisitos Legales - Validación de Normas</h1>
+        </div>
+        <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
+            <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
+                <!-- Se rellena dinámicamente -->
+            </nav>
+            <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
+                Cumplimiento de normas
+            </a>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Panel de Filtros Lateral con Borradorcitos -->
+            <aside class="bg-white p-6 rounded-2xl border shadow-sm h-fit sticky top-6 space-y-4 lg:col-span-1">
+                <div id="lastUpdateDisplay" class="text-xs font-medium italic border-b pb-2 mb-2" style="color: #3B599F;"></div>
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h2 class="font-bold text-sm" style="color: #3B599F;">Filtros de Búsqueda</h2>
+                    <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline">Reset Todo</button>
+                </div>
+                
+                <!-- Filtro de Búsqueda de Texto -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Buscar Texto</label>
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Norma o sumilla..." class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
+                        <button onclick="clearFilter('searchInput')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
+                
+                <!-- Fecha Específica con Calendario Interactivo -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Fecha Específica</label>
+                    <div class="relative">
+                        <input type="date" id="filterFecha" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
+                        <button onclick="clearFilter('filterFecha')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Periodo (Mes/Año) -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Periodo (Mes/Año)</label>
+                    <div class="relative">
+                        <select id="filterMesAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                        <button onclick="clearFilter('filterMesAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Año Específico -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Año Específico</label>
+                    <div class="relative">
+                        <select id="filterAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todos los Años</option>
+                        </select>
+                        <button onclick="clearFilter('filterAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Pilar del SIG -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Pilar del SIG</label>
+                    <div class="relative">
+                        <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todos los Pilares</option>
+                        </select>
+                        <button onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Tipo de Norma -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Tipo de Norma</label>
+                    <div class="relative">
+                        <select id="filterTipo" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todos los Tipos</option>
+                        </select>
+                        <button onclick="clearFilter('filterTipo')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Autoridad -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Autoridad</label>
+                    <div class="relative">
+                        <select id="filterAutoridad" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todas las Autoridades</option>
+                        </select>
+                        <button onclick="clearFilter('filterAutoridad')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Contenido Principal: Tabla -->
+            <div class="lg:col-span-3 space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold" style="color: #3B599F;">Panel de Validación de Normas</h2>
+                            <p class="text-xs text-slate-500">Haz clic en cualquier fila para revisar el detalle y gestionar su validación.</p>
+                        </div>
+                        <div id="rowCountDisplay" class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">Mostrando 0 registros</div>
+                    </div>
+
+                    <!-- Tabla de Datos -->
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr style="background-color: #3B599F; color: white;" class="text-xs uppercase tracking-wider">
+                                    <th class="p-3">Fecha</th>
+                                    <th class="p-3">Norma</th>
+                                    <th class="p-3">Sumilla / Descripción</th>
+                                    <th class="p-3">Pilar del SIG</th>
+                                    <th class="p-3">Tipo</th>
+                                    <th class="p-3">Autoridad</th>
+                                    <th class="p-3" id="thColumnaF">Columna F</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Datos dinámicos -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Ventana Flotante (Modal) -->
+    <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all">
+            
+            <!-- Barra de Estado Superior Dinámica -->
+            <div id="modalStatusBanner" class="px-6 py-3 flex items-center justify-between text-white font-bold transition-colors duration-300" style="background-color: #FBC13F;">
+                <span id="modalStatusText" class="text-sm tracking-wide uppercase">Pendiente de validar</span>
+                <button onclick="closeModal()" class="text-white hover:opacity-80 text-xl font-bold px-2">&times;</button>
+            </div>
+
+            <!-- Contenido del Modal -->
+            <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto text-left">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Norma</span>
+                    <h3 id="modalNorma" class="text-xl font-extrabold text-left" style="color: #3B599F;">-</h3>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block">Fecha</span>
+                        <span id="modalFecha" class="font-semibold text-slate-700">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block">Pilar del SIG</span>
+                        <span id="modalPilar" class="font-semibold text-slate-700">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block">Tipo de Norma</span>
+                        <span id="modalTipo" class="font-semibold text-slate-700">-</span>
+                    </div>
+                </div>
+
+                <!-- Sumilla -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Sumilla / Descripción Completa</span>
+                    <p id="modalSumilla" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block mb-1">Autoridad Reguladora</span>
+                        <span id="modalAutoridad" class="font-semibold px-3 py-1 bg-blue-50 text-blue-800 rounded-lg inline-block text-xs">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block mb-1" id="modalLabelColumnaF">Columna F</span>
+                        <span id="modalColumnaF" class="font-semibold px-3 py-1 bg-slate-100 text-slate-700 rounded-lg inline-block text-xs">-</span>
+                    </div>
+                </div>
+
+                <!-- Panel Complementario -->
+                <div id="modalExtraSection" class="hidden space-y-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Detalles Complementarios</span>
+                    <div id="modalExtraFields" class="space-y-3"></div>
+                </div>
+
+                <!-- Cajón de Enlace -->
+                <div id="modalLinkContainer" class="hidden pt-2">
+                    <a id="modalLinkColI" href="#" target="_blank" class="w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 hover:opacity-90" style="background-color: #3B599F;">
+                        <span>Ver norma aquí</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Pie del Modal -->
+            <div class="bg-slate-50 px-6 py-4 border-t flex justify-end">
+                <button onclick="closeModal()" class="px-5 py-2 rounded-lg text-white font-bold text-sm transition shadow-sm" style="background-color: #3B599F;">Cerrar</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Control de Seguridad y Navegación
+        window.addEventListener('DOMContentLoaded', function() {
+            var role = sessionStorage.getItem('userRole');
+            
+            if (role !== 'admin') {
+                alert("Acceso restringido. Esta sección es exclusiva para administradores.");
+                window.location.href = 'indicadores.html';
+                return;
+            }
+
+            var navContainer = document.getElementById('userNav');
+            if (navContainer) {
+                navContainer.innerHTML = `
+                    <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
+                    <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas</a>
+                    <a href="validacion.html" class="underline underline-offset-4 font-bold">Validación</a>
+                    <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
+                `;
+            }
+
+            fetchData();
+
+            var filterIds = ['searchInput', 'filterFecha', 'filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
+            for(var i = 0; i < filterIds.length; i++) {
+                var el = document.getElementById(filterIds[i]);
+                if(el) {
+                    el.addEventListener('change', applyFilters);
+                    el.addEventListener('input', applyFilters);
+                }
+            }
+            document.getElementById('btnReset').addEventListener('click', resetFilters);
+        });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        function clearFilter(id) {
+            var el = document.getElementById(id);
+            if(el) {
+                el.value = '';
+                applyFilters();
+            }
+        }
+
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
+        var rawData = [];
+        var headersList = [];
+
+        function decodeHtmlEntities(str) {
+            if (!str) return '';
+            var txt = document.createElement('textarea');
+            txt.innerHTML = str;
+            return txt.value;
+        }
+
+        function fetchData() {
+            Papa.parse(csvUrl, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.meta && results.meta.fields) {
+                        headersList = results.meta.fields;
+                    }
+                    if (results.data.length > 0) {
+                        var lastDate = results.data[results.data.length - 1]['Fecha'] || "";
+                        document.getElementById('lastUpdateDisplay').textContent = "Última act: " + lastDate;
+                    }
+                    rawData = [];
+                    for (var i = 0; i < results.data.length; i++) {
+                        var row = results.data[i];
+                        var normaText = (row['Norma'] || '').trim().toUpperCase();
+                        if (normaText !== "" && normaText !== "SIN NOVEDAD") {
+                            var fechaStr = (row['Fecha'] || '').trim();
+                            row.exactDate = fechaStr;
+                            var partes = fechaStr.split('/');
+                            if(partes.length === 3) {
+                                row.mesAnio = partes[1].padStart(2, '0') + '/' + partes[2];
+                                row.a = partes[2];
+                                row.sortDate = partes[2] + partes[1].padStart(2, '0') + partes[0].padStart(2, '0');
+                            } else {
+                                row.sortDate = '00000000';
+                            }
+                            rawData.push(row);
+                        }
+                    }
+
+                    rawData.sort(function(a, b) {
+                        return b.sortDate.localeCompare(a.sortDate);
+                    });
+
+                    if (headersList.length > 5) {
+                        document.getElementById('thColumnaF').textContent = decodeHtmlEntities(headersList[5]);
+                        document.getElementById('modalLabelColumnaF').textContent = decodeHtmlEntities(headersList[5]);
+                    }
+
+                    populateFilters();
+                    renderTable(rawData);
+                }
+            });
+        }
+
+        function populateFilters() {
+            function getUniqueValues(key) {
+                var uniqueMap = {};
+                for(var i = 0; i < rawData.length; i++) {
+                    var val = rawData[i][key];
+                    if(val) {
+                        var decoded = decodeHtmlEntities(val.trim());
+                        var lower = decoded.toLowerCase();
+                        if(!uniqueMap[lower]) {
+                            uniqueMap[lower] = decoded;
+                        }
+                    }
+                }
+                return Object.values(uniqueMap);
+            }
+
+            function fillSelect(id, data, sortDesc) {
+                if(sortDesc) {
+                    data.sort((a, b) => b.localeCompare(a));
+                } else {
+                    data.sort((a, b) => a.localeCompare(b));
+                }
+                var select = document.getElementById(id);
+                select.innerHTML = select.options[0].outerHTML;
+                for(var i = 0; i < data.length; i++) {
+                    var opt = document.createElement('option');
+                    opt.value = data[i];
+                    opt.textContent = data[i];
+                    select.appendChild(opt);
+                }
+            }
+
+            fillSelect('filterMesAnio', getUniqueValues('mesAnio'), true);
+            fillSelect('filterAnio', getUniqueValues('a'), true);
+            fillSelect('filterPilar', getUniqueValues('Pilar del SIG'), false);
+            fillSelect('filterTipo', getUniqueValues('Tipo de norma'), false);
+            fillSelect('filterAutoridad', getUniqueValues('Autoridad'), false);
+        }
+
+        function applyFilters() {
+            var s = document.getElementById('searchInput').value.toLowerCase();
+            var fe = document.getElementById('filterFecha').value;
+            var ma = document.getElementById('filterMesAnio').value;
+            var an = document.getElementById('filterAnio').value;
+            var pi = document.getElementById('filterPilar').value.toLowerCase();
+            var ti = document.getElementById('filterTipo').value.toLowerCase();
+            var au = document.getElementById('filterAutoridad').value.toLowerCase();
+
+            var filterSortDate = '';
+            if(fe) {
+                filterSortDate = fe.replace(/-/g, '');
+            }
+
+            var filtered = [];
+            for(var i = 0; i < rawData.length; i++) {
+                var item = rawData[i];
+                var normaDec = decodeHtmlEntities(item['Norma'] || '').toLowerCase();
+                var sumillaDec = decodeHtmlEntities(item['Sumilla / Descripción'] || '').toLowerCase();
+                
+                var matchS = !s || normaDec.includes(s) || sumillaDec.includes(s);
+                var matchFE = !filterSortDate || item.sortDate === filterSortDate;
+                var matchMA = !ma || item.mesAnio === ma;
+                var matchAN = !an || item.a === an;
+                
+                var matchPI = !pi || decodeHtmlEntities(item['Pilar del SIG'] || '').trim().toLowerCase() === pi;
+                var matchTI = !ti || decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase() === ti;
+                var matchAU = !au || decodeHtmlEntities(item['Autoridad'] || '').trim().toLowerCase() === au;
+                
+                if(matchS && matchFE && matchMA && matchAN && matchPI && matchTI && matchAU) {
+                    filtered.push(item);
+                }
+            }
+            renderTable(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterFecha').value = '';
+            document.getElementById('filterMesAnio').value = '';
+            document.getElementById('filterAnio').value = '';
+            document.getElementById('filterPilar').value = '';
+            document.getElementById('filterTipo').value = '';
+            document.getElementById('filterAutoridad').value = '';
+            renderTable(rawData);
+        }
+
+        function renderTable(data) {
+            var tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            var colFKey = headersList.length > 5 ? headersList[5] : '';
+
+            for (var i = 0; i < data.length; i++) {
+                var item = data[i];
+                var tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 cursor-pointer transition";
+                
+                var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
+
+                tr.innerHTML = `
+                    <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
+                    <td class="p-3 font-bold" style="color: #3B599F;">${decodeHtmlEntities(item['Norma'] || '')}</td>
+                    <td class="p-3 text-slate-600 text-xs max-w-md whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
+                    <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
+                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Tipo de norma'] || '')}</td>
+                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
+                    <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
+                `;
+
+                (function(rowObj) {
+                    tr.addEventListener('click', function() {
+                        openModal(rowObj);
+                    });
+                })(item);
+
+                tbody.appendChild(tr);
+            }
+
+            document.getElementById('rowCountDisplay').textContent = "Mostrando " + data.length + " registros";
+        }
+
+        function openModal(item) {
+            document.getElementById('modalNorma').textContent = decodeHtmlEntities(item['Norma'] || 'Sin Norma');
+            document.getElementById('modalFecha').textContent = item['Fecha'] || '-';
+            document.getElementById('modalPilar').textContent = decodeHtmlEntities(item['Pilar del SIG'] || '-');
+            document.getElementById('modalTipo').textContent = decodeHtmlEntities(item['Tipo de norma'] || '-');
+            document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || 'Sin descripción disponible.');
+            document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
+
+            var colFKey = headersList.length > 5 ? headersList[5] : '';
+            document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
+
+            var extraFieldsContainer = document.getElementById('modalExtraFields');
+            var extraSection = document.getElementById('modalExtraSection');
+            extraFieldsContainer.innerHTML = '';
+            var hasExtra = false;
+
+            var indicesExtra = [9, 10, 11, 12, 13];
+            for(var idx = 0; idx < indicesExtra.length; idx++) {
+                var colIdx = indicesExtra[idx];
+                if(headersList.length > colIdx) {
+                    var headerName = decodeHtmlEntities(headersList[colIdx]);
+                    var cellVal = decodeHtmlEntities(item[headersList[colIdx]] || '').trim();
+                    if(cellVal) {
+                        hasExtra = true;
+                        var cardDiv = document.createElement('div');
+                        cardDiv.className = "bg-slate-50 p-4 rounded-xl border border-slate-100 text-left space-y-1";
+                        cardDiv.innerHTML = `
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">${headerName}</span>
+                            <p class="text-slate-700 text-sm leading-relaxed text-left whitespace-pre-line">${cellVal}</p>
+                        `;
+                        extraFieldsContainer.appendChild(cardDiv);
+                    }
+                }
+            }
+
+            if(hasExtra) {
+                extraSection.classList.remove('hidden');
+            } else {
+                extraSection.classList.add('hidden');
+            }
+
+            var colIKey = headersList.length > 8 ? headersList[8] : '';
+            var linkContainer = document.getElementById('modalLinkContainer');
+            var linkAnchor = document.getElementById('modalLinkColI');
+            var linkVal = colIKey ? (item[colIKey] || '').trim() : '';
+
+            if (linkVal) {
+                linkAnchor.href = linkVal;
+                linkContainer.classList.remove('hidden');
+            } else {
+                linkContainer.classList.add('hidden');
+            }
+
+            var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
+            var banner = document.getElementById('modalStatusBanner');
+            var statusText = document.getElementById('modalStatusText');
+
+            if (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x') {
+                banner.style.backgroundColor = '#6CAC5E';
+                statusText.textContent = 'Validado';
+                statusText.style.color = '#ffffff';
+            } else {
+                banner.style.backgroundColor = '#FBC13F';
+                statusText.textContent = 'Pendiente de validar';
+                statusText.style.color = '#2c3e50';
+            }
+
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('detailModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('flex');
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
