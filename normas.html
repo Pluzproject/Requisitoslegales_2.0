@@ -89,7 +89,7 @@
                         <div id="rowCountDisplay" class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">Mostrando 0 registros</div>
                     </div>
 
-                    <!-- Tabla de Datos (Orden inverso y Columna F) -->
+                    <!-- Tabla de Datos -->
                     <div class="overflow-x-auto rounded-xl border border-slate-200">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -114,11 +114,11 @@
         </div>
     </main>
 
-    <!-- Ventana Flotante (Modal) Actualizada con campos J, K, L, M y Enlace I -->
+    <!-- Ventana Flotante (Modal) Optimizada -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden transform transition-all">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all">
             
-            <!-- Barra de Estado Superior Dinámica (Verde si está Validado, Amarillo si está Pendiente) -->
+            <!-- Barra de Estado Superior Dinámica -->
             <div id="modalStatusBanner" class="px-6 py-3 flex items-center justify-between text-white font-bold transition-colors duration-300" style="background-color: #FBC13F;">
                 <span id="modalStatusText" class="text-sm tracking-wide uppercase">Pendiente de validar</span>
                 <button onclick="closeModal()" class="text-white hover:opacity-80 text-xl font-bold px-2">&times;</button>
@@ -157,31 +157,21 @@
                     </div>
                 </div>
 
-                <!-- Campos Adicionales: Columnas J, K, L, M -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 block" id="modalLabelColJ">Columna J</span>
-                        <span id="modalColJ" class="font-semibold text-slate-700 text-xs">-</span>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 block" id="modalLabelColK">Columna K</span>
-                        <span id="modalColK" class="font-semibold text-slate-700 text-xs">-</span>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 block" id="modalLabelColL">Columna L</span>
-                        <span id="modalColL" class="font-semibold text-slate-700 text-xs">-</span>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 block" id="modalLabelColM">Columna M</span>
-                        <span id="modalColM" class="font-semibold text-slate-700 text-xs">-</span>
+                <!-- Panel Visualmente Optimizado para Columnas J, K, L, M -->
+                <div id="modalExtraSection" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Detalles Complementarios</span>
+                    <div id="modalExtraFields" class="space-y-1.5 text-xs">
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
 
-                <!-- Enlace de Columna I -->
-                <div id="modalLinkContainer" class="hidden bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1" id="modalLabelColI">Enlace Asociado</span>
-                    <a id="modalLinkColI" href="#" target="_blank" class="text-sm font-semibold underline break-all flex items-center gap-2" style="color: #3B599F;">
-                        Abrir enlace externo &rarr;
+                <!-- Cajón de Enlace (Columna I) -->
+                <div id="modalLinkContainer" class="hidden">
+                    <a id="modalLinkColI" href="#" target="_blank" class="w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 hover:opacity-90" style="background-color: #3B599F;">
+                        <span>Ver norma aquí</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
                     </a>
                 </div>
 
@@ -203,6 +193,14 @@
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
         var rawData = [];
         var headersList = [];
+
+        // Función para limpiar entidades HTML y caracteres especiales
+        function decodeHtmlEntities(str) {
+            if (!str) return '';
+            var txt = document.createElement('textarea');
+            txt.innerHTML = str;
+            return txt.value;
+        }
 
         window.addEventListener('DOMContentLoaded', function() {
             fetchData();
@@ -248,21 +246,15 @@
                         }
                     }
 
-                    // Ordenar de más reciente a más antiguo por defecto
+                    // Orden cronológico inverso (más reciente arriba)
                     rawData.sort(function(a, b) {
                         return b.sortDate.localeCompare(a.sortDate);
                     });
 
-                    // Nombres dinámicos de columnas
                     if (headersList.length > 5) {
-                        document.getElementById('thColumnaF').textContent = headersList[5];
-                        document.getElementById('modalLabelColumnaF').textContent = headersList[5];
+                        document.getElementById('thColumnaF').textContent = decodeHtmlEntities(headersList[5]);
+                        document.getElementById('modalLabelColumnaF').textContent = decodeHtmlEntities(headersList[5]);
                     }
-                    if (headersList.length > 8) document.getElementById('modalLabelColI').textContent = headersList[8];
-                    if (headersList.length > 9) document.getElementById('modalLabelColJ').textContent = headersList[9];
-                    if (headersList.length > 10) document.getElementById('modalLabelColK').textContent = headersList[10];
-                    if (headersList.length > 11) document.getElementById('modalLabelColL').textContent = headersList[11];
-                    if (headersList.length > 12) document.getElementById('modalLabelColM').textContent = headersList[12];
 
                     populateFilters();
                     renderTable(rawData);
@@ -276,10 +268,10 @@
                 for(var i = 0; i < rawData.length; i++) {
                     var val = rawData[i][key];
                     if(val) {
-                        var trimmed = val.trim();
-                        var lower = trimmed.toLowerCase();
+                        var decoded = decodeHtmlEntities(val.trim());
+                        var lower = decoded.toLowerCase();
                         if(!uniqueMap[lower]) {
-                            uniqueMap[lower] = trimmed;
+                            uniqueMap[lower] = decoded;
                         }
                     }
                 }
@@ -320,13 +312,16 @@
             var filtered = [];
             for(var i = 0; i < rawData.length; i++) {
                 var item = rawData[i];
-                var matchS = !s || (item['Norma'] && item['Norma'].toLowerCase().includes(s)) || (item['Sumilla / Descripción'] && item['Sumilla / Descripción'].toLowerCase().includes(s));
+                var normaDec = decodeHtmlEntities(item['Norma'] || '').toLowerCase();
+                var sumillaDec = decodeHtmlEntities(item['Sumilla / Descripción'] || '').toLowerCase();
+                
+                var matchS = !s || normaDec.includes(s) || sumillaDec.includes(s);
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
                 
-                var matchPI = !pi || (item['Pilar del SIG'] && item['Pilar del SIG'].trim().toLowerCase() === pi);
-                var matchTI = !ti || (item['Tipo de norma'] && item['Tipo de norma'].trim().toLowerCase() === ti);
-                var matchAU = !au || (item['Autoridad'] && item['Autoridad'].trim().toLowerCase() === au);
+                var matchPI = !pi || decodeHtmlEntities(item['Pilar del SIG'] || '').trim().toLowerCase() === pi;
+                var matchTI = !ti || decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase() === ti;
+                var matchAU = !au || decodeHtmlEntities(item['Autoridad'] || '').trim().toLowerCase() === au;
                 
                 if(matchS && matchMA && matchAN && matchPI && matchTI && matchAU) {
                     filtered.push(item);
@@ -356,15 +351,15 @@
                 var tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 cursor-pointer transition";
                 
-                var valColF = colFKey ? (item[colFKey] || '') : '';
+                var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
 
                 tr.innerHTML = `
                     <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
-                    <td class="p-3 font-bold" style="color: #3B599F;">${item['Norma'] || ''}</td>
-                    <td class="p-3 text-slate-600 truncate max-w-xs">${item['Sumilla / Descripción'] || ''}</td>
-                    <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${item['Pilar del SIG'] || ''}</span></td>
-                    <td class="p-3 text-xs">${item['Tipo de norma'] || ''}</td>
-                    <td class="p-3 text-xs">${item['Autoridad'] || ''}</td>
+                    <td class="p-3 font-bold" style="color: #3B599F;">${decodeHtmlEntities(item['Norma'] || '')}</td>
+                    <td class="p-3 text-slate-600 truncate max-w-xs">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
+                    <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
+                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Tipo de norma'] || '')}</td>
+                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
                     <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
                 `;
 
@@ -381,28 +376,45 @@
         }
 
         function openModal(item) {
-            document.getElementById('modalNorma').textContent = item['Norma'] || 'Sin Norma';
+            document.getElementById('modalNorma').textContent = decodeHtmlEntities(item['Norma'] || 'Sin Norma');
             document.getElementById('modalFecha').textContent = item['Fecha'] || '-';
-            document.getElementById('modalPilar').textContent = item['Pilar del SIG'] || '-';
-            document.getElementById('modalTipo').textContent = item['Tipo de norma'] || '-';
-            document.getElementById('modalAutoridad').textContent = item['Autoridad'] || '-';
-            document.getElementById('modalSumilla').textContent = item['Sumilla / Descripción'] || 'Sin descripción disponible.';
+            document.getElementById('modalPilar').textContent = decodeHtmlEntities(item['Pilar del SIG'] || '-');
+            document.getElementById('modalTipo').textContent = decodeHtmlEntities(item['Tipo de norma'] || '-');
+            document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
+            document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || 'Sin descripción disponible.');
 
             var colFKey = headersList.length > 5 ? headersList[5] : '';
-            document.getElementById('modalColumnaF').textContent = colFKey ? (item[colFKey] || '-') : '-';
+            document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            // Columnas J, K, L, M
-            var colJKey = headersList.length > 9 ? headersList[9] : '';
-            var colKKey = headersList.length > 10 ? headersList[10] : '';
-            var colLKey = headersList.length > 11 ? headersList[11] : '';
-            var colMKey = headersList.length > 12 ? headersList[12] : '';
+            // Generar dinámicamente las filas de las columnas J, K, L, M de forma visualmente óptima
+            var extraFieldsContainer = document.getElementById('modalExtraFields');
+            var extraSection = document.getElementById('modalExtraSection');
+            extraFieldsContainer.innerHTML = '';
+            var hasExtra = false;
 
-            document.getElementById('modalColJ').textContent = colJKey ? (item[colJKey] || '-') : '-';
-            document.getElementById('modalColK').textContent = colKKey ? (item[colKKey] || '-') : '-';
-            document.getElementById('modalColL').textContent = colLKey ? (item[colLKey] || '-') : '-';
-            document.getElementById('modalColM').textContent = colMKey ? (item[colMKey] || '-') : '-';
+            var indicesExtra = [9, 10, 11, 12]; // J, K, L, M
+            for(var idx = 0; idx < indicesExtra.length; idx++) {
+                var colIdx = indicesExtra[idx];
+                if(headersList.length > colIdx) {
+                    var headerName = decodeHtmlEntities(headersList[colIdx]);
+                    var cellVal = decodeHtmlEntities(item[headersList[colIdx]] || '').trim();
+                    if(cellVal) {
+                        hasExtra = true;
+                        var rowDiv = document.createElement('div');
+                        rowDiv.className = "flex justify-between items-center py-1 border-b border-slate-200/60 last:border-0";
+                        rowDiv.innerHTML = `<span class="font-bold text-slate-500">${headerName}:</span> <span class="text-slate-700 text-right ml-2">${cellVal}</span>`;
+                        extraFieldsContainer.appendChild(rowDiv);
+                    }
+                }
+            }
 
-            // Columna I (Enlace)
+            if(hasExtra) {
+                extraSection.classList.remove('hidden');
+            } else {
+                extraSection.classList.add('hidden');
+            }
+
+            // Columna I (Enlace) convertido en Cajón "Ver norma aquí"
             var colIKey = headersList.length > 8 ? headersList[8] : '';
             var linkContainer = document.getElementById('modalLinkContainer');
             var linkAnchor = document.getElementById('modalLinkColI');
@@ -410,7 +422,6 @@
 
             if (linkVal) {
                 linkAnchor.href = linkVal;
-                linkAnchor.textContent = linkVal;
                 linkContainer.classList.remove('hidden');
             } else {
                 linkContainer.classList.add('hidden');
