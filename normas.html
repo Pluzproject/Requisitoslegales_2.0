@@ -40,50 +40,89 @@
     <main class="main-container">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
-            <!-- Panel de Filtros Lateral -->
+            <!-- Panel de Filtros Lateral con Borradorcitos -->
             <aside class="bg-white p-6 rounded-2xl border shadow-sm h-fit sticky top-6 space-y-4 lg:col-span-1">
                 <div id="lastUpdateDisplay" class="text-xs font-medium italic border-b pb-2 mb-2" style="color: #3B599F;"></div>
-                <h2 class="font-bold border-b pb-2" style="color: #3B599F;">Filtros de Búsqueda</h2>
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h2 class="font-bold text-sm" style="color: #3B599F;">Filtros de Búsqueda</h2>
+                    <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline">Reset Todo</button>
+                </div>
                 
-                <input type="text" id="searchInput" placeholder="Buscar norma o sumilla..." class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
+                <!-- Filtro de Búsqueda de Texto -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Buscar Texto</label>
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Norma o sumilla..." class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
+                        <button onclick="clearFilter('searchInput')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
                 
                 <!-- Fecha Específica con Calendario Interactivo -->
                 <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500">Fecha Específica (Calendario)</label>
-                    <input type="date" id="filterFecha" class="w-full border rounded-lg text-sm px-3 py-2 text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
+                    <label class="text-xs font-bold text-gray-500">Fecha Específica</label>
+                    <div class="relative">
+                        <input type="date" id="filterFecha" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
+                        <button onclick="clearFilter('filterFecha')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
                 </div>
 
+                <!-- Periodo (Mes/Año) -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Periodo (Mes/Año)</label>
-                    <select id="filterMesAnio" class="w-full border rounded-lg text-sm px-3 py-2">
-                        <option value="">Seleccionar...</option>
-                    </select>
+                    <div class="relative">
+                        <select id="filterMesAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                        <button onclick="clearFilter('filterMesAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
                 </div>
 
+                <!-- Año Específico -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Año Específico</label>
-                    <select id="filterAnio" class="w-full border rounded-lg text-sm px-3 py-2">
-                        <option value="">Todos los Años</option>
-                    </select>
+                    <div class="relative">
+                        <select id="filterAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todos los Años</option>
+                        </select>
+                        <button onclick="clearFilter('filterAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
                 </div>
 
+                <!-- Pilar del SIG -->
                 <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500">Categorización y Autoridad</label>
-                    <select id="filterPilar" class="w-full border rounded-lg text-sm px-3 py-2 mb-2">
-                        <option value="">Todos los Pilares</option>
-                    </select>
-                    <select id="filterTipo" class="w-full border rounded-lg text-sm px-3 py-2 mb-2">
-                        <option value="">Todos los Tipos</option>
-                    </select>
-                    <select id="filterAutoridad" class="w-full border rounded-lg text-sm px-3 py-2">
-                        <option value="">Todas las Autoridades</option>
-                    </select>
+                    <label class="text-xs font-bold text-gray-500">Pilar del SIG</label>
+                    <div class="relative">
+                        <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todos los Pilares</option>
+                        </select>
+                        <button onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
                 </div>
-                
-                <button id="btnReset" class="w-full px-4 py-2 rounded-lg text-white font-bold text-sm transition shadow-sm" style="background-color: #E06D6D;">RESET FILTROS</button>
+
+                <!-- Tipo de Norma -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Tipo de Norma</label>
+                    <div class="relative">
+                        <select id="filterTipo" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todos los Tipos</option>
+                        </select>
+                        <button onclick="clearFilter('filterTipo')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Autoridad -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Autoridad</label>
+                    <div class="relative">
+                        <select id="filterAutoridad" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todas las Autoridades</option>
+                        </select>
+                        <button onclick="clearFilter('filterAutoridad')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
             </aside>
 
-            <!-- Contenido Principal: Tabla de Normas -->
+            <!-- Contenido Principal: Tabla de Normas con Ajuste de Texto -->
             <div class="lg:col-span-3 space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
@@ -99,13 +138,13 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr style="background-color: #3B599F; color: white;" class="text-xs uppercase tracking-wider">
-                                    <th class="p-3">Fecha</th>
-                                    <th class="p-3">Norma</th>
+                                    <th class="p-3 whitespace-nowrap">Fecha</th>
+                                    <th class="p-3 whitespace-nowrap">Norma</th>
                                     <th class="p-3">Sumilla / Descripción</th>
-                                    <th class="p-3">Pilar del SIG</th>
-                                    <th class="p-3">Tipo</th>
-                                    <th class="p-3">Autoridad</th>
-                                    <th class="p-3" id="thColumnaF">Columna F</th>
+                                    <th class="p-3 whitespace-nowrap">Pilar del SIG</th>
+                                    <th class="p-3 whitespace-nowrap">Tipo</th>
+                                    <th class="p-3 whitespace-nowrap">Autoridad</th>
+                                    <th class="p-3 whitespace-nowrap" id="thColumnaF">Columna F</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
@@ -231,6 +270,14 @@
         function logout() {
             sessionStorage.clear();
             window.location.href = 'index.html';
+        }
+
+        function clearFilter(id) {
+            var el = document.getElementById(id);
+            if(el) {
+                el.value = '';
+                applyFilters();
+            }
         }
 
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
@@ -386,18 +433,18 @@
             for (var i = 0; i < data.length; i++) {
                 var item = data[i];
                 var tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 cursor-pointer transition";
+                tr.className = "hover:bg-slate-50 cursor-pointer transition align-top";
                 
                 var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
 
                 tr.innerHTML = `
                     <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
-                    <td class="p-3 font-bold" style="color: #3B599F;">${decodeHtmlEntities(item['Norma'] || '')}</td>
-                    <td class="p-3 text-slate-600 truncate max-w-xs">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
-                    <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
-                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Tipo de norma'] || '')}</td>
-                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
-                    <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
+                    <td class="p-3 font-bold whitespace-nowrap" style="color: #3B599F;">${decodeHtmlEntities(item['Norma'] || '')}</td>
+                    <td class="p-3 text-slate-600 text-xs leading-relaxed max-w-sm whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
+                    <td class="p-3 text-xs font-medium whitespace-nowrap"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
+                    <td class="p-3 text-xs whitespace-nowrap">${decodeHtmlEntities(item['Tipo de norma'] || '')}</td>
+                    <td class="p-3 text-xs whitespace-nowrap">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
+                    <td class="p-3 text-xs font-semibold text-slate-700 whitespace-nowrap">${valColF}</td>
                 `;
 
                 (function(rowObj) {
