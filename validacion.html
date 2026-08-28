@@ -236,6 +236,24 @@
                     <p id="modalSumilla" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
                 </div>
 
+                <!-- Artículos Relevantes -->
+                <div id="modalArticulosContainer" class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1 hidden">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Artículos relevantes</span>
+                    <p id="modalArticulos" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
+                </div>
+
+                <!-- Recomendación -->
+                <div id="modalRecomendacionContainer" class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1 hidden">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Recomendación</span>
+                    <p id="modalRecomendacion" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
+                </div>
+
+                <!-- Entregables Recomendados -->
+                <div id="modalEntregablesContainer" class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1 hidden">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Entregables recomendados</span>
+                    <p id="modalEntregables" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <span class="text-xs font-bold text-slate-400 block mb-1">Autoridad Reguladora</span>
@@ -255,19 +273,19 @@
                     </a>
                 </div>
 
-                <!-- Edición de Evidencia (Columna M) y Revisado (Columna N) -->
+                <!-- Edición de Evidencia y Revisado -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Editar Campos (Columnas M y N)</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Editar campos</span>
                     
-                    <!-- Columna M: Evidencia -->
+                    <!-- Evidencia -->
                     <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 block">Evidencia (Columna M)</label>
+                        <label class="text-xs font-bold text-slate-500 block">Evidencia</label>
                         <textarea id="editEvidencia" rows="3" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;" placeholder="Ingrese o edite la evidencia..."></textarea>
                     </div>
 
-                    <!-- Columna N: Revisado -->
+                    <!-- Estado de Revisión -->
                     <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 block">Estado de Revisión (Columna N)</label>
+                        <label class="text-xs font-bold text-slate-500 block">Estado de Revisión</label>
                         <select id="editRevisado" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
                             <option value="">Pendiente (Vacío)</option>
                             <option value="si">Validado (Sí)</option>
@@ -278,7 +296,7 @@
                 <!-- Botón de Guardado -->
                 <div class="pt-2">
                     <button onclick="guardarCambiosSheet()" class="w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2" style="background-color: #6CAC5E;">
-                        <span>Guardar Cambios en Google Sheets</span>
+                        <span>Guardar cambios</span>
                     </button>
                     <p id="syncStatus" class="text-center text-xs text-slate-400 mt-2"></p>
                 </div>
@@ -293,7 +311,6 @@
     </div>
 
     <script>
-        // PEGA AQUÍ TU URL DE LA APLICACIÓN WEB DE GOOGLE APPS SCRIPT
         const scriptAppUrl = 'https://script.google.com/macros/s/AKfycbyzKontvuFNjie7q2KXDRydyEbOYKT7F8e9M622qhAN-UGCmBiSzKSJjvCcESmeliiM/exec';
 
         window.addEventListener('DOMContentLoaded', function() {
@@ -561,6 +578,51 @@
             document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
             document.getElementById('syncStatus').textContent = '';
 
+            // Buscar y rellenar dinámicamente Artículos, Recomendación y Entregables
+            var articulosVal = '';
+            var recomendacionVal = '';
+            var entregablesVal = '';
+
+            headersList.forEach(function(h) {
+                var hLower = h.toLowerCase();
+                if (hLower.includes('articulo') || hLower.includes('artículos')) {
+                    articulosVal = item[h] || '';
+                }
+                if (hLower.includes('recomendacion') || hLower.includes('recomendación')) {
+                    recomendacionVal = item[h] || '';
+                }
+                if (hLower.includes('entregable')) {
+                    entregablesVal = item[h] || '';
+                }
+            });
+
+            // Artículos Relevantes
+            var artContainer = document.getElementById('modalArticulosContainer');
+            if (articulosVal.trim()) {
+                document.getElementById('modalArticulos').textContent = decodeHtmlEntities(articulosVal);
+                artContainer.classList.remove('hidden');
+            } else {
+                artContainer.classList.add('hidden');
+            }
+
+            // Recomendación
+            var recContainer = document.getElementById('modalRecomendacionContainer');
+            if (recomendacionVal.trim()) {
+                document.getElementById('modalRecomendacion').textContent = decodeHtmlEntities(recomendacionVal);
+                recContainer.classList.remove('hidden');
+            } else {
+                recContainer.classList.add('hidden');
+            }
+
+            // Entregables Recomendados
+            var entContainer = document.getElementById('modalEntregablesContainer');
+            if (entregablesVal.trim()) {
+                document.getElementById('modalEntregables').textContent = decodeHtmlEntities(entregablesVal);
+                entContainer.classList.remove('hidden');
+            } else {
+                entContainer.classList.add('hidden');
+            }
+
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
@@ -614,7 +676,7 @@
                 updateKPIs(rawData);
                 applyFilters();
                 
-                document.getElementById('syncStatus').textContent = '¡Modificaciones guardadas en M y N correctamente!';
+                document.getElementById('syncStatus').textContent = '¡Modificaciones guardadas correctamente!';
                 setTimeout(() => { document.getElementById('syncStatus').textContent = ''; }, 3500);
             }).catch(err => {
                 console.error(err);
