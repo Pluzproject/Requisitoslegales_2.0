@@ -49,6 +49,13 @@
                 <input type="text" id="searchInput" placeholder="Buscar norma o sumilla..." class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
                 
                 <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Fecha Específica</label>
+                    <select id="filterFecha" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todas las Fechas</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Periodo (Mes/Año)</label>
                     <select id="filterMesAnio" class="w-full border rounded-lg text-sm px-3 py-2">
                         <option value="">Seleccionar...</option>
@@ -114,7 +121,7 @@
         </div>
     </main>
 
-    <!-- Ventana Flotante (Modal) Optimizada -->
+    <!-- Ventana Flotante (Modal) Optimizada y Alineada a la Izquierda -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all">
             
@@ -125,10 +132,10 @@
             </div>
 
             <!-- Contenido del Modal -->
-            <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+            <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto text-left">
                 <div>
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Norma</span>
-                    <h3 id="modalNorma" class="text-xl font-extrabold" style="color: #3B599F;">-</h3>
+                    <h3 id="modalNorma" class="text-xl font-extrabold text-left" style="color: #3B599F;">-</h3>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
@@ -146,6 +153,12 @@
                     </div>
                 </div>
 
+                <!-- Sumilla reubicada justo debajo de los datos principales -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Sumilla / Descripción Completa</span>
+                    <p id="modalSumilla" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <span class="text-xs font-bold text-slate-400 block mb-1">Autoridad Reguladora</span>
@@ -157,27 +170,22 @@
                     </div>
                 </div>
 
-                <!-- Panel Visualmente Optimizado para Columnas J, K, L, M -->
-                <div id="modalExtraSection" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Detalles Complementarios</span>
-                    <div id="modalExtraFields" class="space-y-1.5 text-xs">
-                        <!-- Se llena dinámicamente -->
+                <!-- Panel Armonioso para Columnas J, K, L, M, N (Detalles Complementarios) -->
+                <div id="modalExtraSection" class="hidden space-y-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Detalles Complementarios</span>
+                    <div id="modalExtraFields" class="space-y-3">
+                        <!-- Se llena dinámicamente con diseño de tarjeta izquierda -->
                     </div>
                 </div>
 
                 <!-- Cajón de Enlace (Columna I) -->
-                <div id="modalLinkContainer" class="hidden">
+                <div id="modalLinkContainer" class="hidden pt-2">
                     <a id="modalLinkColI" href="#" target="_blank" class="w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 hover:opacity-90" style="background-color: #3B599F;">
                         <span>Ver norma aquí</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                         </svg>
                     </a>
-                </div>
-
-                <div>
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Sumilla / Descripción Completa</span>
-                    <p id="modalSumilla" class="mt-1 text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">-</p>
                 </div>
             </div>
 
@@ -194,7 +202,6 @@
         var rawData = [];
         var headersList = [];
 
-        // Función para limpiar entidades HTML y caracteres especiales
         function decodeHtmlEntities(str) {
             if (!str) return '';
             var txt = document.createElement('textarea');
@@ -205,7 +212,7 @@
         window.addEventListener('DOMContentLoaded', function() {
             fetchData();
 
-            var filterIds = ['searchInput', 'filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
+            var filterIds = ['searchInput', 'filterFecha', 'filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
             for(var i = 0; i < filterIds.length; i++) {
                 var el = document.getElementById(filterIds[i]);
                 if(el) {
@@ -234,7 +241,9 @@
                         var row = results.data[i];
                         var normaText = (row['Norma'] || '').trim().toUpperCase();
                         if (normaText !== "" && normaText !== "SIN NOVEDAD") {
-                            var partes = (row['Fecha'] || '').split('/');
+                            var fechaStr = (row['Fecha'] || '').trim();
+                            row.exactDate = fechaStr;
+                            var partes = fechaStr.split('/');
                             if(partes.length === 3) {
                                 row.mesAnio = partes[1].padStart(2, '0') + '/' + partes[2];
                                 row.a = partes[2];
@@ -294,6 +303,7 @@
                 }
             }
 
+            fillSelect('filterFecha', getUniqueValues('exactDate'), true);
             fillSelect('filterMesAnio', getUniqueValues('mesAnio'), true);
             fillSelect('filterAnio', getUniqueValues('a'), true);
             fillSelect('filterPilar', getUniqueValues('Pilar del SIG'), false);
@@ -303,6 +313,7 @@
 
         function applyFilters() {
             var s = document.getElementById('searchInput').value.toLowerCase();
+            var fe = document.getElementById('filterFecha').value;
             var ma = document.getElementById('filterMesAnio').value;
             var an = document.getElementById('filterAnio').value;
             var pi = document.getElementById('filterPilar').value.toLowerCase();
@@ -316,6 +327,7 @@
                 var sumillaDec = decodeHtmlEntities(item['Sumilla / Descripción'] || '').toLowerCase();
                 
                 var matchS = !s || normaDec.includes(s) || sumillaDec.includes(s);
+                var matchFE = !fe || item.exactDate === fe;
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
                 
@@ -323,7 +335,7 @@
                 var matchTI = !ti || decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase() === ti;
                 var matchAU = !au || decodeHtmlEntities(item['Autoridad'] || '').trim().toLowerCase() === au;
                 
-                if(matchS && matchMA && matchAN && matchPI && matchTI && matchAU) {
+                if(matchS && matchFE && matchMA && matchAN && matchPI && matchTI && matchAU) {
                     filtered.push(item);
                 }
             }
@@ -332,6 +344,7 @@
 
         function resetFilters() {
             document.getElementById('searchInput').value = '';
+            document.getElementById('filterFecha').value = '';
             document.getElementById('filterMesAnio').value = '';
             document.getElementById('filterAnio').value = '';
             document.getElementById('filterPilar').value = '';
@@ -380,19 +393,19 @@
             document.getElementById('modalFecha').textContent = item['Fecha'] || '-';
             document.getElementById('modalPilar').textContent = decodeHtmlEntities(item['Pilar del SIG'] || '-');
             document.getElementById('modalTipo').textContent = decodeHtmlEntities(item['Tipo de norma'] || '-');
-            document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
             document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || 'Sin descripción disponible.');
+            document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
 
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            // Generar dinámicamente las filas de las columnas J, K, L, M de forma visualmente óptima
+            // Generar dinámicamente las tarjetas de las columnas J, K, L, M, N con alineación izquierda limpia
             var extraFieldsContainer = document.getElementById('modalExtraFields');
             var extraSection = document.getElementById('modalExtraSection');
             extraFieldsContainer.innerHTML = '';
             var hasExtra = false;
 
-            var indicesExtra = [9, 10, 11, 12]; // J, K, L, M
+            var indicesExtra = [9, 10, 11, 12, 13]; // J, K, L, M, N
             for(var idx = 0; idx < indicesExtra.length; idx++) {
                 var colIdx = indicesExtra[idx];
                 if(headersList.length > colIdx) {
@@ -400,10 +413,13 @@
                     var cellVal = decodeHtmlEntities(item[headersList[colIdx]] || '').trim();
                     if(cellVal) {
                         hasExtra = true;
-                        var rowDiv = document.createElement('div');
-                        rowDiv.className = "flex justify-between items-center py-1 border-b border-slate-200/60 last:border-0";
-                        rowDiv.innerHTML = `<span class="font-bold text-slate-500">${headerName}:</span> <span class="text-slate-700 text-right ml-2">${cellVal}</span>`;
-                        extraFieldsContainer.appendChild(rowDiv);
+                        var cardDiv = document.createElement('div');
+                        cardDiv.className = "bg-slate-50 p-4 rounded-xl border border-slate-100 text-left space-y-1";
+                        cardDiv.innerHTML = `
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">${headerName}</span>
+                            <p class="text-slate-700 text-sm leading-relaxed text-left whitespace-pre-line">${cellVal}</p>
+                        `;
+                        extraFieldsContainer.appendChild(cardDiv);
                     }
                 }
             }
