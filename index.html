@@ -84,6 +84,7 @@
             if(autorizado) {
                 sessionStorage.setItem('userRole', 'admin');
                 sessionStorage.setItem('userName', user);
+                // Redirige al panel de indicadores con privilegios de administrador
                 window.location.href = 'indicadores.html'; 
             } else {
                 errorBox.textContent = "Credenciales incorrectas o usuario no registrado como administrador.";
