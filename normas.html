@@ -174,7 +174,7 @@
                 <div id="modalExtraSection" class="hidden space-y-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Detalles Complementarios</span>
                     <div id="modalExtraFields" class="space-y-3">
-                        <!-- Se llena dinámicamente con diseño de tarjeta izquierda -->
+                        <!-- Se llena dinámicamente incluyendo M y N -->
                     </div>
                 </div>
 
@@ -399,13 +399,13 @@
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            // Generar dinámicamente las tarjetas de las columnas J, K, L, M, N con alineación izquierda limpia
+            // Generar dinámicamente las tarjetas de las columnas J(9), K(10), L(11), M(12), N(13)
             var extraFieldsContainer = document.getElementById('modalExtraFields');
             var extraSection = document.getElementById('modalExtraSection');
             extraFieldsContainer.innerHTML = '';
             var hasExtra = false;
 
-            var indicesExtra = [9, 10, 11, 12, 13]; // J, K, L, M, N
+            var indicesExtra = [9, 10, 11, 12, 13]; // J, K, L, M, N explicítamente incluidos
             for(var idx = 0; idx < indicesExtra.length; idx++) {
                 var colIdx = indicesExtra[idx];
                 if(headersList.length > colIdx) {
