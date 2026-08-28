@@ -25,12 +25,12 @@
         <!-- Formulario de Login -->
         <div class="space-y-4">
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-600">Usuario / Administrador (Columna A)</label>
-                <input type="text" id="userInput" placeholder="Ej. 43662282" class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 border-slate-300">
+                <label class="text-xs font-bold text-slate-600">Administrador</label>
+                <input type="text" id="userInput" placeholder="12345678" class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 border-slate-300">
             </div>
 
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-600">Contraseña (Columna B)</label>
+                <label class="text-xs font-bold text-slate-600">Contraseña</label>
                 <input type="password" id="passInput" placeholder="••••••••" class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 border-slate-300">
             </div>
 
@@ -39,7 +39,7 @@
             </div>
 
             <button onclick="handleLogin()" class="w-full py-3 rounded-xl text-white font-bold text-sm transition shadow-sm bg-corporate-blue hover:opacity-90">
-                Iniciar Sesión (Administrador)
+                Iniciar Sesión
             </button>
 
             <div class="relative flex py-2 items-center">
@@ -48,15 +48,14 @@
                 <div class="flex-grow border-t border-slate-200"></div>
             </div>
 
-            <!-- Enlace directo para usuario público que va a tu hoja de indicadores -->
+            <!-- Enlace directo para usuario público -->
             <a href="indicadores.html" onclick="handlePublicAccess()" class="block text-center w-full py-3 rounded-xl text-slate-700 font-bold text-sm transition shadow-sm bg-slate-100 hover:bg-slate-200">
-                Ingresar como Usuario Público (Ver Indicadores)
+                Ingresar como Usuario Público
             </a>
         </div>
     </div>
 
     <script>
-        // Lista oficial de administradores vinculada directamente desde tu estructura de GitHub
         const administradoresValidos = [
             { usuario: "43662282", password: "123" },
             { usuario: "12345678", password: "123" },
@@ -85,7 +84,7 @@
             if(autorizado) {
                 sessionStorage.setItem('userRole', 'admin');
                 sessionStorage.setItem('userName', user);
-                window.location.href = 'normas.html'; // Redirige a la gestión de normas para el admin
+                window.location.href = 'indicadores.html'; // El admin entra a indicadores y desde ahí navega a normas
             } else {
                 errorBox.textContent = "Credenciales incorrectas o usuario no registrado como administrador.";
                 errorBox.classList.remove('hidden');
