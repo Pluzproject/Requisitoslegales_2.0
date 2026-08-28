@@ -122,7 +122,7 @@
                 </div>
             </aside>
 
-            <!-- Contenido Principal: Tabla de Normas con Ajuste de Texto -->
+            <!-- Contenido Principal: Tabla de Normas con Estilo Original y Sumilla Ajustada -->
             <div class="lg:col-span-3 space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
@@ -138,13 +138,13 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr style="background-color: #3B599F; color: white;" class="text-xs uppercase tracking-wider">
-                                    <th class="p-3 whitespace-nowrap">Fecha</th>
-                                    <th class="p-3 whitespace-nowrap">Norma</th>
+                                    <th class="p-3">Fecha</th>
+                                    <th class="p-3">Norma</th>
                                     <th class="p-3">Sumilla / Descripción</th>
-                                    <th class="p-3 whitespace-nowrap">Pilar del SIG</th>
-                                    <th class="p-3 whitespace-nowrap">Tipo</th>
-                                    <th class="p-3 whitespace-nowrap">Autoridad</th>
-                                    <th class="p-3 whitespace-nowrap" id="thColumnaF">Columna F</th>
+                                    <th class="p-3">Pilar del SIG</th>
+                                    <th class="p-3">Tipo</th>
+                                    <th class="p-3">Autoridad</th>
+                                    <th class="p-3" id="thColumnaF">Columna F</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
@@ -433,18 +433,18 @@
             for (var i = 0; i < data.length; i++) {
                 var item = data[i];
                 var tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 cursor-pointer transition align-top";
+                tr.className = "hover:bg-slate-50 cursor-pointer transition";
                 
                 var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
 
                 tr.innerHTML = `
                     <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
-                    <td class="p-3 font-bold whitespace-nowrap" style="color: #3B599F;">${decodeHtmlEntities(item['Norma'] || '')}</td>
-                    <td class="p-3 text-slate-600 text-xs leading-relaxed max-w-sm whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
-                    <td class="p-3 text-xs font-medium whitespace-nowrap"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
-                    <td class="p-3 text-xs whitespace-nowrap">${decodeHtmlEntities(item['Tipo de norma'] || '')}</td>
-                    <td class="p-3 text-xs whitespace-nowrap">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
-                    <td class="p-3 text-xs font-semibold text-slate-700 whitespace-nowrap">${valColF}</td>
+                    <td class="p-3 font-bold" style="color: #3B599F;">${decodeHtmlEntities(item['Norma'] || '')}</td>
+                    <td class="p-3 text-slate-600 text-xs max-w-md whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
+                    <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
+                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Tipo de norma'] || '')}</td>
+                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
+                    <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
                 `;
 
                 (function(rowObj) {
