@@ -31,9 +31,8 @@
             <h1 class="text-2xl font-bold tracking-tight" style="font-family: Arial, sans-serif;">Portal de Requisitos Legales - Indicadores y Métricas</h1>
         </div>
         <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
-            <nav class="space-x-6 text-sm font-semibold">
-                <a href="index.html" class="underline underline-offset-4">Indicadores</a>
-                <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas (Tabla)</a>
+            <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
+                <!-- Se rellena dinámicamente según el rol (Admin o Público) -->
             </nav>
             <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
                 Cumplimiento de normas
@@ -150,26 +149,30 @@
     </main>
 
     <script>
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
-        var rawData = [];
-        var lastUpdateRawDate = "";
-
-        let chartPilaresInstance = null;
-        let chartTiposInstance = null;
-        let chartAutoridadesInstance = null;
-
-        // Paleta Corporativa Exacta: Azul, Verde, Amarillo, Rojo Suave, Plomo
-        const corporateColors = [
-            '#3B599F', // Azul Corporativo
-            '#6CAC5E', // Verde Corporativo
-            '#FBC13F', // Amarillo Corporativo
-            '#E06D6D', // Rojo Suave
-            '#7A8B99', // Plomo Neutral
-            '#5272B5', // Tono azul secundario
-            '#84BD74'  // Tono verde secundario
-        ];
-
+        // Control de Sesión y Renderizado de Menú
         window.addEventListener('DOMContentLoaded', function() {
+            var role = sessionStorage.getItem('userRole');
+            if (!role) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            var navContainer = document.getElementById('userNav');
+            if (navContainer) {
+                if (role === 'admin') {
+                    navContainer.innerHTML = `
+                        <a href="indicadores.html" class="underline underline-offset-4">Indicadores</a>
+                        <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas (Tabla)</a>
+                        <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
+                    `;
+                } else {
+                    navContainer.innerHTML = `
+                        <span class="text-xs font-semibold bg-white/25 px-3 py-1 rounded-lg">Modo Público (Indicadores)</span>
+                        <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-slate-700 text-white text-xs font-bold hover:bg-slate-800 transition shadow-sm">Salir</button>
+                    `;
+                }
+            }
+
             fetchData();
 
             var filterIds = ['searchInput', 'filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
@@ -182,6 +185,23 @@
             }
             document.getElementById('btnReset').addEventListener('click', resetDashboard);
         });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
+        var rawData = [];
+        var lastUpdateRawDate = "";
+
+        let chartPilaresInstance = null;
+        let chartTiposInstance = null;
+        let chartAutoridadesInstance = null;
+
+        const corporateColors = [
+            '#3B599F', '#6CAC5E', '#FBC13F', '#E06D6D', '#7A8B99', '#5272B5', '#84BD74'
+        ];
 
         function fetchData() {
             Papa.parse(csvUrl, {
@@ -213,7 +233,6 @@
         }
 
         function populateFilters() {
-            // Función para obtener valores únicos evitando duplicados por mayúsculas/minúsculas
             function getUniqueValues(key) {
                 var uniqueMap = {};
                 for(var i = 0; i < rawData.length; i++) {
@@ -222,7 +241,7 @@
                         var trimmed = val.trim();
                         var lower = trimmed.toLowerCase();
                         if(!uniqueMap[lower]) {
-                            uniqueMap[lower] = trimmed; // Mantiene una versión limpia para mostrar
+                            uniqueMap[lower] = trimmed;
                         }
                     }
                 }
@@ -266,7 +285,6 @@
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
                 
-                // Comparación insensible a mayúsculas/minúsculas
                 var matchPI = !pi || (item['Pilar del SIG'] && item['Pilar del SIG'].trim().toLowerCase() === pi);
                 var matchTI = !ti || (item['Tipo de norma'] && item['Tipo de norma'].trim().toLowerCase() === ti);
                 var matchAU = !au || (item['Autoridad'] && item['Autoridad'].trim().toLowerCase() === au);
@@ -297,8 +315,6 @@
 
             for (var i = 0; i < data.length; i++) {
                 var item = data[i];
-                
-                // Agrupar sumas unificando mayúsculas y minúsculas para mantener consistencia en gráficos
                 var pilar = item['Pilar del SIG'] ? item['Pilar del SIG'].trim() : 'No especificado';
                 pilaresCounts[pilar] = (pilaresCounts[pilar] || 0) + 1;
 
