@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicadores - Portal de Requisitos Legales</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Plugin para mostrar números dentro de los gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #2c3e50;
+        }
+        .main-container { max-width: 95%; margin: 0 auto; padding: 2.5rem 1rem; }
+        .bg-corporate-blue { background-color: #3B599F; }
+        .text-corporate-blue { color: #3B599F; }
+        .border-corporate-blue { border-color: #3B599F; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header con navegación y botón de cumplimiento -->
+    <header class="bg-corporate-blue text-white shadow-md py-6 px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-2xl font-bold tracking-tight" style="font-family: Arial, sans-serif;">Portal de Requisitos Legales - Indicadores y Métricas</h1>
+        </div>
+        <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
+            <nav class="space-x-6 text-sm font-semibold">
+                <a href="index.html" class="underline underline-offset-4">Indicadores</a>
+                <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas (Tabla)</a>
+            </nav>
+            <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
+                Cumplimiento de normas
+            </a>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Panel de Filtros Lateral -->
+            <aside class="bg-white p-6 rounded-2xl border shadow-sm h-fit sticky top-6 space-y-4 lg:col-span-1">
+                <div id="lastUpdateDisplay" class="text-xs font-medium italic border-b pb-2 mb-2" style="color: #3B599F;"></div>
+                <h2 class="font-bold border-b pb-2" style="color: #3B599F;">Filtros de Métricas</h2>
+                
+                <input type="text" id="searchInput" placeholder="Buscar norma o sumilla..." class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
+                
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Periodo (Mes/Año)</label>
+                    <select id="filterMesAnio" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Año Específico</label>
+                    <select id="filterAnio" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todos los Años</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Categorización</label>
+                    <select id="filterPilar" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todos los Pilares</option>
+                    </select>
+                    <select id="filterTipo" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todos los Tipos</option>
+                    </select>
+                    <select id="filterAutoridad" class="w-full border rounded-lg text-sm px-3 py-2">
+                        <option value="">Todas las Autoridades</option>
+                    </select>
+                </div>
+                
+                <button id="btnReset" class="w-full px-4 py-2 rounded-lg text-white font-bold text-sm transition shadow-sm" style="background-color: #E06D6D;">RESET FILTROS</button>
+            </aside>
+
+            <!-- Contenido Principal: KPIs y Gráficos -->
+            <div class="lg:col-span-3 space-y-8">
+                
+                <!-- Tarjetas KPI / Resumen Ejecutivo -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Normas Filtradas</p>
+                            <h3 id="kpiTotalNormas" class="text-3xl font-extrabold mt-1" style="color: #3B599F;">0</h3>
+                        </div>
+                        <div class="p-3 rounded-xl text-xl" style="background-color: #eef2f8; color: #3B599F;">📄</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Pilares Activos</p>
+                            <h3 id="kpiPilares" class="text-3xl font-extrabold mt-1" style="color: #6CAC5E;">0</h3>
+                        </div>
+                        <div class="p-3 rounded-xl text-xl" style="background-color: #f1f8ee; color: #6CAC5E;">🏛️</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Autoridades</p>
+                            <h3 id="kpiAutoridades" class="text-3xl font-extrabold mt-1" style="color: #d99b1a;">0</h3>
+                        </div>
+                        <div class="p-3 rounded-xl text-xl" style="background-color: #fef8e7; color: #FBC13F;">⚖️</div>
+                    </div>
+                </div>
+
+                <!-- Gráficos Estadísticos con Paleta Corporativa -->
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    
+                    <!-- Gráfico: Normas por Pilar del SIG -->
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                        <h3 class="font-bold text-lg mb-6 flex items-center gap-2" style="color: #3B599F;">
+                            <span>📊 Normas por Pilar del SIG</span>
+                        </h3>
+                        <div class="relative h-[400px] w-full flex items-center justify-center">
+                            <canvas id="chartPilares"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico: Normas por Tipo de Norma -->
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                        <h3 class="font-bold text-lg mb-6 flex items-center gap-2" style="color: #3B599F;">
+                            <span>📋 Distribución por Tipo de Norma</span>
+                        </h3>
+                        <div class="relative h-[400px] w-full flex items-center justify-center">
+                            <canvas id="chartTipos"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico: Normas por Autoridad Reguladora (Ancho completo) -->
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 xl:col-span-2 flex flex-col justify-between">
+                        <h3 class="font-bold text-lg mb-6 flex items-center gap-2" style="color: #3B599F;">
+                            <span>🏛️ Concentración por Autoridad Reguladora</span>
+                        </h3>
+                        <div class="relative h-[420px] w-full">
+                            <canvas id="chartAutoridades"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
+        var rawData = [];
+        var lastUpdateRawDate = "";
+
+        let chartPilaresInstance = null;
+        let chartTiposInstance = null;
+        let chartAutoridadesInstance = null;
+
+        // Paleta Corporativa Exacta: Azul, Verde, Amarillo, Rojo Suave, Plomo
+        const corporateColors = [
+            '#3B599F', // Azul Corporativo
+            '#6CAC5E', // Verde Corporativo
+            '#FBC13F', // Amarillo Corporativo
+            '#E06D6D', // Rojo Suave
+            '#7A8B99', // Plomo Neutral
+            '#5272B5', // Tono azul secundario
+            '#84BD74'  // Tono verde secundario
+        ];
+
+        window.addEventListener('DOMContentLoaded', function() {
+            fetchData();
+
+            var filterIds = ['searchInput', 'filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
+            for(var i = 0; i < filterIds.length; i++) {
+                var el = document.getElementById(filterIds[i]);
+                if(el) { 
+                    el.addEventListener('change', applyFilters); 
+                    el.addEventListener('input', applyFilters); 
+                }
+            }
+            document.getElementById('btnReset').addEventListener('click', resetDashboard);
+        });
+
+        function fetchData() {
+            Papa.parse(csvUrl, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.data.length > 0) {
+                        lastUpdateRawDate = results.data[results.data.length - 1]['Fecha'] || "";
+                        document.getElementById('lastUpdateDisplay').textContent = "Última act: " + lastUpdateRawDate;
+                    }
+                    rawData = [];
+                    for (var i = 0; i < results.data.length; i++) {
+                        var row = results.data[i];
+                        var normaText = (row['Norma'] || '').trim().toUpperCase();
+                        if (normaText !== "" && normaText !== "SIN NOVEDAD") {
+                            var partes = (row['Fecha'] || '').split('/');
+                            if(partes.length === 3) {
+                                row.mesAnio = partes[1].padStart(2, '0') + '/' + partes[2];
+                                row.a = partes[2];
+                            }
+                            rawData.push(row);
+                        }
+                    }
+                    populateFilters();
+                    updateDashboard(rawData);
+                }
+            });
+        }
+
+        function populateFilters() {
+            // Función para obtener valores únicos evitando duplicados por mayúsculas/minúsculas
+            function getUniqueValues(key) {
+                var uniqueMap = {};
+                for(var i = 0; i < rawData.length; i++) {
+                    var val = rawData[i][key];
+                    if(val) {
+                        var trimmed = val.trim();
+                        var lower = trimmed.toLowerCase();
+                        if(!uniqueMap[lower]) {
+                            uniqueMap[lower] = trimmed; // Mantiene una versión limpia para mostrar
+                        }
+                    }
+                }
+                return Object.values(uniqueMap);
+            }
+
+            function fillSelect(id, data, sortDesc) {
+                var select = document.getElementById(id);
+                if(sortDesc) {
+                    data.sort((a, b) => b.localeCompare(a));
+                } else { 
+                    data.sort((a, b) => a.localeCompare(b)); 
+                }
+                for(var i = 0; i < data.length; i++) {
+                    var opt = document.createElement('option');
+                    opt.value = data[i]; 
+                    opt.textContent = data[i];
+                    select.appendChild(opt);
+                }
+            }
+
+            fillSelect('filterMesAnio', getUniqueValues('mesAnio'), true);
+            fillSelect('filterAnio', getUniqueValues('a'), true);
+            fillSelect('filterPilar', getUniqueValues('Pilar del SIG'), false);
+            fillSelect('filterTipo', getUniqueValues('Tipo de norma'), false);
+            fillSelect('filterAutoridad', getUniqueValues('Autoridad'), false);
+        }
+
+        function applyFilters() {
+            var s = document.getElementById('searchInput').value.toLowerCase();
+            var ma = document.getElementById('filterMesAnio').value;
+            var an = document.getElementById('filterAnio').value;
+            var pi = document.getElementById('filterPilar').value.toLowerCase();
+            var ti = document.getElementById('filterTipo').value.toLowerCase();
+            var au = document.getElementById('filterAutoridad').value.toLowerCase();
+
+            var filtered = [];
+            for(var i = 0; i < rawData.length; i++) {
+                var item = rawData[i];
+                var matchS = !s || (item['Norma'] && item['Norma'].toLowerCase().includes(s)) || (item['Sumilla / Descripción'] && item['Sumilla / Descripción'].toLowerCase().includes(s));
+                var matchMA = !ma || item.mesAnio === ma;
+                var matchAN = !an || item.a === an;
+                
+                // Comparación insensible a mayúsculas/minúsculas
+                var matchPI = !pi || (item['Pilar del SIG'] && item['Pilar del SIG'].trim().toLowerCase() === pi);
+                var matchTI = !ti || (item['Tipo de norma'] && item['Tipo de norma'].trim().toLowerCase() === ti);
+                var matchAU = !au || (item['Autoridad'] && item['Autoridad'].trim().toLowerCase() === au);
+                
+                if(matchS && matchMA && matchAN && matchPI && matchTI && matchAU) {
+                    filtered.push(item);
+                }
+            }
+            updateDashboard(filtered);
+        }
+
+        function resetDashboard() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterMesAnio').value = '';
+            document.getElementById('filterAnio').value = '';
+            document.getElementById('filterPilar').value = '';
+            document.getElementById('filterTipo').value = '';
+            document.getElementById('filterAutoridad').value = '';
+            updateDashboard(rawData);
+        }
+
+        function updateDashboard(data) {
+            document.getElementById('kpiTotalNormas').textContent = data.length;
+
+            var pilaresCounts = {};
+            var tiposCounts = {};
+            var autoridadesCounts = {};
+
+            for (var i = 0; i < data.length; i++) {
+                var item = data[i];
+                
+                // Agrupar sumas unificando mayúsculas y minúsculas para mantener consistencia en gráficos
+                var pilar = item['Pilar del SIG'] ? item['Pilar del SIG'].trim() : 'No especificado';
+                pilaresCounts[pilar] = (pilaresCounts[pilar] || 0) + 1;
+
+                var tipo = item['Tipo de norma'] ? item['Tipo de norma'].trim() : 'No especificado';
+                tiposCounts[tipo] = (tiposCounts[tipo] || 0) + 1;
+
+                var autoridad = item['Autoridad'] ? item['Autoridad'].trim() : 'No especificada';
+                autoridadesCounts[autoridad] = (autoridadesCounts[autoridad] || 0) + 1;
+            }
+
+            document.getElementById('kpiPilares').textContent = Object.keys(pilaresCounts).length;
+            document.getElementById('kpiAutoridades').textContent = Object.keys(autoridadesCounts).length;
+
+            renderPilaresChart(pilaresCounts);
+            renderTiposChart(tiposCounts);
+            renderAutoridadesChart(autoridadesCounts);
+        }
+
+        function renderPilaresChart(dataObj) {
+            var labels = Object.keys(dataObj);
+            var values = Object.values(dataObj);
+
+            if (chartPilaresInstance) chartPilaresInstance.destroy();
+
+            var ctx = document.getElementById('chartPilares').getContext('2d');
+            chartPilaresInstance = new Chart(ctx, {
+                type: 'doughnut',
+                plugins: [ChartDataLabels],
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: corporateColors,
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'right', 
+                            labels: { boxWidth: 16, padding: 15, font: { family: 'Arial', size: 12, weight: '600' } } 
+                        },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { family: 'Arial', weight: 'bold', size: 13 },
+                            formatter: (value) => value > 0 ? value : ''
+                        }
+                    },
+                    layout: { padding: 10 }
+                }
+            });
+        }
+
+        function renderTiposChart(dataObj) {
+            var labels = Object.keys(dataObj);
+            var values = Object.values(dataObj);
+
+            if (chartTiposInstance) chartTiposInstance.destroy();
+
+            var ctx = document.getElementById('chartTipos').getContext('2d');
+            chartTiposInstance = new Chart(ctx, {
+                type: 'pie',
+                plugins: [ChartDataLabels],
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: corporateColors.slice().reverse(),
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'right', 
+                            labels: { boxWidth: 16, padding: 15, font: { family: 'Arial', size: 12, weight: '600' } } 
+                        },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { family: 'Arial', weight: 'bold', size: 13 },
+                            formatter: (value) => value > 0 ? value : ''
+                        }
+                    },
+                    layout: { padding: 10 }
+                }
+            });
+        }
+
+        function renderAutoridadesChart(dataObj) {
+            var labels = Object.keys(dataObj);
+            var values = Object.values(dataObj);
+
+            if (chartAutoridadesInstance) chartAutoridadesInstance.destroy();
+
+            var ctx = document.getElementById('chartAutoridades').getContext('2d');
+            chartAutoridadesInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Número de Normas',
+                        data: values,
+                        backgroundColor: '#3B599F',
+                        borderRadius: 8,
+                        barThickness: 'flex',
+                        maxBarThickness: 50
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            ticks: { precision: 0, font: { family: 'Arial', size: 12, weight: '600' } },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: { 
+                            ticks: { font: { family: 'Arial', size: 12, weight: '600' } },
+                            grid: { display: false }
+                        }
+                    },
+                    layout: { padding: 10 }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
