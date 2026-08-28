@@ -89,7 +89,7 @@
                         <div id="rowCountDisplay" class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">Mostrando 0 registros</div>
                     </div>
 
-                    <!-- Tabla de Datos (Columna F en lugar de Revisado) -->
+                    <!-- Tabla de Datos (Orden inverso y Columna F) -->
                     <div class="overflow-x-auto rounded-xl border border-slate-200">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -114,9 +114,9 @@
         </div>
     </main>
 
-    <!-- Ventana Flotante (Modal) Completa con todos los campos y Estado de Validación -->
+    <!-- Ventana Flotante (Modal) Actualizada con campos J, K, L, M y Enlace I -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden transform transition-all">
             
             <!-- Barra de Estado Superior Dinámica (Verde si está Validado, Amarillo si está Pendiente) -->
             <div id="modalStatusBanner" class="px-6 py-3 flex items-center justify-between text-white font-bold transition-colors duration-300" style="background-color: #FBC13F;">
@@ -124,7 +124,7 @@
                 <button onclick="closeModal()" class="text-white hover:opacity-80 text-xl font-bold px-2">&times;</button>
             </div>
 
-            <!-- Contenido del Modal con todos los campos -->
+            <!-- Contenido del Modal -->
             <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                 <div>
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Norma</span>
@@ -155,6 +155,34 @@
                         <span class="text-xs font-bold text-slate-400 block mb-1" id="modalLabelColumnaF">Columna F</span>
                         <span id="modalColumnaF" class="font-semibold px-3 py-1 bg-slate-100 text-slate-700 rounded-lg inline-block text-xs">-</span>
                     </div>
+                </div>
+
+                <!-- Campos Adicionales: Columnas J, K, L, M -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block" id="modalLabelColJ">Columna J</span>
+                        <span id="modalColJ" class="font-semibold text-slate-700 text-xs">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block" id="modalLabelColK">Columna K</span>
+                        <span id="modalColK" class="font-semibold text-slate-700 text-xs">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block" id="modalLabelColL">Columna L</span>
+                        <span id="modalColL" class="font-semibold text-slate-700 text-xs">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block" id="modalLabelColM">Columna M</span>
+                        <span id="modalColM" class="font-semibold text-slate-700 text-xs">-</span>
+                    </div>
+                </div>
+
+                <!-- Enlace de Columna I -->
+                <div id="modalLinkContainer" class="hidden bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1" id="modalLabelColI">Enlace Asociado</span>
+                    <a id="modalLinkColI" href="#" target="_blank" class="text-sm font-semibold underline break-all flex items-center gap-2" style="color: #3B599F;">
+                        Abrir enlace externo &rarr;
+                    </a>
                 </div>
 
                 <div>
@@ -212,7 +240,6 @@
                             if(partes.length === 3) {
                                 row.mesAnio = partes[1].padStart(2, '0') + '/' + partes[2];
                                 row.a = partes[2];
-                                // Crear un valor numérico para ordenar de más reciente a más antiguo (AAAAMMDD)
                                 row.sortDate = partes[2] + partes[1].padStart(2, '0') + partes[0].padStart(2, '0');
                             } else {
                                 row.sortDate = '00000000';
@@ -226,10 +253,16 @@
                         return b.sortDate.localeCompare(a.sortDate);
                     });
 
-                    // Configurar el nombre de la Columna F dinámicamente si existe en el CSV (índice 5 o la 6ª columna)
-                    var colFName = headersList.length > 5 ? headersList[5] : 'Columna F';
-                    document.getElementById('thColumnaF').textContent = colFName;
-                    document.getElementById('modalLabelColumnaF').textContent = colFName;
+                    // Nombres dinámicos de columnas
+                    if (headersList.length > 5) {
+                        document.getElementById('thColumnaF').textContent = headersList[5];
+                        document.getElementById('modalLabelColumnaF').textContent = headersList[5];
+                    }
+                    if (headersList.length > 8) document.getElementById('modalLabelColI').textContent = headersList[8];
+                    if (headersList.length > 9) document.getElementById('modalLabelColJ').textContent = headersList[9];
+                    if (headersList.length > 10) document.getElementById('modalLabelColK').textContent = headersList[10];
+                    if (headersList.length > 11) document.getElementById('modalLabelColL').textContent = headersList[11];
+                    if (headersList.length > 12) document.getElementById('modalLabelColM').textContent = headersList[12];
 
                     populateFilters();
                     renderTable(rawData);
@@ -260,7 +293,7 @@
                     data.sort((a, b) => a.localeCompare(b));
                 }
                 var select = document.getElementById(id);
-                select.innerHTML = select.options[0].outerHTML; // Mantener opción por defecto
+                select.innerHTML = select.options[0].outerHTML;
                 for(var i = 0; i < data.length; i++) {
                     var opt = document.createElement('option');
                     opt.value = data[i];
@@ -316,7 +349,6 @@
             var tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
-            // Obtener el nombre de la Columna F dinámicamente
             var colFKey = headersList.length > 5 ? headersList[5] : '';
 
             for (var i = 0; i < data.length; i++) {
@@ -358,6 +390,31 @@
 
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? (item[colFKey] || '-') : '-';
+
+            // Columnas J, K, L, M
+            var colJKey = headersList.length > 9 ? headersList[9] : '';
+            var colKKey = headersList.length > 10 ? headersList[10] : '';
+            var colLKey = headersList.length > 11 ? headersList[11] : '';
+            var colMKey = headersList.length > 12 ? headersList[12] : '';
+
+            document.getElementById('modalColJ').textContent = colJKey ? (item[colJKey] || '-') : '-';
+            document.getElementById('modalColK').textContent = colKKey ? (item[colKKey] || '-') : '-';
+            document.getElementById('modalColL').textContent = colLKey ? (item[colLKey] || '-') : '-';
+            document.getElementById('modalColM').textContent = colMKey ? (item[colMKey] || '-') : '-';
+
+            // Columna I (Enlace)
+            var colIKey = headersList.length > 8 ? headersList[8] : '';
+            var linkContainer = document.getElementById('modalLinkContainer');
+            var linkAnchor = document.getElementById('modalLinkColI');
+            var linkVal = colIKey ? (item[colIKey] || '').trim() : '';
+
+            if (linkVal) {
+                linkAnchor.href = linkVal;
+                linkAnchor.textContent = linkVal;
+                linkContainer.classList.remove('hidden');
+            } else {
+                linkContainer.classList.add('hidden');
+            }
 
             // Lógica de validación con la columna Revisado
             var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
