@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso - Portal de Requisitos Legales</title>
+    <title>Iniciar Sesión - Portal de Requisitos Legales</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Incluimos PapaParse para leer la hoja de Usuarios -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,136 +19,83 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 space-y-6 border border-slate-100">
+    <div class="bg-white p-8 rounded-2xl shadow-md w-full max-w-md space-y-6 border border-slate-100">
         <div class="text-center space-y-2">
-            <h1 class="text-2xl font-bold" style="color: #3B599F;">Portal SIG</h1>
-            <p class="text-xs text-slate-500">Gestión de Requisitos Legales</p>
+            <h1 class="text-2xl font-bold" style="color: #3B599F;">Portal de Requisitos Legales</h1>
+            <p class="text-xs text-slate-500">Ingrese su usuario y contraseña para acceder</p>
         </div>
-
-        <!-- Formulario de Login -->
-        <div class="space-y-4">
+        
+        <form id="loginForm" class="space-y-4">
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-600">Usuario / Administrador</label>
-                <input type="text" id="userInput" placeholder="Ingrese su usuario..." class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 border-slate-300">
+                <label class="text-xs font-bold text-slate-500">Usuario / DNI</label>
+                <input type="text" id="userInput" required class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 border-slate-300" placeholder="Ej. 43662282 o 55555555">
             </div>
-
+            
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-600">Contraseña</label>
-                <input type="password" id="passInput" placeholder="••••••••" class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 border-slate-300">
+                <label class="text-xs font-bold text-slate-500">Contraseña</label>
+                <input type="password" id="passInput" required class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 border-slate-300" placeholder="••••••">
             </div>
 
-            <div id="errorMsg" class="text-xs text-red-600 font-semibold hidden text-center bg-red-50 p-2 rounded-lg">
-                Usuario o contraseña incorrectos.
-            </div>
-
-            <button onclick="handleLogin()" class="w-full py-3 rounded-xl text-white font-bold text-sm transition shadow-sm bg-corporate-blue hover:opacity-90">
+            <button type="submit" class="w-full py-3 rounded-xl text-white font-bold text-sm transition shadow-sm bg-corporate-blue hover:opacity-90">
                 Iniciar Sesión
             </button>
-
-            <div class="relative flex py-2 items-center">
-                <div class="flex-grow border-t border-slate-200"></div>
-                <span class="flex-shrink mx-4 text-xs text-slate-400 uppercase">O bien</span>
-                <div class="flex-grow border-t border-slate-200"></div>
-            </div>
-
-            <!-- Enlace directo para usuario público -->
-            <a href="indicadores.html" onclick="handlePublicAccess()" class="block text-center w-full py-3 rounded-xl text-slate-700 font-bold text-sm transition shadow-sm bg-slate-100 hover:bg-slate-200">
-                Ingresar como Usuario Público
-            </a>
-        </div>
+            
+            <p id="errorMsg" class="text-xs text-red-500 text-center font-medium hidden">Usuario o contraseña incorrectos.</p>
+        </form>
     </div>
 
     <script>
-        // Enlace CSV de la pestaña "Usuarios" de tu Google Sheets
-        const usuariosCsvUrl = 'TU_ENLACE_CSV_DE_LA_HOJA_USUARIOS'; 
+        // ⚠️ REEMPLAZA ESTE ENLACE con el enlace CSV publicado de tu pestaña de Usuarios
+        const usuariosCsvUrl = 'TU_ENLACE_CSV_DE_USUARIOS_AQUI';
 
-        const administradoresValidos = [
-            { usuario: "43662282", password: "123" },
-            { usuario: "12345678", password: "123" },
-            { usuario: "87654321", password: "123" }
-        ];
-
-        function handleLogin() {
-            var user = document.getElementById('userInput').value.trim();
-            var pass = document.getElementById('passInput').value.trim();
-            var errorBox = document.getElementById('errorMsg');
-
-            if(!user || !pass) {
-                errorBox.textContent = "Por favor ingrese su usuario y contraseña.";
-                errorBox.classList.remove('hidden');
-                return;
-            }
-
-            errorBox.classList.add('hidden');
-
-            // 1. Verificar si es Administrador (Acceso rápido local)
-            var autorizadoAdmin = false;
-            for(var i = 0; i < administradoresValidos.length; i++) {
-                if(administradoresValidos[i].usuario === user && administradoresValidos[i].password === pass) {
-                    autorizadoAdmin = true;
-                    break;
-                }
-            }
-
-            if(autorizadoAdmin) {
-                sessionStorage.setItem('userRole', 'admin');
-                sessionStorage.setItem('userName', user);
-                window.location.href = 'indicadores.html'; 
-                return;
-            }
-
-            // 2. Si no es admin, verificar en la hoja "Usuarios" (Columnas D, E, F)
-            errorBox.textContent = "Verificando credenciales...";
-            errorBox.classList.remove('hidden');
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var userVal = document.getElementById('userInput').value.trim();
+            var passVal = document.getElementById('passInput').value.trim();
+            var errorMsg = document.getElementById('errorMsg');
+            errorMsg.classList.add('hidden');
 
             Papa.parse(usuariosCsvUrl, {
                 download: true,
-                header: false, // Usamos índices de matriz para mayor precisión
+                header: false, // Leemos por índices de columna para mayor precisión
                 skipEmptyLines: true,
                 complete: function(results) {
-                    var filas = results.data;
-                    var validadorEncontrado = false;
-                    var pilarAsignado = "";
+                    var rows = results.data;
+                    var loggedIn = false;
 
-                    // Omitimos la cabecera (empezamos en i = 1)
-                    for (var i = 1; i < filas.length; i++) {
-                        var fila = filas[i];
-                        var colUsuarioD = (fila[3] || '').trim(); // Columna D (Índice 3)
-                        var colPassE     = (fila[4] || '').trim(); // Columna E (Índice 4)
-                        var colPilarF    = (fila[5] || '').trim(); // Columna F (Índice 5)
+                    // Empezamos desde i = 1 para saltar la fila de encabezados
+                    for (var i = 1; i < rows.length; i++) {
+                        var row = rows[i];
+                        var dbUser  = (row[0] || '').trim();
+                        var dbPass  = (row[1] || '').trim();
+                        var dbRol   = (row[2] || '').trim().toLowerCase();
+                        var dbPilar = (row[3] || '').trim();
 
-                        if (user === colUsuarioD && pass === colPassE) {
-                            validadorEncontrado = true;
-                            pilarAsignado = colPilarF;
+                        if (dbUser === userVal && dbPass === passVal) {
+                            loggedIn = true;
+                            
+                            // Guardamos el rol normalizado y el pilar asignado
+                            var rolNormalizado = (dbRol.includes('admin')) ? 'admin' : 'validador';
+                            sessionStorage.setItem('userRole', rolNormalizado);
+                            sessionStorage.setItem('pilarValidador', dbPilar);
+
+                            // Redirección al panel de validación
+                            window.location.href = 'validacion.html';
                             break;
                         }
                     }
 
-                    if (validadorEncontrado) {
-                        // Guardamos rol y pilar asignado en sessionStorage
-                        sessionStorage.setItem('userRole', 'validador');
-                        sessionStorage.setItem('userName', user);
-                        sessionStorage.setItem('pilarValidador', pilarAsignado);
-                        
-                        // Redirige al panel de validación
-                        window.location.href = 'validacion.html';
-                    } else {
-                        errorBox.textContent = "Usuario o contraseña incorrectos.";
-                        errorBox.classList.remove('hidden');
+                    if (!loggedIn) {
+                        errorMsg.classList.remove('hidden');
                     }
                 },
                 error: function(err) {
                     console.error("Error al leer usuarios:", err);
-                    errorBox.textContent = "Error al conectar con la base de datos de usuarios.";
-                    errorBox.classList.remove('hidden');
+                    errorMsg.textContent = "Error al conectar con la lista de usuarios.";
+                    errorMsg.classList.remove('hidden');
                 }
             });
-        }
-
-        function handlePublicAccess() {
-            sessionStorage.setItem('userRole', 'public');
-            sessionStorage.setItem('userName', 'Usuario Público');
-        }
+        });
     </script>
 </body>
 </html>
