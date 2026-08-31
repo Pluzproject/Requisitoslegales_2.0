@@ -235,12 +235,13 @@
     </div>
 
     <script>
-        // Control de Sesión y Roles
+        // Control de Sesión y Roles (Con normalización a minúsculas para evitar errores de mayúsculas)
         window.addEventListener('DOMContentLoaded', function() {
-            var role = sessionStorage.getItem('userRole');
+            var rawRole = sessionStorage.getItem('userRole');
+            var role = rawRole ? rawRole.trim().toLowerCase() : '';
             
             // Permitir acceso a admin, validador y publico
-            if (!role || (role !== 'admin' && role !== 'validador' && role !== 'publico')) {
+            if (role !== 'admin' && role !== 'validador' && role !== 'publico') {
                 alert("Acceso no autorizado. Inicie sesión nuevamente.");
                 window.location.href = 'index.html';
                 return;
@@ -255,7 +256,7 @@
                         <a href="index.html" class="ml-4 px-3 py-1.5 rounded-lg bg-slate-600 text-white text-xs font-bold hover:bg-slate-700 transition shadow-sm">Cambiar Usuario</a>
                     `;
                 } else {
-                    // Validador o Admin
+                    // Validador o Admin (Tienen acceso a Validador, Normas e Indicadores)
                     navContainer.innerHTML = `
                         <a href="validacion.html" class="opacity-80 hover:opacity-100 transition">Validador</a>
                         <a href="normas.html" class="underline underline-offset-4 font-bold">Normas</a>
