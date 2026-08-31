@@ -29,7 +29,7 @@
         </div>
         <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
             <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
-                <!-- Se rellena dinámicamente con las pestañas para ambos roles -->
+                <!-- Se rellena dinámicamente -->
             </nav>
             <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
                 Cumplimiento de normas
@@ -133,9 +133,9 @@
                     </div>
                 </div>
 
-                <!-- Pilar del SIG -->
+                <!-- Pilar del SIG (Columna C) -->
                 <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500">Pilar del SIG</label>
+                    <label class="text-xs font-bold text-gray-500">Pilar del SIG (Columna C)</label>
                     <div class="relative">
                         <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todos los Pilares</option>
@@ -273,14 +273,31 @@
                     </a>
                 </div>
 
-                <!-- Edición de Evidencia y Revisado -->
+                <!-- Edición de Campos (Tipo, Artículos, Evidencia, Revisado) -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Editar campos</span>
                     
-                    <!-- Evidencia -->
+                    <!-- Tipo de Norma (Columna H) -->
                     <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 block">Evidencia</label>
-                        <textarea id="editEvidencia" rows="3" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;" placeholder="Ingrese o edite la evidencia..."></textarea>
+                        <label class="text-xs font-bold text-slate-500 block">Tipo de Norma (Columna H)</label>
+                        <select id="editTipo" onchange="toggleConditionalFields()" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
+                            <option value="">Seleccione tipo...</option>
+                            <option value="Obligatorio">Obligatorio</option>
+                            <option value="Referencial">Referencial</option>
+                            <option value="Informativo">Informativo</option>
+                        </select>
+                    </div>
+
+                    <!-- Artículos Relevantes (Columna J) - Condicional -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 block">Artículos Relevantes (Columna J)</label>
+                        <textarea id="editArticulos" rows="2" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;" placeholder="Ingrese artículos relevantes..."></textarea>
+                    </div>
+
+                    <!-- Evidencia (Columna M) - Condicional con texto sugerido -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 block">Evidencia (Columna M)</label>
+                        <textarea id="editEvidencia" rows="3" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;" placeholder="Completar con las evidencias puntuales que se tendrían que presentar - todas las evidencias mencionadas deben adjuntarse en Isotools-"></textarea>
                     </div>
 
                     <!-- Estado de Revisión -->
@@ -316,7 +333,6 @@
         window.addEventListener('DOMContentLoaded', function() {
             var role = sessionStorage.getItem('userRole');
             
-            // Permitir acceso si es admin o validador
             if (role !== 'admin' && role !== 'validador') {
                 alert("Acceso restringido. Por favor inicie sesión.");
                 window.location.href = 'index.html';
@@ -325,7 +341,6 @@
 
             var navContainer = document.getElementById('userNav');
             if (navContainer) {
-                // Ambos roles ven exactamente la misma barra de navegación superior
                 navContainer.innerHTML = `
                     <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
                     <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas</a>
@@ -354,7 +369,6 @@
 
         function clearFilter(id) {
             var role = sessionStorage.getItem('userRole');
-            // Si es validador, no permitir limpiar su pilar asignado
             if (role === 'validador' && id === 'filterPilar') return;
 
             var el = document.getElementById(id);
@@ -419,25 +433,24 @@
 
                     populateFilters();
                     
-                    // Si es validador, preseleccionar y bloquear su pilar asignado antes del primer filtro
                     var role = sessionStorage.getItem('userRole');
                     if (role === 'validador') {
                         var pilarValidador = sessionStorage.getItem('pilarValidador') || '';
                         var selectPilar = document.getElementById('filterPilar');
                         if (selectPilar && pilarValidador) {
                             selectPilar.value = pilarValidador;
-                            selectPilar.disabled = true; // Bloqueado
+                            selectPilar.disabled = true;
                             var btnClearPilar = document.getElementById('btnClearPilar');
-                            if(btnClearPilar) btnClearPilar.style.display = 'none'; // Ocultar la 'X' de limpiar pilar
+                            if(btnClearPilar) btnClearPilar.style.display = 'none';
                         }
                     }
 
-                    applyFilters(); // Aplica filtros y calcula KPIs iniciales basados en la vista
+                    applyFilters();
                 }
             });
         }
 
-        // Función inteligente para emparejar pilares evitando errores por variaciones de texto (ej. SST vs Seguridad)
+        // Validación precisa sobre la Columna C (Pilar del SIG) con soporte para seguridad/SST
         function matchPillar(itemPilar, filterPilar) {
             if (!filterPilar) return true;
             var itemP = decodeHtmlEntities(itemPilar || '').trim().toLowerCase();
@@ -446,11 +459,12 @@
             if (itemP === filtP) return true;
             if (itemP.includes(filtP) || filtP.includes(itemP)) return true;
             
-            // Coincidencias flexibles y sinónimos comunes en SIG (SST, Medio Ambiente, Calidad, Energía, etc.)
-            if (filtP === 'sst' && (itemP.includes('seguridad') || itemP.includes('salud') || itemP.includes('sst'))) return true;
-            if (filtP.includes('seguridad') && (itemP.includes('sst') || itemP.includes('seguridad'))) return true;
-            if (filtP === 'ma' && (itemP.includes('ambiente') || itemP.includes('ambiental') || itemP.includes('ma'))) return true;
-            if (filtP.includes('ambiente') && (itemP.includes('ma') || itemP.includes('ambiente'))) return true;
+            if ((filtP.includes('seguridad') || filtP === 'sst') && (itemP.includes('seguridad') || itemP.includes('sst') || itemP.includes('salud'))) {
+                return true;
+            }
+            if (filtP === 'ma' && (itemP.includes('ambiente') || itemP.includes('ambiental') || itemP.includes('ma'))) {
+                return true;
+            }
             
             return false;
         }
@@ -540,9 +554,7 @@
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
                 
-                // Uso de coincidencia inteligente de pilar
                 var matchPI = matchPillar(item['Pilar del SIG'], pi);
-                
                 var matchTI = !ti || decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase() === ti;
                 var matchAU = !au || decodeHtmlEntities(item['Autoridad'] || '').trim().toLowerCase() === au;
                 
@@ -552,7 +564,7 @@
             }
             
             renderTable(filtered);
-            updateKPIs(filtered); // KPIs calculados exactamente sobre el filtro actual del validador/admin
+            updateKPIs(filtered);
             document.getElementById('rowCountDisplay').textContent = "Mostrando " + filtered.length + " registros";
         }
 
@@ -564,7 +576,6 @@
             document.getElementById('filterMesAnio').value = '';
             document.getElementById('filterAnio').value = '';
             
-            // Si es admin, limpia el pilar. Si es validador, mantiene fijo su pilar asignado.
             if (role === 'admin') {
                 document.getElementById('filterPilar').value = '';
             }
@@ -654,7 +665,6 @@
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            // Enlace original
             var linkVal = item['Enlace'] || item['Link'] || '';
             if(linkVal) {
                 document.getElementById('modalLinkColI').href = linkVal;
@@ -663,14 +673,51 @@
                 document.getElementById('modalLinkContainer').classList.add('hidden');
             }
 
-            // Campos de edición
+            // Cargar campos de edición condicionales
+            var currentTipoNorma = (item['Tipo de norma'] || '').trim();
+            // Normalizar para coincidir con las opciones (Obligatorio, Referencial, Informativo)
+            var normalizedTipo = '';
+            if (currentTipoNorma.toLowerCase().includes('obligatorio')) normalizedTipo = 'Obligatorio';
+            else if (currentTipoNorma.toLowerCase().includes('referencial')) normalizedTipo = 'Referencial';
+            else if (currentTipoNorma.toLowerCase().includes('informativo')) normalizedTipo = 'Informativo';
+
+            document.getElementById('editTipo').value = normalizedTipo;
+            document.getElementById('editArticulos').value = item['Artículos relevantes'] || '';
             document.getElementById('editEvidencia').value = item['Evidencia'] || '';
+            
             var revVal = (item['Revisado'] || '').trim().toLowerCase();
             document.getElementById('editRevisado').value = (revVal === 'si' || revVal === 'sí' || revVal === '1' || revVal === 'x') ? 'si' : '';
-            document.getElementById('syncStatus').textContent = '';
+            
+            // Aplicar reglas condicionales al abrir
+            toggleConditionalFields();
 
+            document.getElementById('syncStatus').textContent = '';
             document.getElementById('detailModal').classList.remove('hidden');
             document.getElementById('detailModal').classList.add('flex');
+        }
+
+        // Función para habilitar/deshabilitar Artículos y Evidencia según si es "Obligatorio"
+        function toggleConditionalFields() {
+            var tipoVal = document.getElementById('editTipo').value.trim().toLowerCase();
+            var editArt = document.getElementById('editArticulos');
+            var editEvid = document.getElementById('editEvidencia');
+
+            if (tipoVal === 'obligatorio') {
+                editArt.disabled = false;
+                editArt.classList.remove('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
+                
+                editEvid.disabled = false;
+                editEvid.classList.remove('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
+                editEvid.placeholder = "Completar con las evidencias puntuales que se tendrían que presentar - todas las evidencias mencionadas deben adjuntarse en Isotools-";
+            } else {
+                editArt.disabled = true;
+                editArt.classList.add('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
+                editArt.value = '';
+
+                editEvid.disabled = true;
+                editEvid.classList.add('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
+                editEvid.value = '';
+            }
         }
 
         function closeModal() {
@@ -682,9 +729,18 @@
         function guardarCambiosSheet() {
             if(!currentModalItem) return;
 
+            var nuevoTipo = document.getElementById('editTipo').value;
+            var nuevosArticulos = document.getElementById('editArticulos').value;
             var nuevaEvidencia = document.getElementById('editEvidencia').value;
             var nuevoRevisado = document.getElementById('editRevisado').value;
 
+            if (nuevoTipo.toLowerCase() !== 'obligatorio') {
+                nuevosArticulos = '';
+                nuevaEvidencia = '';
+            }
+
+            currentModalItem['Tipo de norma'] = nuevoTipo;
+            currentModalItem['Artículos relevantes'] = nuevosArticulos;
             currentModalItem['Evidencia'] = nuevaEvidencia;
             currentModalItem['Revisado'] = nuevoRevisado;
 
@@ -692,6 +748,8 @@
 
             var dataToSend = {
                 norma: currentModalItem['Norma'],
+                tipoNorma: nuevoTipo,
+                articulosRelevantes: nuevosArticulos,
                 evidencia: nuevaEvidencia,
                 revisado: nuevoRevisado
             };
