@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso - Portal de Requisitos Legales</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Incluimos PapaParse para leer la hoja de Usuarios -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,8 +27,8 @@
         <!-- Formulario de Login -->
         <div class="space-y-4">
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-600">Administrador</label>
-                <input type="text" id="userInput" placeholder="12345678" class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 border-slate-300">
+                <label class="text-xs font-bold text-slate-600">Usuario / Administrador</label>
+                <input type="text" id="userInput" placeholder="Ingrese su usuario..." class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 border-slate-300">
             </div>
 
             <div class="space-y-1">
@@ -56,6 +58,9 @@
     </div>
 
     <script>
+        // Enlace CSV de la pestaña "Usuarios" de tu Google Sheets
+        const usuariosCsvUrl = 'TU_ENLACE_CSV_DE_LA_HOJA_USUARIOS'; 
+
         const administradoresValidos = [
             { usuario: "43662282", password: "123" },
             { usuario: "12345678", password: "123" },
@@ -73,23 +78,70 @@
                 return;
             }
 
-            var autorizado = false;
+            errorBox.classList.add('hidden');
+
+            // 1. Verificar si es Administrador (Acceso rápido local)
+            var autorizadoAdmin = false;
             for(var i = 0; i < administradoresValidos.length; i++) {
                 if(administradoresValidos[i].usuario === user && administradoresValidos[i].password === pass) {
-                    autorizado = true;
+                    autorizadoAdmin = true;
                     break;
                 }
             }
 
-            if(autorizado) {
+            if(autorizadoAdmin) {
                 sessionStorage.setItem('userRole', 'admin');
                 sessionStorage.setItem('userName', user);
-                // Redirige al panel de indicadores con privilegios de administrador
                 window.location.href = 'indicadores.html'; 
-            } else {
-                errorBox.textContent = "Credenciales incorrectas o usuario no registrado como administrador.";
-                errorBox.classList.remove('hidden');
+                return;
             }
+
+            // 2. Si no es admin, verificar en la hoja "Usuarios" (Columnas D, E, F)
+            errorBox.textContent = "Verificando credenciales...";
+            errorBox.classList.remove('hidden');
+
+            Papa.parse(usuariosCsvUrl, {
+                download: true,
+                header: false, // Usamos índices de matriz para mayor precisión
+                skipEmptyLines: true,
+                complete: function(results) {
+                    var filas = results.data;
+                    var validadorEncontrado = false;
+                    var pilarAsignado = "";
+
+                    // Omitimos la cabecera (empezamos en i = 1)
+                    for (var i = 1; i < filas.length; i++) {
+                        var fila = filas[i];
+                        var colUsuarioD = (fila[3] || '').trim(); // Columna D (Índice 3)
+                        var colPassE     = (fila[4] || '').trim(); // Columna E (Índice 4)
+                        var colPilarF    = (fila[5] || '').trim(); // Columna F (Índice 5)
+
+                        if (user === colUsuarioD && pass === colPassE) {
+                            validadorEncontrado = true;
+                            pilarAsignado = colPilarF;
+                            break;
+                        }
+                    }
+
+                    if (validadorEncontrado) {
+                        // Guardamos rol y pilar asignado en sessionStorage
+                        sessionStorage.setItem('userRole', 'validador');
+                        sessionStorage.setItem('userName', user);
+                        sessionStorage.setItem('pilarValidador', pilarAsignado);
+                        
+                        // Redirige al panel de validación
+                        window.location.href = 'validacion.html';
+                    } else {
+                        errorBox.textContent = "Usuario o contraseña incorrectos.";
+                        errorBox.classList.remove('hidden');
+                    }
+                },
+                error: function(err) {
+                    console.error("Error al leer usuarios:", err);
+                    errorBox.textContent = "Error al conectar con la base de datos de usuarios.";
+                    errorBox.classList.remove('hidden');
+                }
+            });
         }
 
         function handlePublicAccess() {
