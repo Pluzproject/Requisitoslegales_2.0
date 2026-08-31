@@ -29,7 +29,7 @@
         </div>
         <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
             <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
-                <!-- Se rellena dinámicamente y restringe a usuarios públicos -->
+                <!-- Se rellena dinámicamente según el rol -->
             </nav>
             <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
                 Cumplimiento de normas
@@ -45,7 +45,7 @@
                 <div id="lastUpdateDisplay" class="text-xs font-medium italic border-b pb-2 mb-2" style="color: #3B599F;"></div>
                 <div class="flex justify-between items-center border-b pb-2">
                     <h2 class="font-bold text-sm" style="color: #3B599F;">Filtros de Búsqueda</h2>
-                    <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline">Reset Todo</button>
+                    <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline cursor-pointer">Reset Todo</button>
                 </div>
                 
                 <!-- Filtro de Búsqueda de Texto -->
@@ -53,7 +53,7 @@
                     <label class="text-xs font-bold text-gray-500">Buscar Texto</label>
                     <div class="relative">
                         <input type="text" id="searchInput" placeholder="Norma o sumilla..." class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
-                        <button onclick="clearFilter('searchInput')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('searchInput')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
                 
@@ -62,7 +62,7 @@
                     <label class="text-xs font-bold text-gray-500">Fecha Específica</label>
                     <div class="relative">
                         <input type="date" id="filterFecha" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
-                        <button onclick="clearFilter('filterFecha')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterFecha')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
 
@@ -73,7 +73,7 @@
                         <select id="filterMesAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Seleccionar...</option>
                         </select>
-                        <button onclick="clearFilter('filterMesAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterMesAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
 
@@ -84,7 +84,7 @@
                         <select id="filterAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todos los Años</option>
                         </select>
-                        <button onclick="clearFilter('filterAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
 
@@ -95,7 +95,7 @@
                         <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todos los Pilares</option>
                         </select>
-                        <button onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
 
@@ -106,7 +106,7 @@
                         <select id="filterTipo" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todos los Tipos</option>
                         </select>
-                        <button onclick="clearFilter('filterTipo')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterTipo')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
 
@@ -117,7 +117,7 @@
                         <select id="filterAutoridad" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todas las Autoridades</option>
                         </select>
-                        <button onclick="clearFilter('filterAutoridad')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1" title="Borrar filtro">&times;</button>
+                        <button onclick="clearFilter('filterAutoridad')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
             </aside>
@@ -165,7 +165,7 @@
             <!-- Barra de Estado Superior Dinámica -->
             <div id="modalStatusBanner" class="px-6 py-3 flex items-center justify-between text-white font-bold transition-colors duration-300" style="background-color: #FBC13F;">
                 <span id="modalStatusText" class="text-sm tracking-wide uppercase">Pendiente de validar</span>
-                <button onclick="closeModal()" class="text-white hover:opacity-80 text-xl font-bold px-2">&times;</button>
+                <button onclick="closeModal()" class="text-white hover:opacity-80 text-xl font-bold px-2 cursor-pointer">&times;</button>
             </div>
 
             <!-- Contenido del Modal -->
@@ -228,31 +228,41 @@
 
             <!-- Pie del Modal -->
             <div class="bg-slate-50 px-6 py-4 border-t flex justify-end">
-                <button onclick="closeModal()" class="px-5 py-2 rounded-lg text-white font-bold text-sm transition shadow-sm" style="background-color: #3B599F;">Cerrar</button>
+                <button onclick="closeModal()" class="px-5 py-2 rounded-lg text-white font-bold text-sm transition shadow-sm cursor-pointer" style="background-color: #3B599F;">Cerrar</button>
             </div>
 
         </div>
     </div>
 
     <script>
-        // Control Estricto de Seguridad: Bloquea usuarios públicos en esta página
+        // Control de Sesión y Roles
         window.addEventListener('DOMContentLoaded', function() {
             var role = sessionStorage.getItem('userRole');
             
-            if (role !== 'admin') {
-                alert("Acceso restringido. Esta sección es exclusiva para administradores.");
-                window.location.href = 'indicadores.html';
+            // Permitir acceso a admin, validador y publico
+            if (!role || (role !== 'admin' && role !== 'validador' && role !== 'publico')) {
+                alert("Acceso no autorizado. Inicie sesión nuevamente.");
+                window.location.href = 'index.html';
                 return;
             }
 
             var navContainer = document.getElementById('userNav');
             if (navContainer) {
-                navContainer.innerHTML = `
-                    <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
-                    <a href="normas.html" class="underline underline-offset-4 font-bold">Ver Normas (Tabla)</a>
-                    <a href="validacion.html" class="opacity-80 hover:opacity-100 transition">Validación</a>
-                    <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
-                `;
+                if (role === 'publico') {
+                    navContainer.innerHTML = `
+                        <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
+                        <a href="normas.html" class="underline underline-offset-4 font-bold">Normas</a>
+                        <a href="index.html" class="ml-4 px-3 py-1.5 rounded-lg bg-slate-600 text-white text-xs font-bold hover:bg-slate-700 transition shadow-sm">Cambiar Usuario</a>
+                    `;
+                } else {
+                    // Validador o Admin
+                    navContainer.innerHTML = `
+                        <a href="validacion.html" class="opacity-80 hover:opacity-100 transition">Validador</a>
+                        <a href="normas.html" class="underline underline-offset-4 font-bold">Normas</a>
+                        <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
+                        <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm cursor-pointer">Cerrar Sesión</button>
+                    `;
+                }
             }
 
             fetchData();
