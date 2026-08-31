@@ -49,7 +49,7 @@
                 <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline cursor-pointer">Reset Todo</button>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-4">
                 <!-- Buscar Texto -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Buscar Texto</label>
@@ -65,6 +65,24 @@
                     <div class="relative">
                         <input type="date" id="filterFecha" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
                         <button onclick="clearFilter('filterFecha')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Fecha Desde -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Fecha Desde</label>
+                    <div class="relative">
+                        <input type="date" id="filterFechaDesde" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
+                        <button onclick="clearFilter('filterFechaDesde')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Fecha Hasta -->
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-500">Fecha Hasta</label>
+                    <div class="relative">
+                        <input type="date" id="filterFechaHasta" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
+                        <button onclick="clearFilter('filterFechaHasta')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
 
@@ -273,7 +291,7 @@
 
             fetchData();
 
-            var filterIds = ['searchInput', 'filterFecha', 'filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
+            var filterIds = ['searchInput', 'filterFecha', 'filterFechaDesde', 'filterFechaHasta', 'filterMesAnio', 'filterAnio', 'filterPilar', 'filterTipo', 'filterAutoridad'];
             for(var i = 0; i < filterIds.length; i++) {
                 var el = document.getElementById(filterIds[i]);
                 if(el) {
@@ -322,18 +340,6 @@
             var txt = document.createElement('textarea');
             txt.innerHTML = str;
             return txt.value;
-        }
-
-        function isObligatoria(item) {
-            for (var key in item) {
-                if (item.hasOwnProperty(key)) {
-                    var val = String(item[key]).toLowerCase();
-                    if (val.includes('obligatorio') || val.includes('obligatoria')) {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
 
         function fetchData() {
@@ -426,16 +432,17 @@
         function applyFilters() {
             var s = document.getElementById('searchInput').value.toLowerCase();
             var fe = document.getElementById('filterFecha').value;
+            var fDesde = document.getElementById('filterFechaDesde').value;
+            var fHasta = document.getElementById('filterFechaHasta').value;
             var ma = document.getElementById('filterMesAnio').value;
             var an = document.getElementById('filterAnio').value;
             var pi = document.getElementById('filterPilar').value.toLowerCase();
             var ti = document.getElementById('filterTipo').value.toLowerCase();
             var au = document.getElementById('filterAutoridad').value.toLowerCase();
 
-            var filterSortDate = '';
-            if(fe) {
-                filterSortDate = fe.replace(/-/g, '');
-            }
+            var filterSortDate = fe ? fe.replace(/-/g, '') : '';
+            var sortDesde = fDesde ? fDesde.replace(/-/g, '') : '';
+            var sortHasta = fHasta ? fHasta.replace(/-/g, '') : '';
 
             var filtered = [];
             for(var i = 0; i < rawData.length; i++) {
@@ -445,6 +452,8 @@
                 
                 var matchS = !s || normaDec.includes(s) || sumillaDec.includes(s);
                 var matchFE = !filterSortDate || item.sortDate === filterSortDate;
+                var matchDesde = !sortDesde || item.sortDate >= sortDesde;
+                var matchHasta = !sortHasta || item.sortDate <= sortHasta;
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
                 
@@ -452,7 +461,7 @@
                 var matchTI = !ti || decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase() === ti;
                 var matchAU = !au || decodeHtmlEntities(item['Autoridad'] || '').trim().toLowerCase() === au;
                 
-                if(matchS && matchFE && matchMA && matchAN && matchPI && matchTI && matchAU) {
+                if(matchS && matchFE && matchDesde && matchHasta && matchMA && matchAN && matchPI && matchTI && matchAU) {
                     filtered.push(item);
                 }
             }
@@ -462,6 +471,8 @@
         function resetFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('filterFecha').value = '';
+            document.getElementById('filterFechaDesde').value = '';
+            document.getElementById('filterFechaHasta').value = '';
             document.getElementById('filterMesAnio').value = '';
             document.getElementById('filterAnio').value = '';
             document.getElementById('filterPilar').value = '';
@@ -483,8 +494,9 @@
                 
                 var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
                 var normaName = decodeHtmlEntities(item['Norma'] || '');
-                var esOblig = isObligatoria(item);
-
+                var tipoNormaText = decodeHtmlEntities(item['Tipo de norma'] || '');
+                
+                var esOblig = tipoNormaText.toLowerCase().includes('obligatorio') || tipoNormaText.toLowerCase().includes('obligatoria');
                 var badgeObligatorio = esOblig 
                     ? `<span class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px] font-bold tracking-wide uppercase inline-block">Obligatorio</span>` 
                     : '';
@@ -492,11 +504,11 @@
                 tr.innerHTML = `
                     <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
                     <td class="p-3 font-bold" style="color: #3B599F;">
-                        ${normaName} ${badgeObligatorio}
+                        ${normaName}
                     </td>
                     <td class="p-3 text-slate-600 text-xs max-w-sm whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
                     <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
-                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Tipo de norma'] || '')}</td>
+                    <td class="p-3 text-xs">${tipoNormaText} ${badgeObligatorio}</td>
                     <td class="p-3 text-xs">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
                     <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
                 `;
@@ -529,7 +541,6 @@
             extraFieldsContainer.innerHTML = '';
             var hasExtra = false;
 
-            // Se omiten índices de recomendaciones u otros descartados, manteniendo los demás complementarios
             var indicesExtra = [9, 11, 12, 13];
             for(var idx = 0; idx < indicesExtra.length; idx++) {
                 var colIdx = indicesExtra[idx];
