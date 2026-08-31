@@ -49,7 +49,7 @@
                 <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline cursor-pointer">Reset Todo</button>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4 items-end">
                 <!-- Buscar Texto -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Buscar Texto</label>
@@ -68,21 +68,19 @@
                     </div>
                 </div>
 
-                <!-- Fecha Desde -->
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500">Fecha Desde</label>
-                    <div class="relative">
-                        <input type="date" id="filterFechaDesde" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
-                        <button onclick="clearFilter('filterFechaDesde')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
+                <!-- Contenedor Rango de Fechas ("Globo") -->
+                <div class="space-y-1 xl:col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-bold text-gray-500">Rango de Fechas (Desde / Hasta)</label>
+                        <button onclick="clearDateRange()" class="text-[10px] font-bold text-red-500 hover:underline cursor-pointer">Limpiar rango</button>
                     </div>
-                </div>
-
-                <!-- Fecha Hasta -->
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500">Fecha Hasta</label>
-                    <div class="relative">
-                        <input type="date" id="filterFechaHasta" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;">
-                        <button onclick="clearFilter('filterFechaHasta')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="relative">
+                            <input type="date" id="filterFechaDesde" class="w-full pl-2 pr-2 py-1.5 border rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;" title="Fecha Desde">
+                        </div>
+                        <div class="relative">
+                            <input type="date" id="filterFechaHasta" class="w-full pl-2 pr-2 py-1.5 border rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;" title="Fecha Hasta">
+                        </div>
                     </div>
                 </div>
 
@@ -331,6 +329,12 @@
             }
         }
 
+        function clearDateRange() {
+            document.getElementById('filterFechaDesde').value = '';
+            document.getElementById('filterFechaHasta').value = '';
+            applyFilters();
+        }
+
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
         var rawData = [];
         var headersList = [];
@@ -496,10 +500,12 @@
                 var normaName = decodeHtmlEntities(item['Norma'] || '');
                 var tipoNormaText = decodeHtmlEntities(item['Tipo de norma'] || '');
                 
-                var esOblig = tipoNormaText.toLowerCase().includes('obligatorio') || tipoNormaText.toLowerCase().includes('obligatoria');
-                var badgeObligatorio = esOblig 
-                    ? `<span class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px] font-bold tracking-wide uppercase inline-block">Obligatorio</span>` 
-                    : '';
+                var tipoLower = tipoNormaText.toLowerCase();
+                var esOblig = tipoLower.includes('obligatorio') || tipoLower.includes('obligatoria');
+                
+                var tipoDisplay = esOblig 
+                    ? `<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px] font-bold tracking-wide uppercase inline-block">Obligatorio</span>` 
+                    : tipoNormaText;
 
                 tr.innerHTML = `
                     <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
@@ -508,7 +514,7 @@
                     </td>
                     <td class="p-3 text-slate-600 text-xs max-w-sm whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
                     <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
-                    <td class="p-3 text-xs">${tipoNormaText} ${badgeObligatorio}</td>
+                    <td class="p-3 text-xs">${tipoDisplay}</td>
                     <td class="p-3 text-xs">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
                     <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
                 `;
