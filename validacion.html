@@ -29,7 +29,7 @@
         </div>
         <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
             <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
-                <!-- Se rellena dinámicamente -->
+                <!-- Se rellena dinámicamente según el rol -->
             </nav>
             <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
                 Cumplimiento de normas
@@ -273,7 +273,7 @@
                     </a>
                 </div>
 
-                <!-- Edición de Evidencia y Revisado (Limpio de textos de columnas) -->
+                <!-- Edición de Evidencia y Revisado -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Editar campos</span>
                     
@@ -316,20 +316,30 @@
         window.addEventListener('DOMContentLoaded', function() {
             var role = sessionStorage.getItem('userRole');
             
-            if (role !== 'admin') {
-                alert("Acceso restringido. Esta sección es exclusiva para administradores.");
-                window.location.href = 'indicadores.html';
+            // Permitir acceso si es admin o validador
+            if (role !== 'admin' && role !== 'validador') {
+                alert("Acceso restringido. Por favor inicie sesión.");
+                window.location.href = 'index.html';
                 return;
             }
 
             var navContainer = document.getElementById('userNav');
             if (navContainer) {
-                navContainer.innerHTML = `
-                    <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
-                    <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas</a>
-                    <a href="validacion.html" class="underline underline-offset-4 font-bold">Validación</a>
-                    <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
-                `;
+                if (role === 'admin') {
+                    navContainer.innerHTML = `
+                        <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
+                        <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas</a>
+                        <a href="validacion.html" class="underline underline-offset-4 font-bold">Validación</a>
+                        <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
+                    `;
+                } else {
+                    // Vista específica para Validador
+                    var pilarAsignado = sessionStorage.getItem('pilarValidador') || '';
+                    navContainer.innerHTML = `
+                        <span class="text-xs font-semibold bg-white/20 px-3 py-1.5 rounded-lg">Pilar Asignado: ${pilarAsignado}</span>
+                        <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
+                    `;
+                }
             }
 
             fetchData();
@@ -414,6 +424,18 @@
                     populateFilters();
                     updateKPIs(rawData);
                     renderTable(rawData);
+
+                    // Si es validador, aplicar pre-filtro y bloqueo del pilar asignado
+                    var role = sessionStorage.getItem('userRole');
+                    if (role === 'validador') {
+                        var pilarValidador = sessionStorage.getItem('pilarValidador');
+                        var selectPilar = document.getElementById('filterPilar');
+                        if (selectPilar && pilarValidador) {
+                            selectPilar.value = pilarValidador;
+                            selectPilar.disabled = true; // Bloqueado para que no pueda cambiar de pilar
+                        }
+                        applyFilters(); // Aplicar filtros automáticamente
+                    }
                 }
             });
         }
@@ -512,18 +534,25 @@
                 }
             }
             renderTable(filtered);
+            document.getElementById('rowCountDisplay').textContent = "Mostrando " + filtered.length + " registros";
         }
 
         function resetFilters() {
+            var role = sessionStorage.getItem('userRole');
             document.getElementById('searchInput').value = '';
             document.getElementById('filterEstado').value = '';
             document.getElementById('filterFecha').value = '';
             document.getElementById('filterMesAnio').value = '';
             document.getElementById('filterAnio').value = '';
-            document.getElementById('filterPilar').value = '';
+            
+            // Si es admin, limpia también el pilar. Si es validador, mantiene su pilar asignado.
+            if (role === 'admin') {
+                document.getElementById('filterPilar').value = '';
+            }
+            
             document.getElementById('filterTipo').value = '';
             document.getElementById('filterAutoridad').value = '';
-            renderTable(rawData);
+            applyFilters();
         }
 
         function renderTable(data) {
@@ -564,129 +593,111 @@
 
                 tbody.appendChild(tr);
             }
-
             document.getElementById('rowCountDisplay').textContent = "Mostrando " + data.length + " registros";
         }
 
         function openModal(item) {
             currentModalItem = item;
-            document.getElementById('modalNorma').textContent = decodeHtmlEntities(item['Norma'] || 'Sin Norma');
+            document.getElementById('modalNorma').textContent = decodeHtmlEntities(item['Norma'] || 'Detalle de la Norma');
             document.getElementById('modalFecha').textContent = item['Fecha'] || '-';
             document.getElementById('modalPilar').textContent = decodeHtmlEntities(item['Pilar del SIG'] || '-');
             document.getElementById('modalTipo').textContent = decodeHtmlEntities(item['Tipo de norma'] || '-');
-            document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || 'Sin descripción disponible.');
-            document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
-            document.getElementById('syncStatus').textContent = '';
+            document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || '-');
 
-            // Buscar y rellenar dinámicamente Artículos, Recomendación y Entregables
-            var articulosVal = '';
-            var recomendacionVal = '';
-            var entregablesVal = '';
-
-            headersList.forEach(function(h) {
-                var hLower = h.toLowerCase();
-                if (hLower.includes('articulo') || hLower.includes('artículos')) {
-                    articulosVal = item[h] || '';
-                }
-                if (hLower.includes('recomendacion') || hLower.includes('recomendación')) {
-                    recomendacionVal = item[h] || '';
-                }
-                if (hLower.includes('entregable')) {
-                    entregablesVal = item[h] || '';
-                }
-            });
-
-            // Artículos Relevantes
-            var artContainer = document.getElementById('modalArticulosContainer');
-            if (articulosVal.trim()) {
-                document.getElementById('modalArticulos').textContent = decodeHtmlEntities(articulosVal);
-                artContainer.classList.remove('hidden');
+            // Artículos
+            var art = decodeHtmlEntities(item['Artículos relevantes'] || '');
+            if(art) {
+                document.getElementById('modalArticulos').textContent = art;
+                document.getElementById('modalArticulosContainer').classList.remove('hidden');
             } else {
-                artContainer.classList.add('hidden');
+                document.getElementById('modalArticulosContainer').classList.add('hidden');
             }
 
             // Recomendación
-            var recContainer = document.getElementById('modalRecomendacionContainer');
-            if (recomendacionVal.trim()) {
-                document.getElementById('modalRecomendacion').textContent = decodeHtmlEntities(recomendacionVal);
-                recContainer.classList.remove('hidden');
+            var rec = decodeHtmlEntities(item['Recomendación'] || '');
+            if(rec) {
+                document.getElementById('modalRecomendacion').textContent = rec;
+                document.getElementById('modalRecomendacionContainer').classList.remove('hidden');
             } else {
-                recContainer.classList.add('hidden');
+                document.getElementById('modalRecomendacionContainer').classList.add('hidden');
             }
 
-            // Entregables Recomendados
-            var entContainer = document.getElementById('modalEntregablesContainer');
-            if (entregablesVal.trim()) {
-                document.getElementById('modalEntregables').textContent = decodeHtmlEntities(entregablesVal);
-                entContainer.classList.remove('hidden');
+            // Entregables
+            var ent = decodeHtmlEntities(item['Entregables recomendados'] || '');
+            if(ent) {
+                document.getElementById('modalEntregables').textContent = ent;
+                document.getElementById('modalEntregablesContainer').classList.remove('hidden');
             } else {
-                entContainer.classList.add('hidden');
+                document.getElementById('modalEntregablesContainer').classList.add('hidden');
             }
+
+            document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
 
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            // Cargar valores en los inputs de edición
-            var evidenciaVal = item['Evidencia'] || (headersList.length > 12 ? item[headersList[12]] : '') || '';
-            document.getElementById('editEvidencia').value = decodeHtmlEntities(evidenciaVal);
-
-            var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
-            var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
-            document.getElementById('editRevisado').value = isValido ? 'si' : '';
-
-            var colIKey = headersList.length > 8 ? headersList[8] : '';
-            var linkContainer = document.getElementById('modalLinkContainer');
-            var linkAnchor = document.getElementById('modalLinkColI');
-            var linkVal = colIKey ? (item[colIKey] || '').trim() : '';
-
-            if (linkVal) {
-                linkAnchor.href = linkVal;
-                linkContainer.classList.remove('hidden');
+            // Enlace original (Columna I o similar si aplica)
+            var linkVal = item['Enlace'] || item['Link'] || '';
+            if(linkVal) {
+                document.getElementById('modalLinkColI').href = linkVal;
+                document.getElementById('modalLinkContainer').classList.remove('hidden');
             } else {
-                linkContainer.classList.add('hidden');
+                document.getElementById('modalLinkContainer').classList.add('hidden');
             }
+
+            // Campos de edición
+            document.getElementById('editEvidencia').value = item['Evidencia'] || '';
+            var revVal = (item['Revisado'] || '').trim().toLowerCase();
+            document.getElementById('editRevisado').value = (revVal === 'si' || revVal === 'sí' || revVal === '1' || revVal === 'x') ? 'si' : '';
+            document.getElementById('syncStatus').textContent = '';
 
             document.getElementById('detailModal').classList.remove('hidden');
             document.getElementById('detailModal').classList.add('flex');
-        }
-
-        function guardarCambiosSheet() {
-            if (!currentModalItem) return;
-
-            var nuevaEvidencia = document.getElementById('editEvidencia').value;
-            var nuevoRevisado = document.getElementById('editRevisado').value;
-            var nombreNorma = currentModalItem['Norma'];
-
-            document.getElementById('syncStatus').textContent = 'Sincronizando con Google Sheets...';
-
-            fetch(scriptAppUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    norma: nombreNorma,
-                    evidencia: nuevaEvidencia,
-                    revisado: nuevoRevisado
-                })
-            }).then(() => {
-                currentModalItem['Evidencia'] = nuevaEvidencia;
-                currentModalItem['Revisado'] = nuevoRevisado;
-                
-                updateKPIs(rawData);
-                applyFilters();
-                
-                document.getElementById('syncStatus').textContent = '¡Modificaciones guardadas correctamente!';
-                setTimeout(() => { document.getElementById('syncStatus').textContent = ''; }, 3500);
-            }).catch(err => {
-                console.error(err);
-                document.getElementById('syncStatus').textContent = 'Error al sincronizar.';
-            });
         }
 
         function closeModal() {
             document.getElementById('detailModal').classList.remove('flex');
             document.getElementById('detailModal').classList.add('hidden');
             currentModalItem = null;
+        }
+
+        function guardarCambiosSheet() {
+            if(!currentModalItem) return;
+
+            var nuevaEvidencia = document.getElementById('editEvidencia').value;
+            var nuevoRevisado = document.getElementById('editRevisado').value;
+
+            currentModalItem['Evidencia'] = nuevaEvidencia;
+            currentModalItem['Revisado'] = nuevoRevisado;
+
+            document.getElementById('syncStatus').textContent = "Guardando cambios...";
+
+            var dataToSend = {
+                norma: currentModalItem['Norma'],
+                evidencia: nuevaEvidencia,
+                revisado: nuevoRevisado
+            };
+
+            fetch(scriptAppUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataToSend)
+            })
+            .then(function() {
+                document.getElementById('syncStatus').textContent = "¡Cambios guardados con éxito!";
+                updateKPIs(rawData);
+                renderTable(rawData);
+                setTimeout(function() {
+                    closeModal();
+                }, 1000);
+            })
+            .catch(function(error) {
+                console.error("Error:", error);
+                document.getElementById('syncStatus').textContent = "Error al guardar los cambios.";
+            });
         }
     </script>
 </body>
