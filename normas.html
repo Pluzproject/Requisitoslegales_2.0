@@ -147,7 +147,6 @@
                             <th class="p-3">Tipo</th>
                             <th class="p-3">Autoridad</th>
                             <th class="p-3" id="thColumnaF">Columna F</th>
-                            <th class="p-3" id="thRecomendaciones">Recomendaciones</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
@@ -215,7 +214,7 @@
                     </div>
                 </div>
 
-                <!-- Panel para Recomendaciones y Detalles Complementarios -->
+                <!-- Panel para Detalles Complementarios -->
                 <div id="modalExtraSection" class="hidden space-y-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Detalles Complementarios</span>
                     <div id="modalExtraFields" class="space-y-3">
@@ -317,13 +316,24 @@
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
         var rawData = [];
         var headersList = [];
-        var recomendacionesKey = '';
 
         function decodeHtmlEntities(str) {
             if (!str) return '';
             var txt = document.createElement('textarea');
             txt.innerHTML = str;
             return txt.value;
+        }
+
+        function isObligatoria(item) {
+            for (var key in item) {
+                if (item.hasOwnProperty(key)) {
+                    var val = String(item[key]).toLowerCase();
+                    if (val.includes('obligatorio') || val.includes('obligatoria')) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         function fetchData() {
@@ -334,14 +344,6 @@
                 complete: function(results) {
                     if (results.meta && results.meta.fields) {
                         headersList = results.meta.fields;
-                    }
-                    
-                    // Asignación explícita de la Columna K (Índice 10: A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7, I=8, J=9, K=10)
-                    if (headersList.length > 10) {
-                        recomendacionesKey = headersList[10];
-                        var thRec = document.getElementById('thRecomendaciones');
-                        thRec.textContent = decodeHtmlEntities(recomendacionesKey);
-                        thRec.style.display = '';
                     }
 
                     if (results.data.length > 0) {
@@ -480,17 +482,23 @@
                 tr.className = "hover:bg-slate-50 cursor-pointer transition";
                 
                 var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
-                var valRec = recomendacionesKey ? decodeHtmlEntities(item[recomendacionesKey] || '') : '';
+                var normaName = decodeHtmlEntities(item['Norma'] || '');
+                var esOblig = isObligatoria(item);
+
+                var badgeObligatorio = esOblig 
+                    ? `<span class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px] font-bold tracking-wide uppercase inline-block">Obligatorio</span>` 
+                    : '';
 
                 tr.innerHTML = `
                     <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
-                    <td class="p-3 font-bold" style="color: #3B599F;">${decodeHtmlEntities(item['Norma'] || '')}</td>
+                    <td class="p-3 font-bold" style="color: #3B599F;">
+                        ${normaName} ${badgeObligatorio}
+                    </td>
                     <td class="p-3 text-slate-600 text-xs max-w-sm whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
                     <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
                     <td class="p-3 text-xs">${decodeHtmlEntities(item['Tipo de norma'] || '')}</td>
                     <td class="p-3 text-xs">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
                     <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
-                    ${recomendacionesKey ? `<td class="p-3 text-xs text-slate-600 max-w-xs whitespace-normal break-words">${valRec}</td>` : ''}
                 `;
 
                 (function(rowObj) {
@@ -521,7 +529,8 @@
             extraFieldsContainer.innerHTML = '';
             var hasExtra = false;
 
-            var indicesExtra = [9, 10, 11, 12, 13];
+            // Se omiten índices de recomendaciones u otros descartados, manteniendo los demás complementarios
+            var indicesExtra = [9, 11, 12, 13];
             for(var idx = 0; idx < indicesExtra.length; idx++) {
                 var colIdx = indicesExtra[idx];
                 if(headersList.length > colIdx) {
