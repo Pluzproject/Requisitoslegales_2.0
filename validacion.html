@@ -22,14 +22,14 @@
 </head>
 <body class="min-h-screen">
 
-    <!-- Header con navegación -->
+    <!-- Header con navegación unificada -->
     <header class="bg-corporate-blue text-white shadow-md py-6 px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
         <div class="flex items-center space-x-4">
             <h1 class="text-2xl font-bold tracking-tight">Portal de Requisitos Legales - Validación de Normas</h1>
         </div>
         <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
             <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
-                <!-- Se rellena dinámicamente según el rol -->
+                <!-- Se rellena dinámicamente con las pestañas para ambos roles -->
             </nav>
             <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
                 Cumplimiento de normas
@@ -39,11 +39,11 @@
 
     <main class="main-container space-y-6">
         
-        <!-- Tarjetas de Conteo / Resumen (KPIs) -->
+        <!-- Tarjetas de Conteo / Resumen (KPIs dinámicos según el filtro/pilar) -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Registros</span>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Registros (Filtrado)</span>
                     <h3 id="kpiTotal" class="text-2xl font-extrabold text-slate-700">0</h3>
                 </div>
                 <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
@@ -140,7 +140,7 @@
                         <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todos los Pilares</option>
                         </select>
-                        <button onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
+                        <button id="btnClearPilar" onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
                     </div>
                 </div>
 
@@ -325,21 +325,13 @@
 
             var navContainer = document.getElementById('userNav');
             if (navContainer) {
-                if (role === 'admin') {
-                    navContainer.innerHTML = `
-                        <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
-                        <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas</a>
-                        <a href="validacion.html" class="underline underline-offset-4 font-bold">Validación</a>
-                        <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
-                    `;
-                } else {
-                    // Vista específica para Validador
-                    var pilarAsignado = sessionStorage.getItem('pilarValidador') || '';
-                    navContainer.innerHTML = `
-                        <span class="text-xs font-semibold bg-white/20 px-3 py-1.5 rounded-lg">Pilar Asignado: ${pilarAsignado}</span>
-                        <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
-                    `;
-                }
+                // Ambos roles ven exactamente la misma barra de navegación superior
+                navContainer.innerHTML = `
+                    <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
+                    <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas</a>
+                    <a href="validacion.html" class="underline underline-offset-4 font-bold">Validación</a>
+                    <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
+                `;
             }
 
             fetchData();
@@ -361,6 +353,10 @@
         }
 
         function clearFilter(id) {
+            var role = sessionStorage.getItem('userRole');
+            // Si es validador, no permitir limpiar su pilar asignado
+            if (role === 'validador' && id === 'filterPilar') return;
+
             var el = document.getElementById(id);
             if(el) {
                 el.value = '';
@@ -422,22 +418,41 @@
                     }
 
                     populateFilters();
-                    updateKPIs(rawData);
-                    renderTable(rawData);
-
-                    // Si es validador, aplicar pre-filtro y bloqueo del pilar asignado
+                    
+                    // Si es validador, preseleccionar y bloquear su pilar asignado antes del primer filtro
                     var role = sessionStorage.getItem('userRole');
                     if (role === 'validador') {
-                        var pilarValidador = sessionStorage.getItem('pilarValidador');
+                        var pilarValidador = sessionStorage.getItem('pilarValidador') || '';
                         var selectPilar = document.getElementById('filterPilar');
                         if (selectPilar && pilarValidador) {
                             selectPilar.value = pilarValidador;
-                            selectPilar.disabled = true; // Bloqueado para que no pueda cambiar de pilar
+                            selectPilar.disabled = true; // Bloqueado
+                            var btnClearPilar = document.getElementById('btnClearPilar');
+                            if(btnClearPilar) btnClearPilar.style.display = 'none'; // Ocultar la 'X' de limpiar pilar
                         }
-                        applyFilters(); // Aplicar filtros automáticamente
                     }
+
+                    applyFilters(); // Aplica filtros y calcula KPIs iniciales basados en la vista
                 }
             });
+        }
+
+        // Función inteligente para emparejar pilares evitando errores por variaciones de texto (ej. SST vs Seguridad)
+        function matchPillar(itemPilar, filterPilar) {
+            if (!filterPilar) return true;
+            var itemP = decodeHtmlEntities(itemPilar || '').trim().toLowerCase();
+            var filtP = filterPilar.trim().toLowerCase();
+            
+            if (itemP === filtP) return true;
+            if (itemP.includes(filtP) || filtP.includes(itemP)) return true;
+            
+            // Coincidencias flexibles y sinónimos comunes en SIG (SST, Medio Ambiente, Calidad, Energía, etc.)
+            if (filtP === 'sst' && (itemP.includes('seguridad') || itemP.includes('salud') || itemP.includes('sst'))) return true;
+            if (filtP.includes('seguridad') && (itemP.includes('sst') || itemP.includes('seguridad'))) return true;
+            if (filtP === 'ma' && (itemP.includes('ambiente') || itemP.includes('ambiental') || itemP.includes('ma'))) return true;
+            if (filtP.includes('ambiente') && (itemP.includes('ma') || itemP.includes('ambiente'))) return true;
+            
+            return false;
         }
 
         function updateKPIs(data) {
@@ -501,7 +516,7 @@
             var fe = document.getElementById('filterFecha').value;
             var ma = document.getElementById('filterMesAnio').value;
             var an = document.getElementById('filterAnio').value;
-            var pi = document.getElementById('filterPilar').value.toLowerCase();
+            var pi = document.getElementById('filterPilar').value;
             var ti = document.getElementById('filterTipo').value.toLowerCase();
             var au = document.getElementById('filterAutoridad').value.toLowerCase();
 
@@ -525,7 +540,9 @@
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
                 
-                var matchPI = !pi || decodeHtmlEntities(item['Pilar del SIG'] || '').trim().toLowerCase() === pi;
+                // Uso de coincidencia inteligente de pilar
+                var matchPI = matchPillar(item['Pilar del SIG'], pi);
+                
                 var matchTI = !ti || decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase() === ti;
                 var matchAU = !au || decodeHtmlEntities(item['Autoridad'] || '').trim().toLowerCase() === au;
                 
@@ -533,7 +550,9 @@
                     filtered.push(item);
                 }
             }
+            
             renderTable(filtered);
+            updateKPIs(filtered); // KPIs calculados exactamente sobre el filtro actual del validador/admin
             document.getElementById('rowCountDisplay').textContent = "Mostrando " + filtered.length + " registros";
         }
 
@@ -545,7 +564,7 @@
             document.getElementById('filterMesAnio').value = '';
             document.getElementById('filterAnio').value = '';
             
-            // Si es admin, limpia también el pilar. Si es validador, mantiene su pilar asignado.
+            // Si es admin, limpia el pilar. Si es validador, mantiene fijo su pilar asignado.
             if (role === 'admin') {
                 document.getElementById('filterPilar').value = '';
             }
@@ -593,7 +612,6 @@
 
                 tbody.appendChild(tr);
             }
-            document.getElementById('rowCountDisplay').textContent = "Mostrando " + data.length + " registros";
         }
 
         function openModal(item) {
@@ -636,7 +654,7 @@
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            // Enlace original (Columna I o similar si aplica)
+            // Enlace original
             var linkVal = item['Enlace'] || item['Link'] || '';
             if(linkVal) {
                 document.getElementById('modalLinkColI').href = linkVal;
@@ -688,8 +706,12 @@
             })
             .then(function() {
                 document.getElementById('syncStatus').textContent = "¡Cambios guardados con éxito!";
-                updateKPIs(rawData);
-                renderTable(rawData);
+                var filteredData = rawData.filter(item => {
+                    var pi = document.getElementById('filterPilar').value;
+                    return matchPillar(item['Pilar del SIG'], pi);
+                });
+                updateKPIs(filteredData);
+                renderTable(filteredData);
                 setTimeout(function() {
                     closeModal();
                 }, 1000);
