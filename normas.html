@@ -39,8 +39,8 @@
 
     <main class="main-container space-y-6">
         
-        <!-- Panel de Filtros Superior Horizontal con Borradorcitos -->
-        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+        <!-- Panel de Filtros Superior Horizontal Sticky (Siempre Visible) -->
+        <section class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4 sticky top-4 z-40 backdrop-blur-md bg-white/95">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-3 gap-2">
                 <div class="flex items-center gap-3">
                     <h2 class="font-bold text-base" style="color: #3B599F;">Filtros de Búsqueda</h2>
@@ -147,7 +147,7 @@
                             <th class="p-3">Tipo</th>
                             <th class="p-3">Autoridad</th>
                             <th class="p-3" id="thColumnaF">Columna F</th>
-                            <th class="p-3" id="thRecomendaciones" style="display:none;">Recomendaciones</th>
+                            <th class="p-3" id="thRecomendaciones">Recomendaciones</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
@@ -158,6 +158,13 @@
         </section>
 
     </main>
+
+    <!-- Botón Flotante para Ir Arriba -->
+    <button id="btnScrollTop" onclick="scrollToTop()" class="fixed bottom-6 right-6 text-white p-3 rounded-full shadow-xl hidden transition-all z-50 cursor-pointer hover:opacity-90 hover:scale-105" style="background-color: #3B599F;" title="Ir arriba">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </button>
 
     <!-- Ventana Flotante (Modal) Optimizada -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
@@ -208,7 +215,7 @@
                     </div>
                 </div>
 
-                <!-- Panel para Detalles Complementarios (Recomendaciones, etc.) -->
+                <!-- Panel para Recomendaciones y Detalles Complementarios -->
                 <div id="modalExtraSection" class="hidden space-y-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Detalles Complementarios</span>
                     <div id="modalExtraFields" class="space-y-3">
@@ -278,6 +285,22 @@
             document.getElementById('btnReset').addEventListener('click', resetFilters);
         });
 
+        // Control del botón flotante para subir
+        window.addEventListener('scroll', function() {
+            var btnTop = document.getElementById('btnScrollTop');
+            if (window.scrollY > 300) {
+                btnTop.classList.remove('hidden');
+                btnTop.classList.add('flex');
+            } else {
+                btnTop.classList.remove('flex');
+                btnTop.classList.add('hidden');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function logout() {
             sessionStorage.clear();
             window.location.href = 'index.html';
@@ -313,16 +336,9 @@
                         headersList = results.meta.fields;
                     }
                     
-                    // Buscar columna de Recomendaciones dinámicamente
-                    for (var h = 0; h < headersList.length; h++) {
-                        var hName = headersList[h].toLowerCase();
-                        if (hName.includes('recomendacion') || hName.includes('recomendaciones')) {
-                            recomendacionesKey = headersList[h];
-                            break;
-                        }
-                    }
-
-                    if (recomendacionesKey) {
+                    // Asignación explícita de la Columna K (Índice 10: A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7, I=8, J=9, K=10)
+                    if (headersList.length > 10) {
+                        recomendacionesKey = headersList[10];
                         var thRec = document.getElementById('thRecomendaciones');
                         thRec.textContent = decodeHtmlEntities(recomendacionesKey);
                         thRec.style.display = '';
