@@ -14,7 +14,7 @@
             background-color: #f4f6f9;
             color: #2c3e50;
         }
-        .main-container { max-width: 95%; margin: 0 auto; padding: 2.5rem 1rem; }
+        .main-container { max-width: 98%; margin: 0 auto; padding: 2rem 1rem; }
         .bg-corporate-blue { background-color: #3B599F; }
         .text-corporate-blue { color: #3B599F; }
         .border-corporate-blue { border-color: #3B599F; }
@@ -37,18 +37,20 @@
         </div>
     </header>
 
-    <main class="main-container">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            
-            <!-- Panel de Filtros Lateral con Borradorcitos -->
-            <aside class="bg-white p-6 rounded-2xl border shadow-sm h-fit sticky top-6 space-y-4 lg:col-span-1">
-                <div id="lastUpdateDisplay" class="text-xs font-medium italic border-b pb-2 mb-2" style="color: #3B599F;"></div>
-                <div class="flex justify-between items-center border-b pb-2">
-                    <h2 class="font-bold text-sm" style="color: #3B599F;">Filtros de Búsqueda</h2>
-                    <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline cursor-pointer">Reset Todo</button>
+    <main class="main-container space-y-6">
+        
+        <!-- Panel de Filtros Superior Horizontal con Borradorcitos -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-3 gap-2">
+                <div class="flex items-center gap-3">
+                    <h2 class="font-bold text-base" style="color: #3B599F;">Filtros de Búsqueda</h2>
+                    <span id="lastUpdateDisplay" class="text-xs font-medium italic text-slate-500"></span>
                 </div>
-                
-                <!-- Filtro de Búsqueda de Texto -->
+                <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline cursor-pointer">Reset Todo</button>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+                <!-- Buscar Texto -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Buscar Texto</label>
                     <div class="relative">
@@ -57,7 +59,7 @@
                     </div>
                 </div>
                 
-                <!-- Fecha Específica con Calendario Interactivo -->
+                <!-- Fecha Específica -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Fecha Específica</label>
                     <div class="relative">
@@ -82,7 +84,7 @@
                     <label class="text-xs font-bold text-gray-500">Año Específico</label>
                     <div class="relative">
                         <select id="filterAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
-                            <option value="">Todos los Años</option>
+                            <option value="">Todos</option>
                         </select>
                         <button onclick="clearFilter('filterAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
@@ -93,7 +95,7 @@
                     <label class="text-xs font-bold text-gray-500">Pilar del SIG</label>
                     <div class="relative">
                         <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
-                            <option value="">Todos los Pilares</option>
+                            <option value="">Todos</option>
                         </select>
                         <button onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
@@ -104,7 +106,7 @@
                     <label class="text-xs font-bold text-gray-500">Tipo de Norma</label>
                     <div class="relative">
                         <select id="filterTipo" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
-                            <option value="">Todos los Tipos</option>
+                            <option value="">Todos</option>
                         </select>
                         <button onclick="clearFilter('filterTipo')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
@@ -115,50 +117,49 @@
                     <label class="text-xs font-bold text-gray-500">Autoridad</label>
                     <div class="relative">
                         <select id="filterAutoridad" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
-                            <option value="">Todas las Autoridades</option>
+                            <option value="">Todas</option>
                         </select>
                         <button onclick="clearFilter('filterAutoridad')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
-            </aside>
+            </div>
+        </section>
 
-            <!-- Contenido Principal: Tabla de Normas con Estilo Original y Sumilla Ajustada -->
-            <div class="lg:col-span-3 space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
-                        <div>
-                            <h2 class="text-xl font-bold" style="color: #3B599F;">Registro General de Normas</h2>
-                            <p class="text-xs text-slate-500">Haz clic en cualquier fila para ver el detalle completo y estado de validación.</p>
-                        </div>
-                        <div id="rowCountDisplay" class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">Mostrando 0 registros</div>
-                    </div>
-
-                    <!-- Tabla de Datos -->
-                    <div class="overflow-x-auto rounded-xl border border-slate-200">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr style="background-color: #3B599F; color: white;" class="text-xs uppercase tracking-wider">
-                                    <th class="p-3">Fecha</th>
-                                    <th class="p-3">Norma</th>
-                                    <th class="p-3">Sumilla / Descripción</th>
-                                    <th class="p-3">Pilar del SIG</th>
-                                    <th class="p-3">Tipo</th>
-                                    <th class="p-3">Autoridad</th>
-                                    <th class="p-3" id="thColumnaF">Columna F</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
-                                <!-- Datos dinámicos -->
-                            </tbody>
-                        </table>
-                    </div>
+        <!-- Contenido Principal: Tabla de Normas con Ancho Completo -->
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
+                <div>
+                    <h2 class="text-xl font-bold" style="color: #3B599F;">Registro General de Normas</h2>
+                    <p class="text-xs text-slate-500">Haz clic en cualquier fila para ver el detalle completo y estado de validación.</p>
                 </div>
+                <div id="rowCountDisplay" class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">Mostrando 0 registros</div>
             </div>
 
-        </div>
+            <!-- Tabla de Datos Ampliada -->
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr style="background-color: #3B599F; color: white;" class="text-xs uppercase tracking-wider">
+                            <th class="p-3">Fecha</th>
+                            <th class="p-3">Norma</th>
+                            <th class="p-3">Sumilla / Descripción</th>
+                            <th class="p-3">Pilar del SIG</th>
+                            <th class="p-3">Tipo</th>
+                            <th class="p-3">Autoridad</th>
+                            <th class="p-3" id="thColumnaF">Columna F</th>
+                            <th class="p-3" id="thRecomendaciones" style="display:none;">Recomendaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
+                        <!-- Datos dinámicos -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
 
-    <!-- Ventana Flotante (Modal) Optimizada y Alineada a la Izquierda -->
+    <!-- Ventana Flotante (Modal) Optimizada -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all">
             
@@ -190,7 +191,7 @@
                     </div>
                 </div>
 
-                <!-- Sumilla reubicada justo debajo de los datos principales -->
+                <!-- Sumilla reubicada -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Sumilla / Descripción Completa</span>
                     <p id="modalSumilla" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
@@ -207,11 +208,11 @@
                     </div>
                 </div>
 
-                <!-- Panel Armonioso para Columnas J, K, L, M, N (Detalles Complementarios) -->
+                <!-- Panel para Detalles Complementarios (Recomendaciones, etc.) -->
                 <div id="modalExtraSection" class="hidden space-y-3">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Detalles Complementarios</span>
                     <div id="modalExtraFields" class="space-y-3">
-                        <!-- Se llena dinámicamente incluyendo M y N -->
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
 
@@ -235,12 +236,11 @@
     </div>
 
     <script>
-        // Control de Sesión y Roles (Con normalización a minúsculas para evitar errores de mayúsculas)
+        // Control de Sesión y Roles
         window.addEventListener('DOMContentLoaded', function() {
             var rawRole = sessionStorage.getItem('userRole');
             var role = rawRole ? rawRole.trim().toLowerCase() : '';
             
-            // Permitir acceso a admin, validador y publico
             if (role !== 'admin' && role !== 'validador' && role !== 'publico') {
                 alert("Acceso no autorizado. Inicie sesión nuevamente.");
                 window.location.href = 'index.html';
@@ -256,7 +256,6 @@
                         <a href="index.html" class="ml-4 px-3 py-1.5 rounded-lg bg-slate-600 text-white text-xs font-bold hover:bg-slate-700 transition shadow-sm">Cambiar Usuario</a>
                     `;
                 } else {
-                    // Validador o Admin (Tienen acceso a Validador, Normas e Indicadores)
                     navContainer.innerHTML = `
                         <a href="validacion.html" class="opacity-80 hover:opacity-100 transition">Validador</a>
                         <a href="normas.html" class="underline underline-offset-4 font-bold">Normas</a>
@@ -295,6 +294,7 @@
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
         var rawData = [];
         var headersList = [];
+        var recomendacionesKey = '';
 
         function decodeHtmlEntities(str) {
             if (!str) return '';
@@ -312,6 +312,22 @@
                     if (results.meta && results.meta.fields) {
                         headersList = results.meta.fields;
                     }
+                    
+                    // Buscar columna de Recomendaciones dinámicamente
+                    for (var h = 0; h < headersList.length; h++) {
+                        var hName = headersList[h].toLowerCase();
+                        if (hName.includes('recomendacion') || hName.includes('recomendaciones')) {
+                            recomendacionesKey = headersList[h];
+                            break;
+                        }
+                    }
+
+                    if (recomendacionesKey) {
+                        var thRec = document.getElementById('thRecomendaciones');
+                        thRec.textContent = decodeHtmlEntities(recomendacionesKey);
+                        thRec.style.display = '';
+                    }
+
                     if (results.data.length > 0) {
                         var lastDate = results.data[results.data.length - 1]['Fecha'] || "";
                         document.getElementById('lastUpdateDisplay').textContent = "Última act: " + lastDate;
@@ -448,15 +464,17 @@
                 tr.className = "hover:bg-slate-50 cursor-pointer transition";
                 
                 var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
+                var valRec = recomendacionesKey ? decodeHtmlEntities(item[recomendacionesKey] || '') : '';
 
                 tr.innerHTML = `
                     <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
                     <td class="p-3 font-bold" style="color: #3B599F;">${decodeHtmlEntities(item['Norma'] || '')}</td>
-                    <td class="p-3 text-slate-600 text-xs max-w-md whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
+                    <td class="p-3 text-slate-600 text-xs max-w-sm whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
                     <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
                     <td class="p-3 text-xs">${decodeHtmlEntities(item['Tipo de norma'] || '')}</td>
                     <td class="p-3 text-xs">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
                     <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
+                    ${recomendacionesKey ? `<td class="p-3 text-xs text-slate-600 max-w-xs whitespace-normal break-words">${valRec}</td>` : ''}
                 `;
 
                 (function(rowObj) {
