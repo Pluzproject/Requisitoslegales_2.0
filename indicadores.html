@@ -307,24 +307,34 @@
             updateDashboard(rawData);
         }
 
+        // Función auxiliar para normalizar y unificar variaciones de mayúsculas/minúsculas y espacios
+        function groupDataByNormalizedKey(data, keyName, defaultVal) {
+            var counts = {};
+            var displayLabels = {};
+            
+            for (var i = 0; i < data.length; i++) {
+                var item = data[i];
+                var val = item[keyName] ? item[keyName].trim() : defaultVal;
+                if (val === '') val = defaultVal;
+                var lowerKey = val.toLowerCase();
+                
+                if (!displayLabels[lowerKey]) {
+                    // Conserva la primera variante con buena presentación o estandariza capitalización
+                    displayLabels[lowerKey] = val.charAt(0).toUpperCase() + val.slice(1);
+                }
+                
+                var label = displayLabels[lowerKey];
+                counts[label] = (counts[label] || 0) + 1;
+            }
+            return counts;
+        }
+
         function updateDashboard(data) {
             document.getElementById('kpiTotalNormas').textContent = data.length;
 
-            var pilaresCounts = {};
-            var tiposCounts = {};
-            var autoridadesCounts = {};
-
-            for (var i = 0; i < data.length; i++) {
-                var item = data[i];
-                var pilar = item['Pilar del SIG'] ? item['Pilar del SIG'].trim() : 'No especificado';
-                pilaresCounts[pilar] = (pilaresCounts[pilar] || 0) + 1;
-
-                var tipo = item['Tipo de norma'] ? item['Tipo de norma'].trim() : 'No especificado';
-                tiposCounts[tipo] = (tiposCounts[tipo] || 0) + 1;
-
-                var autoridad = item['Autoridad'] ? item['Autoridad'].trim() : 'No especificada';
-                autoridadesCounts[autoridad] = (autoridadesCounts[autoridad] || 0) + 1;
-            }
+            var pilaresCounts = groupDataByNormalizedKey(data, 'Pilar del SIG', 'No especificado');
+            var tiposCounts = groupDataByNormalizedKey(data, 'Tipo de norma', 'No especificado');
+            var autoridadesCounts = groupDataByNormalizedKey(data, 'Autoridad', 'No especificada');
 
             document.getElementById('kpiPilares').textContent = Object.keys(pilaresCounts).length;
             document.getElementById('kpiAutoridades').textContent = Object.keys(autoridadesCounts).length;
