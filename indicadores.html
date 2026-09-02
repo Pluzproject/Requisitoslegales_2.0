@@ -136,7 +136,7 @@
                         <h3 class="font-bold text-lg mb-6 flex items-center gap-2" style="color: #3B599F;">
                             <span>🏛️ Concentración por Autoridad Reguladora</span>
                         </h3>
-                        <div class="relative h-[420px] w-full">
+                        <div class="relative h-[450px] w-full">
                             <canvas id="chartAutoridades"></canvas>
                         </div>
                     </div>
@@ -307,7 +307,6 @@
             updateDashboard(rawData);
         }
 
-        // Función auxiliar para normalizar y unificar variaciones de mayúsculas/minúsculas y espacios
         function groupDataByNormalizedKey(data, keyName, defaultVal) {
             var counts = {};
             var displayLabels = {};
@@ -319,7 +318,6 @@
                 var lowerKey = val.toLowerCase();
                 
                 if (!displayLabels[lowerKey]) {
-                    // Conserva la primera variante con buena presentación o estandariza capitalización
                     displayLabels[lowerKey] = val.charAt(0).toUpperCase() + val.slice(1);
                 }
                 
@@ -329,12 +327,24 @@
             return counts;
         }
 
+        // Función auxiliar para ordenar objetos de conteo de mayor a menor (descendente)
+        function sortObjectDescending(dataObj) {
+            var sortedKeys = Object.keys(dataObj).sort(function(a, b) {
+                return dataObj[b] - dataObj[a];
+            });
+            var sortedObj = {};
+            for (var i = 0; i < sortedKeys.length; i++) {
+                sortedObj[sortedKeys[i]] = dataObj[sortedKeys[i]];
+            }
+            return sortedObj;
+        }
+
         function updateDashboard(data) {
             document.getElementById('kpiTotalNormas').textContent = data.length;
 
-            var pilaresCounts = groupDataByNormalizedKey(data, 'Pilar del SIG', 'No especificado');
-            var tiposCounts = groupDataByNormalizedKey(data, 'Tipo de norma', 'No especificado');
-            var autoridadesCounts = groupDataByNormalizedKey(data, 'Autoridad', 'No especificada');
+            var pilaresCounts = sortObjectDescending(groupDataByNormalizedKey(data, 'Pilar del SIG', 'No especificado'));
+            var tiposCounts = sortObjectDescending(groupDataByNormalizedKey(data, 'Tipo de norma', 'No especificado'));
+            var autoridadesCounts = sortObjectDescending(groupDataByNormalizedKey(data, 'Autoridad', 'No especificada'));
 
             document.getElementById('kpiPilares').textContent = Object.keys(pilaresCounts).length;
             document.getElementById('kpiAutoridades').textContent = Object.keys(autoridadesCounts).length;
@@ -370,7 +380,14 @@
                     plugins: {
                         legend: { 
                             position: 'right', 
-                            labels: { boxWidth: 16, padding: 15, font: { family: 'Arial', size: 12, weight: '600' } } 
+                            labels: { boxWidth: 16, padding: 15, font: { family: 'Arial', size: 12, weight: '600' } },
+                            onClick: function(e, legendItem, legend) {
+                                var selectEl = document.getElementById('filterPilar');
+                                if (selectEl) {
+                                    selectEl.value = legendItem.text;
+                                    applyFilters();
+                                }
+                            }
                         },
                         datalabels: {
                             color: '#ffffff',
@@ -409,7 +426,14 @@
                     plugins: {
                         legend: { 
                             position: 'right', 
-                            labels: { boxWidth: 16, padding: 15, font: { family: 'Arial', size: 12, weight: '600' } } 
+                            labels: { boxWidth: 16, padding: 15, font: { family: 'Arial', size: 12, weight: '600' } },
+                            onClick: function(e, legendItem, legend) {
+                                var selectEl = document.getElementById('filterTipo');
+                                if (selectEl) {
+                                    selectEl.value = legendItem.text;
+                                    applyFilters();
+                                }
+                            }
                         },
                         datalabels: {
                             color: '#ffffff',
@@ -455,7 +479,11 @@
                             grid: { color: '#f1f5f9' }
                         },
                         x: { 
-                            ticks: { font: { family: 'Arial', size: 12, weight: '600' } },
+                            ticks: { 
+                                font: { family: 'Arial', size: 11, weight: '600' },
+                                maxRotation: 45,
+                                minRotation: 45
+                            },
                             grid: { display: false }
                         }
                     },
