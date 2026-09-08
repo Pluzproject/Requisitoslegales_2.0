@@ -56,8 +56,8 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr style="background-color: #f1f5f9; color: #3B599F;" class="text-xs uppercase tracking-wider font-bold">
-                            <th class="p-3 border-b">ID Norma (Col. O)</th>
-                            <th class="p-3 border-b">Norma (Col. B)</th>
+                            <th class="p-3 border-b">ID Norma</th>
+                            <th class="p-3 border-b">Norma</th>
                             <th class="p-3 border-b">Autoridad</th>
                             <th class="p-3 border-b text-center">Acción</th>
                         </tr>
@@ -166,12 +166,12 @@
                     for (var i = 0; i < results.data.length; i++) {
                         var row = results.data[i];
                         var normaText = (row['Norma'] || '').trim();
-                        var idNorma = (row['ID_Norma'] || '').trim(); // Columna O
+                        var idNorma = (row['ID_Norma'] || '').trim();
                         
                         if (normaText !== "" && normaText.toUpperCase() !== "SIN NOVEDAD") {
                             globalNormas.push({
                                 idNorma: idNorma || 'SIN ID',
-                                nombreNorma: normaText, // Columna B
+                                nombreNorma: normaText,
                                 autoridad: row['Autoridad'] || 'No especificada',
                                 raw: row
                             });
@@ -187,7 +187,7 @@
                             globalArticulos = {};
                             for (var j = 0; j < artResults.data.length; j++) {
                                 var artRow = artResults.data[j];
-                                var artIdNorma = (artRow['ID_Norma'] || artRow['id_norma'] || Object.values(artRow)[0] || '').trim(); // Columna A
+                                var artIdNorma = (artRow['ID_Norma'] || artRow['id_norma'] || Object.values(artRow)[0] || '').trim();
                                 
                                 if (artIdNorma) {
                                     if (!globalArticulos[artIdNorma]) {
