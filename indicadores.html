@@ -163,6 +163,7 @@
                     navContainer.innerHTML = `
                         <a href="indicadores.html" class="underline underline-offset-4">Indicadores</a>
                         <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas (Tabla)</a>
+                        <a href="articulos.html" class="opacity-80 hover:opacity-100 transition">Artículos</a>
                         <a href="validacion.html" class="opacity-80 hover:opacity-100 transition">Validación</a>
                         <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
                     `;
@@ -327,7 +328,6 @@
             return counts;
         }
 
-        // Función auxiliar para ordenar objetos de conteo de mayor a menor (descendente)
         function sortObjectDescending(dataObj) {
             var sortedKeys = Object.keys(dataObj).sort(function(a, b) {
                 return dataObj[b] - dataObj[a];
