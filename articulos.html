@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artículos Obligatorios - Portal de Requisitos Legales</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #2c3e50;
+        }
+        .main-container { max-width: 95%; margin: 0 auto; padding: 2.5rem 1rem; }
+        .bg-corporate-blue { background-color: #3B599F; }
+        .text-corporate-blue { color: #3B599F; }
+        .border-corporate-blue { border-color: #3B599F; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header con navegación corporativa -->
+    <header class="bg-corporate-blue text-white shadow-md py-6 px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-2xl font-bold tracking-tight">Portal de Requisitos Legales - Detalle de Artículos</h1>
+        </div>
+        <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
+            <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
+                <!-- Se rellena dinámicamente según el rol -->
+            </nav>
+            <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
+                Cumplimiento de normas
+            </a>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+            
+            <!-- Barra de Filtros y Búsqueda -->
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
+                <div>
+                    <h2 class="text-xl font-bold" style="color: #3B599F;">Matriz de Normas y Artículos Aplicables</h2>
+                    <p class="text-xs text-gray-500 mt-1">Seleccione una norma para desplegar sus artículos obligatorios asociados.</p>
+                </div>
+                <div class="w-full md:w-72">
+                    <input type="text" id="searchNormaInput" placeholder="Filtrar por nombre de norma..." class="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 border-slate-300">
+                </div>
+            </div>
+
+            <!-- Tabla de Normas -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr style="background-color: #f1f5f9; color: #3B599F;" class="text-xs uppercase tracking-wider font-bold">
+                            <th class="p-3 border-b">ID Norma (Col. O)</th>
+                            <th class="p-3 border-b">Norma (Col. B)</th>
+                            <th class="p-3 border-b">Autoridad</th>
+                            <th class="p-3 border-b text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="normasTableBody" class="text-sm divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="4" class="text-center py-6 text-gray-400 font-medium">Cargando registros...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- VENTANA FLOTANTE (MODAL) PARA LOS ARTÍCULOS -->
+    <div id="modalArticulos" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-4xl rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
+            <!-- Header Modal -->
+            <div class="bg-corporate-blue text-white px-6 py-4 flex justify-between items-center">
+                <div>
+                    <h3 id="modalNormaTitle" class="text-lg font-bold">Artículos de la Norma</h3>
+                    <p id="modalNormaSub" class="text-xs opacity-80">ID Norma: <span id="modalIdNorma"></span></p>
+                </div>
+                <button onclick="closeModal()" class="text-white hover:bg-white/20 p-2 rounded-lg text-lg font-bold transition">✕</button>
+            </div>
+            
+            <!-- Cuerpo Modal (Tabla de Artículos) -->
+            <div class="p-6 overflow-y-auto space-y-4 flex-1">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-xs uppercase font-bold">
+                                <th class="p-3 border-b">Artículo / Detalle</th>
+                                <th class="p-3 border-b">Obligación / Requisito</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalArticulosBody" class="text-sm divide-y divide-slate-100">
+                            <!-- Inyección dinámica de artículos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="bg-slate-50 px-6 py-3 border-t flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-600 text-white rounded-lg text-sm font-bold hover:bg-slate-700 transition">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Control de Sesión y Renderizado de Menú
+        window.addEventListener('DOMContentLoaded', function() {
+            var role = sessionStorage.getItem('userRole');
+            if (!role) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            var navContainer = document.getElementById('userNav');
+            if (navContainer) {
+                if (role === 'admin') {
+                    navContainer.innerHTML = `
+                        <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
+                        <a href="normas.html" class="opacity-80 hover:opacity-100 transition">Ver Normas (Tabla)</a>
+                        <a href="articulos.html" class="underline underline-offset-4">Artículos</a>
+                        <a href="validacion.html" class="opacity-80 hover:opacity-100 transition">Validación</a>
+                        <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition shadow-sm">Cerrar Sesión</button>
+                    `;
+                } else {
+                    navContainer.innerHTML = `
+                        <a href="indicadores.html" class="opacity-80 hover:opacity-100 transition">Indicadores</a>
+                        <a href="articulos.html" class="underline underline-offset-4">Artículos</a>
+                        <span class="text-xs font-semibold bg-white/25 px-3 py-1 ml-4 rounded-lg">Modo Público</span>
+                        <button onclick="logout()" class="ml-4 px-3 py-1.5 rounded-lg bg-slate-700 text-white text-xs font-bold hover:bg-slate-800 transition shadow-sm">Salir</button>
+                    `;
+                }
+            }
+
+            loadAllData();
+
+            document.getElementById('searchNormaInput').addEventListener('input', filterNormasTable);
+        });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // Enlaces CSV oficiales
+        const csvUrlNormas = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
+        const csvUrlArticulos = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv';
+
+        let globalNormas = [];
+        let globalArticulos = {}; // Agrupados por ID_Norma
+
+        function loadAllData() {
+            // 1. Cargar Hoja 1 (Normas)
+            Papa.parse(csvUrlNormas, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    globalNormas = [];
+                    for (var i = 0; i < results.data.length; i++) {
+                        var row = results.data[i];
+                        var normaText = (row['Norma'] || '').trim();
+                        var idNorma = (row['ID_Norma'] || '').trim(); // Columna O
+                        
+                        if (normaText !== "" && normaText.toUpperCase() !== "SIN NOVEDAD") {
+                            globalNormas.push({
+                                idNorma: idNorma || 'SIN ID',
+                                nombreNorma: normaText, // Columna B
+                                autoridad: row['Autoridad'] || 'No especificada',
+                                raw: row
+                            });
+                        }
+                    }
+
+                    // 2. Cargar Hoja Detalle_Articulos
+                    Papa.parse(csvUrlArticulos, {
+                        download: true,
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(artResults) {
+                            globalArticulos = {};
+                            for (var j = 0; j < artResults.data.length; j++) {
+                                var artRow = artResults.data[j];
+                                var artIdNorma = (artRow['ID_Norma'] || artRow['id_norma'] || Object.values(artRow)[0] || '').trim(); // Columna A
+                                
+                                if (artIdNorma) {
+                                    if (!globalArticulos[artIdNorma]) {
+                                        globalArticulos[artIdNorma] = [];
+                                    }
+                                    globalArticulos[artIdNorma].push(artRow);
+                                }
+                            }
+                            renderNormasTable(globalNormas);
+                        },
+                        error: function() {
+                            renderNormasTable(globalNormas);
+                        }
+                    });
+                }
+            });
+        }
+
+        function renderNormasTable(normasArray) {
+            var tbody = document.getElementById('normasTableBody');
+            tbody.innerHTML = '';
+
+            if (normasArray.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-400">No se encontraron normas registradas.</td></tr>`;
+                return;
+            }
+
+            for (var i = 0; i < normasArray.length; i++) {
+                var item = normasArray[i];
+                var cantArticulos = globalArticulos[item.idNorma] ? globalArticulos[item.idNorma].length : 0;
+
+                var tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+                tr.innerHTML = `
+                    <td class="p-3 border-b font-mono text-xs font-bold text-corporate-blue">${item.idNorma}</td>
+                    <td class="p-3 border-b font-medium text-slate-800">${item.nombreNorma}</td>
+                    <td class="p-3 border-b text-slate-600 text-xs">${item.autoridad}</td>
+                    <td class="p-3 border-b text-center">
+                        <button onclick="openModal('${item.idNorma}', '${encodeURIComponent(item.nombreNorma)}')" class="px-3 py-1.5 bg-[#3B599F] text-white rounded-lg text-xs font-bold hover:bg-[#2d4580] transition shadow-sm flex items-center gap-1 mx-auto">
+                            Ver Artículos (${cantArticulos})
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function filterNormasTable() {
+            var query = document.getElementById('searchNormaInput').value.toLowerCase();
+            var filtered = globalNormas.filter(function(item) {
+                return item.nombreNorma.toLowerCase().includes(query) || item.idNorma.toLowerCase().includes(query);
+            });
+            renderNormasTable(filtered);
+        }
+
+        function openModal(idNorma, encodedNombre) {
+            var nombreNorma = decodeURIComponent(encodedNombre);
+            document.getElementById('modalIdNorma').textContent = idNorma;
+            document.getElementById('modalNormaTitle').textContent = nombreNorma;
+            
+            var modalBody = document.getElementById('modalArticulosBody');
+            modalBody.innerHTML = '';
+
+            var articulos = globalArticulos[idNorma];
+
+            if (!articulos || articulos.length === 0) {
+                modalBody.innerHTML = `<tr><td colspan="2" class="text-center py-6 text-gray-400">No hay artículos detallados para este ID de Norma (${idNorma}). Asegúrate de que el código coincida exactamente con la columna A de Detalle_Articulos.</td></tr>`;
+            } else {
+                for (var i = 0; i < articulos.length; i++) {
+                    var art = articulos[i];
+                    var keys = Object.keys(art);
+                    var articuloCol = art['Articulo'] || art['Artículo'] || art[keys[1]] || 'N/A';
+                    var descripcionCol = art['Descripcion'] || art['Descripción'] || art['Obligacion'] || art['Obligación'] || art[keys[2]] || JSON.stringify(art);
+
+                    var tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50';
+                    tr.innerHTML = `
+                        <td class="p-3 border-b font-bold text-slate-700 align-top w-1/3">${articuloCol}</td>
+                        <td class="p-3 border-b text-slate-600 align-top">${descripcionCol}</td>
+                    `;
+                    modalBody.appendChild(tr);
+                }
+            }
+
+            document.getElementById('modalArticulos').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modalArticulos').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
