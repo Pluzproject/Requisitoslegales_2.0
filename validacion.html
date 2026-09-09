@@ -270,13 +270,13 @@
                     </a>
                 </div>
 
-                <!-- Edición de Artículos Asociados (Detalle_Articulos) -->
+                <!-- Edición de Artículos Asociados (Detalle_Articulos con Encabezados Dinámicos y Textareas Amplios) -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue">Artículos y Obligaciones (Detalle)</span>
                     </div>
-                    <div id="modalArticulosListContainer" class="space-y-3">
-                        <!-- Se llena dinámicamente con las filas correspondientes al ID_Norma -->
+                    <div id="modalArticulosListContainer" class="space-y-4">
+                        <!-- Se llena dinámicamente con los encabezados reales y campos amplios -->
                     </div>
                 </div>
 
@@ -327,12 +327,11 @@
     <script>
         const scriptAppUrl = 'https://script.google.com/macros/s/AKfycbyzKontvuFNjie7q2KXDRydyEbOYKT7F8e9M622qhAN-UGCmBiSzKSJjvCcESmeliiM/exec';
         const csvResumenUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
-        
-        // URL CSV para la hoja Detalle_Articulos (Reemplaza con tu enlace CSV publicado de Detalle_Articulos)
-        const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv'; 
+        const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv'; // Reemplaza con tu CSV de Detalle_Articulos
 
         var rawData = [];
         var detalleArticulosData = [];
+        var detalleHeadersList = [];
         var headersList = [];
         var currentModalItem = null;
 
@@ -451,13 +450,16 @@
                 }
             });
 
-            // Cargar Detalle_Articulos usando header: false para mapear por índice exacto de columnas
+            // Cargar Detalle_Articulos usando header: true para extraer nombres reales de encabezados
             if (csvDetalleArticulosUrl && !csvDetalleArticulosUrl.includes('AQUÍ_PEGAS')) {
                 Papa.parse(csvDetalleArticulosUrl, {
                     download: true,
-                    header: false,
+                    header: true,
                     skipEmptyLines: true,
                     complete: function(results) {
+                        if (results.meta && results.meta.fields) {
+                            detalleHeadersList = results.meta.fields;
+                        }
                         detalleArticulosData = results.data || [];
                     }
                 });
@@ -649,61 +651,63 @@
             document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || '-');
             document.getElementById('modalIdNormaBadge').textContent = "ID: " + (idNorma || 'N/A');
 
-            // Filtrar y renderizar los artículos de Detalle_Articulos mapeando columnas por índice
+            // Renderizar los artículos de Detalle_Articulos usando los encabezados reales de las columnas
             var containerArticulos = document.getElementById('modalArticulosListContainer');
             containerArticulos.innerHTML = '';
 
             var matchingArticles = [];
             for (var k = 0; k < detalleArticulosData.length; k++) {
-                var rowArr = detalleArticulosData[k];
-                var rowIdNorma = (rowArr[0] || '').trim(); // Columna A asume el ID_Norma
+                var rowObj = detalleArticulosData[k];
+                // Asumimos que la primera columna de Detalle_Articulos contiene el ID_Norma para relacionar
+                var firstKey = detalleHeadersList.length > 0 ? detalleHeadersList[0] : '';
+                var rowIdNorma = (rowObj[firstKey] || '').trim();
+                
                 if (idNorma && rowIdNorma === idNorma) {
-                    matchingArticles.push({
-                        colB: rowArr[1] || '', // Índice 1 (Columna B)
-                        colD: rowArr[3] || '', // Índice 3 (Columna D)
-                        colF: rowArr[5] || '', // Índice 5 (Columna F)
-                        colH: rowArr[7] || '', // Índice 7 (Columna H)
-                        colI: rowArr[8] || ''  // Índice 8 (Columna I)
-                    });
+                    matchingArticles.push(rowObj);
                 }
             }
 
-            if (matchingArticles.length > 0) {
+            if (matchingArticles.length > 0 && detalleHeadersList.length > 0) {
                 for (var j = 0; j < matchingArticles.length; j++) {
                     var art = matchingArticles[j];
                     var artRowDiv = document.createElement('div');
-                    artRowDiv.className = "p-3 bg-white rounded-xl border border-slate-200 space-y-2 article-row-item";
+                    artRowDiv.className = "p-4 bg-white rounded-xl border border-slate-200 space-y-3 article-row-item shadow-xs";
 
-                    artRowDiv.innerHTML = `
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 block">Columna B</label>
-                                <input type="text" class="art-col-b w-full p-2 border rounded-lg text-xs bg-white focus:ring-1 focus:outline-none" value="${decodeHtmlEntities(art.colB)}">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 block">Columna D</label>
-                                <input type="text" class="art-col-d w-full p-2 border rounded-lg text-xs bg-white focus:ring-1 focus:outline-none" value="${decodeHtmlEntities(art.colD)}">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 block">Columna F</label>
-                                <input type="text" class="art-col-f w-full p-2 border rounded-lg text-xs bg-white focus:ring-1 focus:outline-none" value="${decodeHtmlEntities(art.colF)}">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 block">Columna H</label>
-                                <input type="text" class="art-col-h w-full p-2 border rounded-lg text-xs bg-white focus:ring-1 focus:outline-none" value="${decodeHtmlEntities(art.colH)}">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 block">Columna I</label>
-                                <input type="text" class="art-col-i w-full p-2 border rounded-lg text-xs bg-white focus:ring-1 focus:outline-none" value="${decodeHtmlEntities(art.colI)}">
-                            </div>
-                        </div>
-                    `;
+                    var innerHtmlFields = '';
+                    // Recorremos desde la columna 1 en adelante (saltando el ID de relación principal si se desea)
+                    for (var h = 1; h < detalleHeadersList.length; h++) {
+                        var headerName = detalleHeadersList[h];
+                        var cellValue = decodeHtmlEntities(art[headerName] || '');
+                        
+                        // Si es una columna de texto largo (ej. descripción del artículo u obligación), le damos más tamaño (textarea)
+                        var isLongText = headerName.toLowerCase().includes('artículo') || 
+                                         headerName.toLowerCase().includes('detalle') || 
+                                         headerName.toLowerCase().includes('obligación') || 
+                                         headerName.toLowerCase().includes('evidencia') ||
+                                         headerName.toLowerCase().includes('descripción');
+
+                        if (isLongText) {
+                            innerHtmlFields += `
+                                <div class="col-span-full space-y-1">
+                                    <label class="text-xs font-bold text-slate-500 block uppercase tracking-wider">${headerName}</label>
+                                    <textarea rows="3" data-header="${headerName}" class="art-dynamic-field w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">${cellValue}</textarea>
+                                </div>
+                            `;
+                        } else {
+                            innerHtmlFields += `
+                                <div class="space-y-1">
+                                    <label class="text-xs font-bold text-slate-500 block uppercase tracking-wider">${headerName}</label>
+                                    <input type="text" data-header="${headerName}" class="art-dynamic-field w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;" value="${cellValue}">
+                                </div>
+                            `;
+                        }
+                    }
+
+                    artRowDiv.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${innerHtmlFields}</div>`;
                     containerArticulos.appendChild(artRowDiv);
                 }
             } else {
-                containerArticulos.innerHTML = '<p class="text-xs text-slate-400 italic p-2">No se encontraron filas asociadas para este ID_Norma en Detalle_Articulos.</p>';
+                containerArticulos.innerHTML = '<p class="text-xs text-slate-400 italic p-2">No se encontraron artículos asociados para este ID_Norma en la hoja Detalle_Articulos.</p>';
             }
 
             var rec = decodeHtmlEntities(item['Recomendación'] || '');
@@ -766,16 +770,17 @@
 
             var articleRows = document.querySelectorAll('.article-row-item');
             var updatedArticles = [];
+            
             for(var i = 0; i < articleRows.length; i++) {
                 var rowEl = articleRows[i];
-                updatedArticles.push({
-                    idNorma: idNorma,
-                    colB: rowEl.querySelector('.art-col-b').value,
-                    colD: rowEl.querySelector('.art-col-d').value,
-                    colF: rowEl.querySelector('.art-col-f').value,
-                    colH: rowEl.querySelector('.art-col-h').value,
-                    colI: rowEl.querySelector('.art-col-i').value
-                });
+                var fields = rowEl.querySelectorAll('.art-dynamic-field');
+                var articleObj = { idNorma: idNorma };
+                
+                for(var f = 0; f < fields.length; f++) {
+                    var headerName = fields[f].getAttribute('data-header');
+                    articleObj[headerName] = fields[f].value;
+                }
+                updatedArticles.push(articleObj);
             }
 
             currentModalItem['Tipo de norma'] = nuevoTipo;
