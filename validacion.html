@@ -39,7 +39,7 @@
 
     <main class="main-container space-y-6">
         
-        <!-- Tarjetas de Conteo / Resumen (KPIs dinámicos según el filtro/pilar) -->
+        <!-- Tarjetas de Conteo / Resumen -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                 <div>
@@ -80,7 +80,6 @@
                     <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline">Reset Todo</button>
                 </div>
                 
-                <!-- Buscar Texto -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Buscar Texto</label>
                     <div class="relative">
@@ -89,7 +88,6 @@
                     </div>
                 </div>
 
-                <!-- Estado de Validación -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Estado de Validación</label>
                     <div class="relative">
@@ -102,7 +100,6 @@
                     </div>
                 </div>
                 
-                <!-- Fecha Específica -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Fecha Específica</label>
                     <div class="relative">
@@ -111,7 +108,6 @@
                     </div>
                 </div>
 
-                <!-- Periodo (Mes/Año) -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Periodo (Mes/Año)</label>
                     <div class="relative">
@@ -122,7 +118,6 @@
                     </div>
                 </div>
 
-                <!-- Año Específico -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Año Específico</label>
                     <div class="relative">
@@ -133,7 +128,6 @@
                     </div>
                 </div>
 
-                <!-- Pilar del SIG (Columna C) -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Pilar del SIG (Columna C)</label>
                     <div class="relative">
@@ -144,7 +138,6 @@
                     </div>
                 </div>
 
-                <!-- Tipo de Norma -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Tipo de Norma</label>
                     <div class="relative">
@@ -155,7 +148,6 @@
                     </div>
                 </div>
 
-                <!-- Autoridad -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Autoridad</label>
                     <div class="relative">
@@ -173,12 +165,11 @@
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
                         <div>
                             <h2 class="text-xl font-bold" style="color: #3B599F;">Panel de Validación de Normas</h2>
-                            <p class="text-xs text-slate-500">Haz clic en cualquier fila para revisar el detalle y gestionar su validación.</p>
+                            <p class="text-xs text-slate-500">Haz clic en cualquier fila para revisar el detalle y gestionar sus artículos y validación.</p>
                         </div>
                         <div id="rowCountDisplay" class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">Mostrando 0 registros</div>
                     </div>
 
-                    <!-- Tabla de Datos -->
                     <div class="overflow-x-auto rounded-xl border border-slate-200">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -206,7 +197,7 @@
 
     <!-- Ventana Flotante (Modal) -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden transform transition-all">
             
             <div class="px-6 py-4 bg-corporate-blue text-white flex justify-between items-center">
                 <h3 id="modalNorma" class="text-lg font-bold">Detalle de la Norma</h3>
@@ -236,10 +227,15 @@
                     <p id="modalSumilla" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
                 </div>
 
-                <!-- Artículos Relevantes -->
-                <div id="modalArticulosContainer" class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1 hidden">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Artículos relevantes</span>
-                    <p id="modalArticulos" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
+                <!-- Artículos Relevantes en Filas Independientes (Detalle_Articulos por ID_Norma) -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Artículos Relevantes (Desglose por ID_Norma)</span>
+                        <span id="modalIdNormaBadge" class="text-xs bg-blue-100 text-blue-800 font-semibold px-2.5 py-0.5 rounded-full">ID: -</span>
+                    </div>
+                    <div id="modalArticulosListContainer" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+                        <!-- Se llena dinámicamente con filas por artículo -->
+                    </div>
                 </div>
 
                 <!-- Recomendación -->
@@ -273,40 +269,27 @@
                     </a>
                 </div>
 
-                <!-- Edición de Campos (Tipo, Artículos, Evidencia, Revisado) -->
+                <!-- Edición General de Estado y Tipo -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Editar campos</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Edición General de la Norma</span>
                     
-                    <!-- Tipo de Norma (Columna H) -->
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 block">Tipo de Norma (Columna H)</label>
-                        <select id="editTipo" onchange="toggleConditionalFields()" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
-                            <option value="">Seleccione tipo...</option>
-                            <option value="Obligatorio">Obligatorio</option>
-                            <option value="Referencial">Referencial</option>
-                            <option value="Informativo">Informativo</option>
-                        </select>
-                    </div>
-
-                    <!-- Artículos Relevantes (Columna J) - Condicional -->
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 block">Artículos Relevantes (Columna J)</label>
-                        <textarea id="editArticulos" rows="2" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;" placeholder="Ingrese artículos relevantes..."></textarea>
-                    </div>
-
-                    <!-- Evidencia (Columna M) - Condicional con texto sugerido -->
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 block">Evidencia (Columna M)</label>
-                        <textarea id="editEvidencia" rows="3" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;" placeholder="Completar con las evidencias puntuales que se tendrían que presentar - todas las evidencias mencionadas deben adjuntarse en Isotools-"></textarea>
-                    </div>
-
-                    <!-- Estado de Revisión -->
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-500 block">Estado de Revisión</label>
-                        <select id="editRevisado" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
-                            <option value="">Pendiente (Vacío)</option>
-                            <option value="si">Validado (Sí)</option>
-                        </select>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 block">Tipo de Norma (Columna H)</label>
+                            <select id="editTipo" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
+                                <option value="">Seleccione tipo...</option>
+                                <option value="Obligatorio">Obligatorio</option>
+                                <option value="Referencial">Referencial</option>
+                                <option value="Informativo">Informativo</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 block">Estado de Revisión</label>
+                            <select id="editRevisado" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
+                                <option value="">Pendiente (Vacío)</option>
+                                <option value="si">Validado (Sí)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -329,6 +312,15 @@
 
     <script>
         const scriptAppUrl = 'https://script.google.com/macros/s/AKfycbyzKontvuFNjie7q2KXDRydyEbOYKT7F8e9M622qhAN-UGCmBiSzKSJjvCcESmeliiM/exec';
+        const csvResumenUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
+        
+        // URL CSV para la hoja Detalle_Articulos (Reemplaza con tu enlace publicado en CSV de Detalle_Articulos)
+        const csvDetalleArticulosUrl = 'AQUÍ_PEGAS_EL_LINK_CSV_DE_DETALLE_ARTICULOS'; 
+
+        var rawData = [];
+        var detalleArticulosData = [];
+        var headersList = [];
+        var currentModalItem = null;
 
         window.addEventListener('DOMContentLoaded', function() {
             var role = sessionStorage.getItem('userRole');
@@ -378,11 +370,6 @@
             }
         }
 
-        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
-        var rawData = [];
-        var headersList = [];
-        var currentModalItem = null;
-
         function decodeHtmlEntities(str) {
             if (!str) return '';
             var txt = document.createElement('textarea');
@@ -391,7 +378,8 @@
         }
 
         function fetchData() {
-            Papa.parse(csvUrl, {
+            // Cargar Resumen_Normas
+            Papa.parse(csvResumenUrl, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
@@ -448,9 +436,20 @@
                     applyFilters();
                 }
             });
+
+            // Cargar Detalle_Articulos
+            if (csvDetalleArticulosUrl && !csvDetalleArticulosUrl.includes('AQUÍ_PEGAS')) {
+                Papa.parse(csvDetalleArticulosUrl, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        detalleArticulosData = results.data || [];
+                    }
+                });
+            }
         }
 
-        // Validación precisa sobre la Columna C (Pilar del SIG) con soporte para seguridad/SST
         function matchPillar(itemPilar, filterPilar) {
             if (!filterPilar) return true;
             var itemP = decodeHtmlEntities(itemPilar || '').trim().toLowerCase();
@@ -627,19 +626,49 @@
 
         function openModal(item) {
             currentModalItem = item;
+            var idNorma = item['ID_Norma'] || item['Id_Norma'] || item['ID'] || '';
+            
             document.getElementById('modalNorma').textContent = decodeHtmlEntities(item['Norma'] || 'Detalle de la Norma');
             document.getElementById('modalFecha').textContent = item['Fecha'] || '-';
             document.getElementById('modalPilar').textContent = decodeHtmlEntities(item['Pilar del SIG'] || '-');
             document.getElementById('modalTipo').textContent = decodeHtmlEntities(item['Tipo de norma'] || '-');
             document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || '-');
+            document.getElementById('modalIdNormaBadge').textContent = "ID: " + (idNorma || 'N/A');
 
-            // Artículos
-            var art = decodeHtmlEntities(item['Artículos relevantes'] || '');
-            if(art) {
-                document.getElementById('modalArticulos').textContent = art;
-                document.getElementById('modalArticulosContainer').classList.remove('hidden');
+            // Filtrar y renderizar los artículos de Detalle_Articulos asociados al ID_Norma
+            var containerArticulos = document.getElementById('modalArticulosListContainer');
+            containerArticulos.innerHTML = '';
+
+            var matchingArticles = detalleArticulosData.filter(function(art) {
+                var artId = (art['ID_Norma'] || art['Id_Norma'] || art['ID'] || '').trim();
+                return idNorma && artId === idNorma.trim();
+            });
+
+            if (matchingArticles.length > 0) {
+                for (var j = 0; j < matchingArticles.length; j++) {
+                    var artItem = matchingArticles[j];
+                    var artRowDiv = document.createElement('div');
+                    artRowDiv.className = "p-3 bg-white rounded-xl border border-slate-200 space-y-2 article-row-item";
+                    artRowDiv.dataset.articleId = artItem['ID_Articulo'] || artItem['ID'] || j;
+
+                    artRowDiv.innerHTML = `
+                        <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
+                            <span>Artículo: <input type="text" class="art-num border rounded px-2 py-0.5 text-xs w-28 bg-slate-50" value="${decodeHtmlEntities(artItem['Articulo'] || artItem['Artículo'] || '')}"></span>
+                            <span class="text-blue-600">ID Art: ${artItem['ID_Articulo'] || '-'}</span>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 block">Obligación / Descripción</label>
+                            <textarea class="art-desc w-full p-2 border rounded-lg text-xs bg-white focus:ring-1 focus:outline-none" rows="2">${decodeHtmlEntities(artItem['Obligacion'] || artItem['Obligación'] || artItem['Descripcion'] || '')}</textarea>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 block">Evidencia Requerida</label>
+                            <input type="text" class="art-evidencia w-full p-2 border rounded-lg text-xs bg-white focus:ring-1 focus:outline-none" value="${decodeHtmlEntities(artItem['Evidencia'] || '')}">
+                        </div>
+                    `;
+                    containerArticulos.appendChild(artRowDiv);
+                }
             } else {
-                document.getElementById('modalArticulosContainer').classList.add('hidden');
+                containerArticulos.innerHTML = '<p class="text-xs text-slate-400 italic p-2">No se encontraron artículos independientes asociados para este ID_Norma o la fuente está pendiente de configurar.</p>';
             }
 
             // Recomendación
@@ -673,51 +702,20 @@
                 document.getElementById('modalLinkContainer').classList.add('hidden');
             }
 
-            // Cargar campos de edición condicionales
             var currentTipoNorma = (item['Tipo de norma'] || '').trim();
-            // Normalizar para coincidir con las opciones (Obligatorio, Referencial, Informativo)
             var normalizedTipo = '';
             if (currentTipoNorma.toLowerCase().includes('obligatorio')) normalizedTipo = 'Obligatorio';
             else if (currentTipoNorma.toLowerCase().includes('referencial')) normalizedTipo = 'Referencial';
             else if (currentTipoNorma.toLowerCase().includes('informativo')) normalizedTipo = 'Informativo';
 
             document.getElementById('editTipo').value = normalizedTipo;
-            document.getElementById('editArticulos').value = item['Artículos relevantes'] || '';
-            document.getElementById('editEvidencia').value = item['Evidencia'] || '';
             
             var revVal = (item['Revisado'] || '').trim().toLowerCase();
             document.getElementById('editRevisado').value = (revVal === 'si' || revVal === 'sí' || revVal === '1' || revVal === 'x') ? 'si' : '';
-            
-            // Aplicar reglas condicionales al abrir
-            toggleConditionalFields();
 
             document.getElementById('syncStatus').textContent = '';
             document.getElementById('detailModal').classList.remove('hidden');
             document.getElementById('detailModal').classList.add('flex');
-        }
-
-        // Función para habilitar/deshabilitar Artículos y Evidencia según si es "Obligatorio"
-        function toggleConditionalFields() {
-            var tipoVal = document.getElementById('editTipo').value.trim().toLowerCase();
-            var editArt = document.getElementById('editArticulos');
-            var editEvid = document.getElementById('editEvidencia');
-
-            if (tipoVal === 'obligatorio') {
-                editArt.disabled = false;
-                editArt.classList.remove('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
-                
-                editEvid.disabled = false;
-                editEvid.classList.remove('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
-                editEvid.placeholder = "Completar con las evidencias puntuales que se tendrían que presentar - todas las evidencias mencionadas deben adjuntarse en Isotools-";
-            } else {
-                editArt.disabled = true;
-                editArt.classList.add('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
-                editArt.value = '';
-
-                editEvid.disabled = true;
-                editEvid.classList.add('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
-                editEvid.value = '';
-            }
         }
 
         function closeModal() {
@@ -730,28 +728,33 @@
             if(!currentModalItem) return;
 
             var nuevoTipo = document.getElementById('editTipo').value;
-            var nuevosArticulos = document.getElementById('editArticulos').value;
-            var nuevaEvidencia = document.getElementById('editEvidencia').value;
             var nuevoRevisado = document.getElementById('editRevisado').value;
+            var idNorma = currentModalItem['ID_Norma'] || currentModalItem['Id_Norma'] || currentModalItem['ID'] || '';
 
-            if (nuevoTipo.toLowerCase() !== 'obligatorio') {
-                nuevosArticulos = '';
-                nuevaEvidencia = '';
+            // Recopilar los artículos editados del DOM del modal
+            var articleRows = document.querySelectorAll('.article-row-item');
+            var updatedArticles = [];
+            for(var i = 0; i < articleRows.length; i++) {
+                var rowEl = articleRows[i];
+                updatedArticles.push({
+                    idNorma: idNorma,
+                    articulo: rowEl.querySelector('.art-num').value,
+                    obligacion: rowEl.querySelector('.art-desc').value,
+                    evidencia: rowEl.querySelector('.art-evidencia').value
+                });
             }
 
             currentModalItem['Tipo de norma'] = nuevoTipo;
-            currentModalItem['Artículos relevantes'] = nuevosArticulos;
-            currentModalItem['Evidencia'] = nuevaEvidencia;
             currentModalItem['Revisado'] = nuevoRevisado;
 
-            document.getElementById('syncStatus').textContent = "Guardando cambios...";
+            document.getElementById('syncStatus').textContent = "Guardando cambios y sincronizando artículos...";
 
             var dataToSend = {
                 norma: currentModalItem['Norma'],
+                idNorma: idNorma,
                 tipoNorma: nuevoTipo,
-                articulosRelevantes: nuevosArticulos,
-                evidencia: nuevaEvidencia,
-                revisado: nuevoRevisado
+                revisado: nuevoRevisado,
+                articulosDetalle: updatedArticles
             };
 
             fetch(scriptAppUrl, {
