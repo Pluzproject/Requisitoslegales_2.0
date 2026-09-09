@@ -181,9 +181,9 @@
         </svg>
     </button>
 
-    <!-- Ventana Flotante (Modal) Optimizada -->
+    <!-- Ventana Flotante (Modal) Optimizada (Solo Lectura) -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden transform transition-all">
             
             <!-- Barra de Estado Superior Dinámica -->
             <div id="modalStatusBanner" class="px-6 py-3 flex items-center justify-between text-white font-bold transition-colors duration-300" style="background-color: #FBC13F;">
@@ -193,9 +193,12 @@
 
             <!-- Contenido del Modal -->
             <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto text-left">
-                <div>
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Norma</span>
-                    <h3 id="modalNorma" class="text-xl font-extrabold text-left" style="color: #3B599F;">-</h3>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Norma</span>
+                        <h3 id="modalNorma" class="text-xl font-extrabold text-left" style="color: #3B599F;">-</h3>
+                    </div>
+                    <span id="modalIdNormaBadge" class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-mono font-bold">ID: -</span>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
@@ -213,10 +216,22 @@
                     </div>
                 </div>
 
-                <!-- Sumilla reubicada -->
+                <!-- Sumilla -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Sumilla / Descripción Completa</span>
                     <p id="modalSumilla" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
+                </div>
+
+                <!-- Recomendación -->
+                <div id="modalRecomendacionContainer" class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1 hidden">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Recomendación</span>
+                    <p id="modalRecomendacion" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
+                </div>
+
+                <!-- Entregables Recomendados -->
+                <div id="modalEntregablesContainer" class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1 hidden">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Entregables recomendados</span>
+                    <p id="modalEntregables" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -230,10 +245,10 @@
                     </div>
                 </div>
 
-                <!-- Panel para Detalles Complementarios -->
-                <div id="modalExtraSection" class="hidden space-y-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Detalles Complementarios</span>
-                    <div id="modalExtraFields" class="space-y-3">
+                <!-- Artículos y Obligaciones (Detalle) - Cada artículo en su propia tarjeta englobada -->
+                <div id="modalArticulosContainerWrapper" class="space-y-3 hidden">
+                    <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Artículos y Obligaciones (Detalle)</span>
+                    <div id="modalArticulosListContainer" class="space-y-3">
                         <!-- Se llena dinámicamente -->
                     </div>
                 </div>
@@ -336,8 +351,12 @@
         }
 
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
+        const csvDetalleArticulosUrl = 'AQUÍ_PEGAS_EL_LINK_CSV_DE_DETALLE_ARTICULOS'; // Reemplaza con tu CSV de Detalle_Articulos
+
         var rawData = [];
         var headersList = [];
+        var detalleArticulosData = [];
+        var detalleHeadersList = [];
 
         function decodeHtmlEntities(str) {
             if (!str) return '';
@@ -347,6 +366,7 @@
         }
 
         function fetchData() {
+            // Cargar Resumen_Normas
             Papa.parse(csvUrl, {
                 download: true,
                 header: true,
@@ -392,6 +412,21 @@
                     renderTable(rawData);
                 }
             });
+
+            // Cargar Detalle_Articulos para mostrar la información detallada por artículo
+            if (csvDetalleArticulosUrl && !csvDetalleArticulosUrl.includes('AQUÍ_PEGAS')) {
+                Papa.parse(csvDetalleArticulosUrl, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        if (results.meta && results.meta.fields) {
+                            detalleHeadersList = results.meta.fields;
+                        }
+                        detalleArticulosData = results.data || [];
+                    }
+                });
+            }
         }
 
         function populateFilters() {
@@ -532,50 +567,97 @@
         }
 
         function openModal(item) {
+            var idNorma = (item['ID_Norma'] || item['Id_Norma'] || item['ID'] || '').trim();
+
             document.getElementById('modalNorma').textContent = decodeHtmlEntities(item['Norma'] || 'Sin Norma');
             document.getElementById('modalFecha').textContent = item['Fecha'] || '-';
             document.getElementById('modalPilar').textContent = decodeHtmlEntities(item['Pilar del SIG'] || '-');
             document.getElementById('modalTipo').textContent = decodeHtmlEntities(item['Tipo de norma'] || '-');
             document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || 'Sin descripción disponible.');
             document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
+            document.getElementById('modalIdNormaBadge').textContent = "ID: " + (idNorma || 'N/A');
 
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            var extraFieldsContainer = document.getElementById('modalExtraFields');
-            var extraSection = document.getElementById('modalExtraSection');
-            extraFieldsContainer.innerHTML = '';
-            var hasExtra = false;
+            // Renderizar los artículos de Detalle_Articulos en modo solo lectura con tarjetas englobadas
+            var containerArticulos = document.getElementById('modalArticulosListContainer');
+            if (containerArticulos) {
+                containerArticulos.innerHTML = '';
 
-            var indicesExtra = [9, 11, 12, 13];
-            for(var idx = 0; idx < indicesExtra.length; idx++) {
-                var colIdx = indicesExtra[idx];
-                if(headersList.length > colIdx) {
-                    var headerName = decodeHtmlEntities(headersList[colIdx]);
-                    var cellVal = decodeHtmlEntities(item[headersList[colIdx]] || '').trim();
-                    if(cellVal) {
-                        hasExtra = true;
-                        var cardDiv = document.createElement('div');
-                        cardDiv.className = "bg-slate-50 p-4 rounded-xl border border-slate-100 text-left space-y-1";
-                        cardDiv.innerHTML = `
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">${headerName}</span>
-                            <p class="text-slate-700 text-sm leading-relaxed text-left whitespace-pre-line">${cellVal}</p>
-                        `;
-                        extraFieldsContainer.appendChild(cardDiv);
+                var matchingArticles = [];
+                for (var k = 0; k < detalleArticulosData.length; k++) {
+                    var rowObj = detalleArticulosData[k];
+                    var firstKey = detalleHeadersList.length > 0 ? detalleHeadersList[0] : '';
+                    var rowIdNorma = (rowObj[firstKey] || '').trim();
+                    
+                    if (idNorma && rowIdNorma === idNorma) {
+                        matchingArticles.push(rowObj);
                     }
+                }
+
+                if (matchingArticles.length > 0 && detalleHeadersList.length > 0) {
+                    for (var j = 0; j < matchingArticles.length; j++) {
+                        var art = matchingArticles[j];
+                        var artCard = document.createElement('div');
+                        // Tarjeta englobada individual para diferenciar claramente cada artículo
+                        artCard.className = "p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 shadow-xs mb-3";
+
+                        var innerHtmlFields = '';
+                        for (var h = 1; h < detalleHeadersList.length; h++) {
+                            var headerName = detalleHeadersList[h];
+                            var cellValue = decodeHtmlEntities(art[headerName] || '');
+
+                            innerHtmlFields += `
+                                <div class="space-y-1">
+                                    <span class="text-xs font-bold text-corporate-blue block uppercase tracking-wider">${headerName}</span>
+                                    <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-line bg-white p-3 rounded-lg border border-slate-100">${cellValue || '-'}</p>
+                                </div>
+                            `;
+                        }
+
+                        artCard.innerHTML = `
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between border-b pb-2">
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Artículo / Obligación #${j + 1}</span>
+                                </div>
+                                <div class="grid grid-cols-1 gap-3">${innerHtmlFields}</div>
+                            </div>
+                        `;
+                        containerArticulos.appendChild(artCard);
+                    }
+                    document.getElementById('modalArticulosContainerWrapper').classList.remove('hidden');
+                } else {
+                    document.getElementById('modalArticulosContainerWrapper').classList.add('hidden');
                 }
             }
 
-            if(hasExtra) {
-                extraSection.classList.remove('hidden');
-            } else {
-                extraSection.classList.add('hidden');
+            var rec = decodeHtmlEntities(item['Recomendación'] || '');
+            var recContainer = document.getElementById('modalRecomendacionContainer');
+            if(recContainer) {
+                if(rec) {
+                    document.getElementById('modalRecomendacion').textContent = rec;
+                    recContainer.classList.remove('hidden');
+                } else {
+                    recContainer.classList.add('hidden');
+                }
+            }
+
+            var ent = decodeHtmlEntities(item['Entregables recomendados'] || '');
+            var entContainer = document.getElementById('modalEntregablesContainer');
+            if(entContainer) {
+                if(ent) {
+                    document.getElementById('modalEntregables').textContent = ent;
+                    entContainer.classList.remove('hidden');
+                } else {
+                    entContainer.classList.add('hidden');
+                }
             }
 
             var colIKey = headersList.length > 8 ? headersList[8] : '';
             var linkContainer = document.getElementById('modalLinkContainer');
             var linkAnchor = document.getElementById('modalLinkColI');
-            var linkVal = colIKey ? (item[colIKey] || '').trim() : '';
+            var linkVal = colIKey ? (item[colIKey] || '').trim() : (item['Enlace'] || item['Link'] || '').trim();
 
             if (linkVal) {
                 linkAnchor.href = linkVal;
@@ -590,11 +672,11 @@
 
             if (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x') {
                 banner.style.backgroundColor = '#6CAC5E';
-                statusText.textContent = 'Verde';
+                statusText.textContent = 'Validado';
                 statusText.style.color = '#ffffff';
             } else {
                 banner.style.backgroundColor = '#FBC13F';
-                statusText.textContent = 'Amarillo';
+                statusText.textContent = 'Pendiente de validar';
                 statusText.style.color = '#2c3e50';
             }
 
