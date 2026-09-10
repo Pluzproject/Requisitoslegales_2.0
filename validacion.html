@@ -686,7 +686,8 @@
 
                         if (isGravedad) {
                             var valG = cellValue.toLowerCase();
-                            var optAlta = (valG === 'alta') ? 'selected' : '';
+                            var optCritica = (valG.includes('crítica') || valG.includes('critica')) ? 'selected' : '';
+                            var optAlta = (valG === 'alta' || (valG.includes('alta') && !valG.includes('crítica'))) ? 'selected' : '';
                             var optMedia = (valG === 'media') ? 'selected' : '';
                             var optBaja = (valG === 'baja') ? 'selected' : '';
 
@@ -695,9 +696,10 @@
                                     <label class="text-xs font-bold uppercase tracking-wider" style="color: #3B599F;">${headerName}</label>
                                     <select data-header="${headerName}" class="art-dynamic-field w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
                                         <option value="">Seleccione nivel...</option>
-                                        <option value="Alta" ${optAlta}>Alta (Sanción 100-500 UIT)</option>
-                                        <option value="Media" ${optMedia}>Media (Sanción 10-100 UIT)</option>
-                                        <option value="Baja" ${optBaja}>Baja (Sanción &lt;10 UIT)</option>
+                                        <option value="Crítica" ${optCritica}>Crítica (&gt;500 UIT, riesgo de caducidad, paralización o daño grave)</option>
+                                        <option value="Alta" ${optAlta}>Alta (100-500 UIT, impacto tarifa/calidad, OSINERGMIN con plazo)</option>
+                                        <option value="Media" ${optMedia}>Media (10-100 UIT, reporte periódico o mantenimiento de registros)</option>
+                                        <option value="Baja" ${optBaja}>Baja (&lt;10 UIT, carácter informativo o difusión interna)</option>
                                     </select>
                                 </div>
                             `;
