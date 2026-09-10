@@ -672,25 +672,62 @@
                     var innerHtmlFields = '';
                     for (var h = 1; h < detalleHeadersList.length; h++) {
                         var headerName = detalleHeadersList[h];
-                        var cellValue = decodeHtmlEntities(art[headerName] || '');
+                        var cellValue = decodeHtmlEntities(art[headerName] || '').trim();
+                        var headerLower = headerName.toLowerCase();
                         
-                        var isLongText = headerName.toLowerCase().includes('artículo') || 
-                                         headerName.toLowerCase().includes('detalle') || 
-                                         headerName.toLowerCase().includes('obligación') || 
-                                         headerName.toLowerCase().includes('evidencia') ||
-                                         headerName.toLowerCase().includes('descripción');
+                        var isLongText = headerLower.includes('artículo') || 
+                                         headerLower.includes('detalle') || 
+                                         headerLower.includes('obligación') || 
+                                         headerLower.includes('evidencia') ||
+                                         headerLower.includes('descripción');
 
-                        if (isLongText) {
+                        var isGravedad = headerLower.includes('gravedad') || headerLower.includes('nivel de gravedad');
+                        var isEstadoRevisado = headerLower.includes('estado') || headerLower.includes('revisado');
+
+                        if (isGravedad) {
+                            var valG = cellValue.toLowerCase();
+                            var optAlta = (valG === 'alta') ? 'selected' : '';
+                            var optMedia = (valG === 'media') ? 'selected' : '';
+                            var optBaja = (valG === 'baja') ? 'selected' : '';
+
+                            innerHtmlFields += `
+                                <div class="space-y-1">
+                                    <label class="text-xs font-bold uppercase tracking-wider" style="color: #3B599F;">${headerName}</label>
+                                    <select data-header="${headerName}" class="art-dynamic-field w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
+                                        <option value="">Seleccione nivel...</option>
+                                        <option value="Alta" ${optAlta}>Alta (Sanción 100-500 UIT)</option>
+                                        <option value="Media" ${optMedia}>Media (Sanción 10-100 UIT)</option>
+                                        <option value="Baja" ${optBaja}>Baja (Sanción &lt;10 UIT)</option>
+                                    </select>
+                                </div>
+                            `;
+                        } else if (isEstadoRevisado) {
+                            var valE = cellValue.toLowerCase();
+                            var optPendiente = (valE === 'pendiente de revisión' || valE === '' || valE === 'pendiente') ? 'selected' : '';
+                            var optConforme = (valE === 'conforme') ? 'selected' : '';
+                            var optNoAplica = (valE === 'no aplica') ? 'selected' : '';
+
+                            innerHtmlFields += `
+                                <div class="space-y-1">
+                                    <label class="text-xs font-bold uppercase tracking-wider" style="color: #3B599F;">${headerName}</label>
+                                    <select data-header="${headerName}" class="art-dynamic-field w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
+                                        <option value="Pendiente de Revisión" ${optPendiente}>Pendiente de Revisión</option>
+                                        <option value="Conforme" ${optConforme}>Conforme</option>
+                                        <option value="No Aplica" ${optNoAplica}>No Aplica</option>
+                                    </select>
+                                </div>
+                            `;
+                        } else if (isLongText) {
                             innerHtmlFields += `
                                 <div class="col-span-full space-y-1">
-                                    <label class="text-xs font-bold text-slate-500 block uppercase tracking-wider">${headerName}</label>
+                                    <label class="text-xs font-bold uppercase tracking-wider" style="color: #3B599F;">${headerName}</label>
                                     <textarea rows="3" data-header="${headerName}" class="art-dynamic-field w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">${cellValue}</textarea>
                                 </div>
                             `;
                         } else {
                             innerHtmlFields += `
                                 <div class="space-y-1">
-                                    <label class="text-xs font-bold text-slate-500 block uppercase tracking-wider">${headerName}</label>
+                                    <label class="text-xs font-bold uppercase tracking-wider" style="color: #3B599F;">${headerName}</label>
                                     <input type="text" data-header="${headerName}" class="art-dynamic-field w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;" value="${cellValue}">
                                 </div>
                             `;
