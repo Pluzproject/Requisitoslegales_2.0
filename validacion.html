@@ -204,9 +204,9 @@
         </div>
     </main>
 
-    <!-- Ventana Flotante (Modal) -->
+    <!-- Ventana Flotante (Modal) - Ampliada (max-w-6xl) -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden transform transition-all">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full overflow-hidden transform transition-all">
             
             <div class="px-6 py-4 bg-corporate-blue text-white flex justify-between items-center">
                 <div class="flex items-center gap-3">
@@ -327,7 +327,7 @@
     <script>
         const scriptAppUrl = 'https://script.google.com/macros/s/AKfycbyzKontvuFNjie7q2KXDRydyEbOYKT7F8e9M622qhAN-UGCmBiSzKSJjvCcESmeliiM/exec';
         const csvResumenUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
-        const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv'; // Reemplaza con tu CSV de Detalle_Articulos
+        const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv';
 
         var rawData = [];
         var detalleArticulosData = [];
@@ -391,7 +391,6 @@
         }
 
         function fetchData() {
-            // Cargar Resumen_Normas
             Papa.parse(csvResumenUrl, {
                 download: true,
                 header: true,
@@ -450,7 +449,6 @@
                 }
             });
 
-            // Cargar Detalle_Articulos usando header: true para extraer nombres reales de encabezados
             if (csvDetalleArticulosUrl && !csvDetalleArticulosUrl.includes('AQUÍ_PEGAS')) {
                 Papa.parse(csvDetalleArticulosUrl, {
                     download: true,
@@ -651,14 +649,12 @@
             document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || '-');
             document.getElementById('modalIdNormaBadge').textContent = "ID: " + (idNorma || 'N/A');
 
-            // Renderizar los artículos de Detalle_Articulos usando los encabezados reales de las columnas
             var containerArticulos = document.getElementById('modalArticulosListContainer');
             containerArticulos.innerHTML = '';
 
             var matchingArticles = [];
             for (var k = 0; k < detalleArticulosData.length; k++) {
                 var rowObj = detalleArticulosData[k];
-                // Asumimos que la primera columna de Detalle_Articulos contiene el ID_Norma para relacionar
                 var firstKey = detalleHeadersList.length > 0 ? detalleHeadersList[0] : '';
                 var rowIdNorma = (rowObj[firstKey] || '').trim();
                 
@@ -674,12 +670,10 @@
                     artRowDiv.className = "p-4 bg-white rounded-xl border border-slate-200 space-y-3 article-row-item shadow-xs";
 
                     var innerHtmlFields = '';
-                    // Recorremos desde la columna 1 en adelante (saltando el ID de relación principal si se desea)
                     for (var h = 1; h < detalleHeadersList.length; h++) {
                         var headerName = detalleHeadersList[h];
                         var cellValue = decodeHtmlEntities(art[headerName] || '');
                         
-                        // Si es una columna de texto largo (ej. descripción del artículo u obligación), le damos más tamaño (textarea)
                         var isLongText = headerName.toLowerCase().includes('artículo') || 
                                          headerName.toLowerCase().includes('detalle') || 
                                          headerName.toLowerCase().includes('obligación') || 
