@@ -61,7 +61,7 @@
             </div>
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-green-500 uppercase tracking-wider">Validados</span>
+                    <span class="text-xs font-bold text-green-500 uppercase tracking-wider">Conformes</span>
                     <h3 id="kpiValidados" class="text-2xl font-extrabold text-green-600">0</h3>
                 </div>
                 <div class="p-3 bg-green-50 text-green-600 rounded-xl">
@@ -95,8 +95,9 @@
                     <div class="relative">
                         <select id="filterEstado" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todos los Estados</option>
-                            <option value="validado">Validado</option>
-                            <option value="pendiente">Pendiente</option>
+                            <option value="Conforme">Conforme</option>
+                            <option value="Pendiente de Revisión">Pendiente de Revisión</option>
+                            <option value="No Aplica">No Aplica</option>
                         </select>
                         <button onclick="clearFilter('filterEstado')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1">&times;</button>
                     </div>
@@ -300,8 +301,9 @@
                         <div class="space-y-1">
                             <label class="text-xs font-bold text-slate-500 block">Estado de Revisión</label>
                             <select id="editRevisado" class="w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">
-                                <option value="">Pendiente (Vacío)</option>
-                                <option value="si">Validado (Sí)</option>
+                                <option value="Pendiente de Revisión">Pendiente de Revisión</option>
+                                <option value="Conforme">Conforme</option>
+                                <option value="No Aplica">No Aplica</option>
                             </select>
                         </div>
                     </div>
@@ -485,13 +487,15 @@
         function updateKPIs(data) {
             var total = data.length;
             var validados = 0;
+            var pendientes = 0;
             for(var i = 0; i < total; i++) {
                 var rev = (data[i]['Revisado'] || '').trim().toLowerCase();
-                if(rev === 'si' || rev === 'sí' || rev === '1' || rev === 'x') {
+                if(rev === 'conforme' || rev === 'si' || rev === 'sí' || rev === '1' || rev === 'x') {
                     validados++;
+                } else if(rev === '' || rev.includes('pendiente')) {
+                    pendientes++;
                 }
             }
-            var pendientes = total - validados;
             
             document.getElementById('kpiTotal').textContent = total;
             document.getElementById('kpiPendientes').textContent = pendientes;
@@ -558,11 +562,22 @@
                 var normaDec = decodeHtmlEntities(item['Norma'] || '').toLowerCase();
                 var sumillaDec = decodeHtmlEntities(item['Sumilla / Descripción'] || '').toLowerCase();
                 
-                var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
-                var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
+                var revisadoVal = (item['Revisado'] || '').trim();
+                var lowerRev = revisadoVal.toLowerCase();
                 
                 var matchS = !s || normaDec.includes(s) || sumillaDec.includes(s);
-                var matchEst = !est || (est === 'validado' && isValido) || (est === 'pendiente' && !isValido);
+                
+                var matchEst = true;
+                if (est) {
+                    if (est === 'Conforme') {
+                        matchEst = (lowerRev === 'conforme' || lowerRev === 'si' || lowerRev === 'sí' || lowerRev === '1' || lowerRev === 'x');
+                    } else if (est === 'Pendiente de Revisión') {
+                        matchEst = (revisadoVal === '' || lowerRev.includes('pendiente'));
+                    } else if (est === 'No Aplica') {
+                        matchEst = (lowerRev === 'no aplica');
+                    }
+                }
+
                 var matchFE = !filterSortDate || item.sortDate === filterSortDate;
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
@@ -610,12 +625,17 @@
                 tr.className = "hover:bg-slate-50 cursor-pointer transition";
                 
                 var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
-                var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
-                var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
+                var revisadoVal = (item['Revisado'] || '').trim();
+                var lowerRev = revisadoVal.toLowerCase();
                 
-                var statusBadge = isValido 
-                    ? '<span class="px-2.5 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-bold inline-block">Validado</span>'
-                    : '<span class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold inline-block">Pendiente</span>';
+                var statusBadge = '';
+                if (lowerRev === 'conforme' || lowerRev === 'si' || lowerRev === 'sí' || lowerRev === '1' || lowerRev === 'x') {
+                    statusBadge = '<span class="px-2.5 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-bold inline-block">Conforme</span>';
+                } else if (lowerRev === 'no aplica') {
+                    statusBadge = '<span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold inline-block">No Aplica</span>';
+                } else {
+                    statusBadge = '<span class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold inline-block">Pendiente de Revisión</span>';
+                }
 
                 tr.innerHTML = `
                     <td class="p-3 whitespace-nowrap">${statusBadge}</td>
@@ -741,8 +761,17 @@
 
             document.getElementById('editTipo').value = normalizedTipo;
             
-            var revVal = (item['Revisado'] || '').trim().toLowerCase();
-            document.getElementById('editRevisado').value = (revVal === 'si' || revVal === 'sí' || revVal === '1' || revVal === 'x') ? 'si' : '';
+            var revVal = (item['Revisado'] || '').trim();
+            var lowerRevVal = revVal.toLowerCase();
+            var selectRevisado = document.getElementById('editRevisado');
+            
+            if (lowerRevVal === 'conforme' || lowerRevVal === 'si' || lowerRevVal === 'sí' || lowerRevVal === '1' || lowerRevVal === 'x') {
+                selectRevisado.value = 'Conforme';
+            } else if (lowerRevVal === 'no aplica') {
+                selectRevisado.value = 'No Aplica';
+            } else {
+                selectRevisado.value = 'Pendiente de Revisión';
+            }
 
             document.getElementById('syncStatus').textContent = '';
             document.getElementById('detailModal').classList.remove('hidden');
