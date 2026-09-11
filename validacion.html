@@ -270,13 +270,13 @@
                     </a>
                 </div>
 
-                <!-- Edición de Artículos Asociados (Detalle_Articulos con Encabezados Dinámicos y Textareas Amplios) -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
-                    <div class="flex justify-between items-center">
+                <!-- Edición de Artículos Asociados (Detalle_Articulos con Encabezados Dinámicos y Textareas Amplios con mayor diferenciación) -->
+                <div class="bg-slate-100/70 p-5 rounded-2xl border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-center border-b pb-2">
                         <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue">Artículos y Obligaciones (Detalle)</span>
                     </div>
                     <div id="modalArticulosListContainer" class="space-y-4">
-                        <!-- Se llena dinámicamente con los encabezados reales y campos amplios -->
+                        <!-- Se llena dinámicamente con los encabezados reales y campos amplios diferenciados -->
                     </div>
                 </div>
 
@@ -667,7 +667,8 @@
                 for (var j = 0; j < matchingArticles.length; j++) {
                     var art = matchingArticles[j];
                     var artRowDiv = document.createElement('div');
-                    artRowDiv.className = "p-4 bg-white rounded-xl border border-slate-200 space-y-3 article-row-item shadow-xs";
+                    // Tarjeta/bloque de artículo altamente diferenciado con borde lateral corporativo, fondo blanco y sombra sutil
+                    artRowDiv.className = "p-5 bg-white rounded-2xl border-2 border-slate-200 border-l-4 border-l-[#3B599F] space-y-4 article-row-item shadow-sm relative";
 
                     var innerHtmlFields = '';
                     for (var h = 1; h < detalleHeadersList.length; h++) {
@@ -679,7 +680,9 @@
                                          headerLower.includes('detalle') || 
                                          headerLower.includes('obligación') || 
                                          headerLower.includes('evidencia') ||
-                                         headerLower.includes('descripción');
+                                         headerLower.includes('descripción') ||
+                                         headerLower.includes('recomendación') ||
+                                         headerLower.includes('forma');
 
                         var isEstadoRevisado = headerLower.includes('estado') || headerLower.includes('revisado');
 
@@ -703,7 +706,7 @@
                             innerHtmlFields += `
                                 <div class="col-span-full space-y-1">
                                     <label class="text-xs font-bold uppercase tracking-wider" style="color: #3B599F;">${headerName}</label>
-                                    <textarea rows="3" data-header="${headerName}" class="art-dynamic-field w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none" style="border-color: #cbd5e1;">${cellValue}</textarea>
+                                    <textarea rows="3" data-header="${headerName}" class="art-dynamic-field w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none leading-relaxed" style="border-color: #cbd5e1;">${cellValue}</textarea>
                                 </div>
                             `;
                         } else {
@@ -716,7 +719,7 @@
                         }
                     }
 
-                    artRowDiv.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${innerHtmlFields}</div>`;
+                    artRowDiv.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${innerHtmlFields}</div>`;
                     containerArticulos.appendChild(artRowDiv);
                 }
 
