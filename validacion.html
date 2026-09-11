@@ -390,36 +390,6 @@
             return txt.value;
         }
 
-        function updateGravedadStyle(select) {
-            var val = (select.value || '').trim().toLowerCase();
-            // Default styling reset
-            select.style.backgroundColor = '#ffffff';
-            select.style.color = '#2c3e50';
-            select.style.borderColor = '#cbd5e1';
-
-            if (val.includes('crítica') || val.includes('critica')) {
-                // Roja carmesí
-                select.style.backgroundColor = '#ffe4e6';
-                select.style.color = '#991b1b';
-                select.style.borderColor = '#f87171';
-            } else if (val.includes('alta')) {
-                // Naranja
-                select.style.backgroundColor = '#ffedd5';
-                select.style.color = '#c2410c';
-                select.style.borderColor = '#fdba74';
-            } else if (val.includes('media')) {
-                // Amarilla
-                select.style.backgroundColor = '#fef9c3';
-                select.style.color = '#a16207';
-                select.style.borderColor = '#fde047';
-            } else if (val.includes('baja')) {
-                // Amarillo pastel
-                select.style.backgroundColor = '#fefde8';
-                select.style.color = '#713f12';
-                select.style.borderColor = '#fef08a';
-            }
-        }
-
         function fetchData() {
             Papa.parse(csvResumenUrl, {
                 download: true,
@@ -711,30 +681,9 @@
                                          headerLower.includes('evidencia') ||
                                          headerLower.includes('descripción');
 
-                        var isGravedad = headerLower.includes('gravedad') || headerLower.includes('nivel de gravedad');
                         var isEstadoRevisado = headerLower.includes('estado') || headerLower.includes('revisado');
 
-                        if (isGravedad) {
-                            var valG = cellValue.toLowerCase();
-                            var optCritica = (valG.includes('crítica') || valG.includes('critica')) ? 'selected' : '';
-                            var optAlta = (valG === 'alta' || (valG.includes('alta') && !valG.includes('crítica'))) ? 'selected' : '';
-                            var optMedia = (valG === 'media') ? 'selected' : '';
-                            var optBaja = (valG === 'baja') ? 'selected' : '';
-                            var optDefault = (!optCritica && !optAlta && !optMedia && !optBaja) ? 'selected' : '';
-
-                            innerHtmlFields += `
-                                <div class="space-y-1">
-                                    <label class="text-xs font-bold uppercase tracking-wider" style="color: #3B599F;">${headerName}</label>
-                                    <select data-header="${headerName}" onchange="updateGravedadStyle(this)" class="art-dynamic-field w-full p-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:outline-none transition-colors" style="border-color: #cbd5e1;">
-                                        <option value="" ${optDefault}>Seleccione el nivel...</option>
-                                        <option value="Crítica" ${optCritica}>Crítica (&gt;500 UIT, riesgo de caducidad, paralización o daño grave)</option>
-                                        <option value="Alta" ${optAlta}>Alta (100-500 UIT, impacto tarifa/calidad, OSINERGMIN con plazo)</option>
-                                        <option value="Media" ${optMedia}>Media (10-100 UIT, reporte periódico o mantenimiento de registros)</option>
-                                        <option value="Baja" ${optBaja}>Baja (&lt;10 UIT, carácter informativo o difusión interna)</option>
-                                    </select>
-                                </div>
-                            `;
-                        } else if (isEstadoRevisado) {
+                        if (isEstadoRevisado) {
                             var valE = cellValue.toLowerCase();
                             var optPendiente = (valE === 'pendiente de revisión' || valE === '' || valE === 'pendiente') ? 'selected' : '';
                             var optConforme = (valE === 'conforme') ? 'selected' : '';
@@ -770,14 +719,6 @@
                     artRowDiv.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${innerHtmlFields}</div>`;
                     containerArticulos.appendChild(artRowDiv);
                 }
-
-                // Apply initial colors to newly rendered gravedad selects
-                var gravitySelects = containerArticulos.querySelectorAll('select');
-                gravitySelects.forEach(function(sel) {
-                    if (sel.getAttribute('data-header') && (sel.getAttribute('data-header').toLowerCase().includes('gravedad'))) {
-                        updateGravedadStyle(sel);
-                    }
-                });
 
             } else {
                 containerArticulos.innerHTML = '<p class="text-xs text-slate-400 italic p-2">No se encontraron artículos asociados para este ID_Norma en la hoja Detalle_Articulos.</p>';
