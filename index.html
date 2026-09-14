@@ -30,8 +30,13 @@
         <!-- Formulario de Login Tradicional -->
         <form id="loginForm" class="space-y-4">
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-500">Usuario / DNI</label>
-                <input type="text" id="userInput" required class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 border-slate-300" placeholder="Ej. 43662282 o 55555555">
+                <label class="text-xs font-bold text-slate-500">Usuario</label>
+                <select id="userInput" required class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 border-slate-300 bg-white">
+                    <option value="" disabled selected>Seleccione un usuario</option>
+                    <option value="Administrador">Administrador</option>
+                    <option value="Validador Medioambiente">Validador Medioambiente</option>
+                    <option value="Validador Seguridad y Salud">Validador Seguridad y Salud</option>
+                </select>
             </div>
             
             <div class="space-y-1">
