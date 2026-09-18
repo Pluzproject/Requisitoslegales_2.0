@@ -7,6 +7,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
         body {
@@ -46,7 +47,22 @@
                     <h2 class="font-bold text-base" style="color: #3B599F;">Filtros de Búsqueda</h2>
                     <span id="lastUpdateDisplay" class="text-xs font-medium italic text-slate-500"></span>
                 </div>
-                <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline cursor-pointer">Reset Todo</button>
+                <div class="flex items-center gap-3">
+                    <!-- BOTONES DE DESCARGA EXCEL -->
+                    <button onclick="descargarExcelNormas()" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2 text-white hover:opacity-90 cursor-pointer" style="background-color: #217346;" title="Descargar Normas en Excel">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span>Excel Normas</span>
+                    </button>
+                    <button onclick="descargarExcelDetalle()" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2 text-white hover:opacity-90 cursor-pointer" style="background-color: #217346;" title="Descargar Detalle Artículos en Excel">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span>Excel Detalle</span>
+                    </button>
+                    <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline cursor-pointer">Reset Todo</button>
+                </div>
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4 items-end">
@@ -351,7 +367,7 @@
         }
 
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
-        const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv'; // Reemplaza con tu CSV de Detalle_Articulos
+        const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv';
 
         var rawData = [];
         var headersList = [];
@@ -413,7 +429,7 @@
                 }
             });
 
-            // Cargar Detalle_Articulos para mostrar la información detallada por artículo
+            // Cargar Detalle_Articulos
             if (csvDetalleArticulosUrl && !csvDetalleArticulosUrl.includes('AQUÍ_PEGAS')) {
                 Papa.parse(csvDetalleArticulosUrl, {
                     download: true,
@@ -566,6 +582,143 @@
             document.getElementById('rowCountDisplay').textContent = "Mostrando " + data.length + " registros";
         }
 
+        // ============================================
+        // FUNCIONES DE DESCARGA EXCEL
+        // ============================================
+
+        // BOTÓN 1: Descargar Excel de Normas (columnas A, B, C, D, F, G, H, I de Hoja 1)
+        function descargarExcelNormas() {
+            if (rawData.length === 0) {
+                alert("No hay datos para descargar.");
+                return;
+            }
+
+            // Mapeo de columnas: A=0, B=1, C=2, D=3, F=5, G=6, H=7, I=8
+            var columnasIndices = [0, 1, 2, 3, 5, 6, 7, 8];
+            
+            // Preparar datos para Excel
+            var datosExcel = [];
+            
+            // Encabezados
+            var encabezados = [];
+            for (var i = 0; i < columnasIndices.length; i++) {
+                var idx = columnasIndices[i];
+                if (headersList[idx]) {
+                    encabezados.push(decodeHtmlEntities(headersList[idx]));
+                } else {
+                    encabezados.push('Columna ' + (idx + 1));
+                }
+            }
+            datosExcel.push(encabezados);
+            
+            // Datos
+            for (var j = 0; j < rawData.length; j++) {
+                var fila = [];
+                for (var k = 0; k < columnasIndices.length; k++) {
+                    var idx = columnasIndices[k];
+                    var headerKey = headersList[idx];
+                    var valor = headerKey ? decodeHtmlEntities(rawData[j][headerKey] || '') : '';
+                    fila.push(valor);
+                }
+                datosExcel.push(fila);
+            }
+            
+            // Crear libro de Excel
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(datosExcel);
+            
+            // Ajustar ancho de columnas
+            var wscols = [];
+            for (var c = 0; c < encabezados.length; c++) {
+                wscols.push({ wch: 20 });
+            }
+            ws['!cols'] = wscols;
+            
+            XLSX.utils.book_append_sheet(wb, ws, "Normas");
+            
+            // Generar nombre de archivo con fecha
+            var fecha = new Date();
+            var nombreArchivo = 'Normas_' + fecha.getFullYear() + 
+                               ('0' + (fecha.getMonth() + 1)).slice(-2) + 
+                               ('0' + fecha.getDate()).slice(-2) + '.xlsx';
+            
+            XLSX.writeFile(wb, nombreArchivo);
+        }
+
+        // BOTÓN 2: Descargar Excel de Detalle Artículos
+        // Vincula columna A de Detalle_Articulos con columna O de Hoja 1
+        // Resultado: Columna B de Hoja 1 + Columnas B, C, D, E, F, G de Detalle_Articulos
+        function descargarExcelDetalle() {
+            if (detalleArticulosData.length === 0) {
+                alert("No hay datos de detalle para descargar.");
+                return;
+            }
+
+            // Crear mapa de Hoja 1: columna O (índice 14) -> columna B (índice 1)
+            var mapaHoja1 = {};
+            for (var i = 0; i < rawData.length; i++) {
+                var valorO = (rawData[i][headersList[14]] || '').trim();
+                var valorB = decodeHtmlEntities(rawData[i][headersList[1]] || '');
+                if (valorO) {
+                    mapaHoja1[valorO] = valorB;
+                }
+            }
+
+            // Preparar datos para Excel
+            var datosExcel = [];
+            
+            // Encabezados: Norma (de Hoja 1) + encabezados de Detalle_Articulos B-G
+            var encabezados = ['Norma'];
+            for (var h = 1; h <= 6 && h < detalleHeadersList.length; h++) {
+                encabezados.push(decodeHtmlEntities(detalleHeadersList[h]));
+            }
+            datosExcel.push(encabezados);
+            
+            // Datos
+            for (var j = 0; j < detalleArticulosData.length; j++) {
+                var filaDetalle = detalleArticulosData[j];
+                var valorA = (filaDetalle[detalleHeadersList[0]] || '').trim();
+                
+                // Buscar correspondencia en Hoja 1
+                var normaCorrespondiente = mapaHoja1[valorA] || '';
+                
+                var fila = [normaCorrespondiente];
+                
+                // Agregar columnas B, C, D, E, F, G de Detalle_Articulos
+                for (var k = 1; k <= 6 && k < detalleHeadersList.length; k++) {
+                    var valor = decodeHtmlEntities(filaDetalle[detalleHeadersList[k]] || '');
+                    fila.push(valor);
+                }
+                
+                datosExcel.push(fila);
+            }
+            
+            // Crear libro de Excel
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(datosExcel);
+            
+            // Ajustar ancho de columnas
+            var wscols = [];
+            for (var c = 0; c < encabezados.length; c++) {
+                wscols.push({ wch: 25 });
+            }
+            ws['!cols'] = wscols;
+            
+            XLSX.utils.book_append_sheet(wb, ws, "Detalle Artículos");
+            
+            // Generar nombre de archivo con fecha
+            var fecha = new Date();
+            var nombreArchivo = 'Detalle_Articulos_' + fecha.getFullYear() + 
+                               ('0' + (fecha.getMonth() + 1)).slice(-2) + 
+                               ('0' + fecha.getDate()).slice(-2) + '.xlsx';
+            
+            XLSX.writeFile(wb, nombreArchivo);
+        }
+
+        // ============================================
+        // FIN FUNCIONES DE DESCARGA EXCEL
+        // ============================================
+
         function openModal(item) {
             var idNorma = (item['ID_Norma'] || item['Id_Norma'] || item['ID'] || '').trim();
 
@@ -600,7 +753,6 @@
                     for (var j = 0; j < matchingArticles.length; j++) {
                         var art = matchingArticles[j];
                         var artCard = document.createElement('div');
-                        // Tarjeta englobada individual para diferenciar claramente cada artículo
                         artCard.className = "p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 shadow-xs mb-3";
 
                         var innerHtmlFields = '';
