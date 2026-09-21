@@ -133,9 +133,9 @@
                     </div>
                 </div>
 
-                <!-- Pilar del SIG (Columna C) -->
+                <!-- Pilar del SIG -->
                 <div class="space-y-1">
-                    <label class="text-xs font-bold text-gray-500">Pilar del SIG (Columna C)</label>
+                    <label class="text-xs font-bold text-gray-500">Pilar del SIG</label>
                     <div class="relative">
                         <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
                             <option value="">Todos los Pilares</option>
@@ -190,7 +190,7 @@
                                     <th class="p-3">Pilar del SIG</th>
                                     <th class="p-3">Tipo</th>
                                     <th class="p-3">Autoridad</th>
-                                    <th class="p-3" id="thColumnaF">Columna F</th>
+                                    <th class="p-3" id="thColumnaF">Aplica al Sector</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
@@ -257,7 +257,7 @@
                         <span id="modalAutoridad" class="font-semibold px-3 py-1 bg-blue-50 text-blue-800 rounded-lg inline-block text-xs">-</span>
                     </div>
                     <div>
-                        <span class="text-xs font-bold text-slate-400 block mb-1" id="modalLabelColumnaF">Columna F</span>
+                        <span class="text-xs font-bold text-slate-400 block mb-1" id="modalLabelColumnaF">Aplica al Sector</span>
                         <span id="modalColumnaF" class="font-semibold px-3 py-1 bg-slate-100 text-slate-700 rounded-lg inline-block text-xs">-</span>
                     </div>
                 </div>
@@ -270,13 +270,13 @@
                     </a>
                 </div>
 
-                <!-- Edición de Artículos Asociados (Detalle_Articulos con Encabezados Dinámicos y Textareas Amplios con mayor diferenciación) -->
+                <!-- Edición de Artículos Asociados -->
                 <div class="bg-slate-100/70 p-5 rounded-2xl border border-slate-200 space-y-4">
                     <div class="flex justify-between items-center border-b pb-2">
                         <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue">Artículos y Obligaciones (Detalle)</span>
                     </div>
                     <div id="modalArticulosListContainer" class="space-y-4">
-                        <!-- Se llena dinámicamente con los encabezados reales y campos amplios diferenciados -->
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
 
@@ -325,15 +325,46 @@
     </div>
 
     <script>
-        const scriptAppUrl = 'https://script.google.com/macros/s/AKfycbyzKontvuFNjie7q2KXDRydyEbOYKT7F8e9M622qhAN-UGCmBiSzKSJjvCcESmeliiM/exec';
-        const csvResumenUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?output=csv';
+        // ============================================
+        // 📌 MAPA DE ÍNDICES (Resumen_Normas - nuevo orden)
+        // ============================================
+        const IDX = {
+            ID_NORMA:       0,   // A
+            FECHA:          1,   // B
+            NORMA:          2,   // C
+            PILAR:          3,   // D
+            SUMILLA:        4,   // E
+            APLICA_SECTOR:  5,   // F
+            CONTENIDO:      6,   // G
+            AUTORIDAD:      7,   // H
+            TIPO:           8,   // I
+            ENLACE:         9,   // J
+            ARTICULOS:      10,  // K
+            RECOMENDACION:  11,  // L
+            ENTREGABLES:    12,  // M
+            EVIDENCIA:      13,  // N
+            REVISADO:       14   // O
+        };
+
+        // ============================================
+        // 🔗 URLs
+        // ============================================
+        // ✅ CAMBIO 1: URL con gid específico de Resumen_Normas
+        const csvResumenUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=1467030430&single=true&output=csv';
         const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv';
+        const scriptAppUrl = 'https://script.google.com/macros/s/AKfycbyzKontvuFNjie7q2KXDRydyEbOYKT7F8e9M622qhAN-UGCmBiSzKSJjvCcESmeliiM/exec';
 
         var rawData = [];
         var detalleArticulosData = [];
         var detalleHeadersList = [];
         var headersList = [];
         var currentModalItem = null;
+
+        // Helper para leer celda de Resumen_Normas por índice de columna
+        function getResumenCell(row, idx) {
+            var key = headersList[idx];
+            return key ? (row[key] || '') : '';
+        }
 
         window.addEventListener('DOMContentLoaded', function() {
             var role = sessionStorage.getItem('userRole');
@@ -400,15 +431,16 @@
                         headersList = results.meta.fields;
                     }
                     if (results.data.length > 0) {
-                        var lastDate = results.data[results.data.length - 1]['Fecha'] || "";
+                        var lastRow = results.data[results.data.length - 1];
+                        var lastDate = getResumenCell(lastRow, IDX.FECHA) || "";
                         document.getElementById('lastUpdateDisplay').textContent = "Última act: " + lastDate;
                     }
                     rawData = [];
                     for (var i = 0; i < results.data.length; i++) {
                         var row = results.data[i];
-                        var normaText = (row['Norma'] || '').trim().toUpperCase();
+                        var normaText = decodeHtmlEntities(getResumenCell(row, IDX.NORMA)).trim().toUpperCase();
                         if (normaText !== "" && normaText !== "SIN NOVEDAD") {
-                            var fechaStr = (row['Fecha'] || '').trim();
+                            var fechaStr = decodeHtmlEntities(getResumenCell(row, IDX.FECHA)).trim();
                             row.exactDate = fechaStr;
                             var partes = fechaStr.split('/');
                             if(partes.length === 3) {
@@ -426,10 +458,9 @@
                         return b.sortDate.localeCompare(a.sortDate);
                     });
 
-                    if (headersList.length > 5) {
-                        document.getElementById('thColumnaF').textContent = decodeHtmlEntities(headersList[5]);
-                        document.getElementById('modalLabelColumnaF').textContent = decodeHtmlEntities(headersList[5]);
-                    }
+                    // ✅ CAMBIO 2: Header F forzado
+                    document.getElementById('thColumnaF').textContent = 'Aplica al Sector';
+                    document.getElementById('modalLabelColumnaF').textContent = 'Aplica al Sector';
 
                     populateFilters();
                     
@@ -486,7 +517,8 @@
             var total = data.length;
             var validados = 0;
             for(var i = 0; i < total; i++) {
-                var rev = (data[i]['Revisado'] || '').trim().toLowerCase();
+                // ✅ CAMBIO 3: Revisado desde Col O (índice 14)
+                var rev = decodeHtmlEntities(getResumenCell(data[i], IDX.REVISADO)).trim().toLowerCase();
                 if(rev === 'si' || rev === 'sí' || rev === '1' || rev === 'x') {
                     validados++;
                 }
@@ -499,12 +531,29 @@
         }
 
         function populateFilters() {
-            function getUniqueValues(key) {
+            function getUniqueValuesByKey(key) {
                 var uniqueMap = {};
                 for(var i = 0; i < rawData.length; i++) {
                     var val = rawData[i][key];
                     if(val) {
                         var decoded = decodeHtmlEntities(val.trim());
+                        var lower = decoded.toLowerCase();
+                        if(!uniqueMap[lower]) {
+                            uniqueMap[lower] = decoded;
+                        }
+                    }
+                }
+                return Object.values(uniqueMap);
+            }
+
+            function getUniqueValuesByIdx(idx) {
+                var key = headersList[idx];
+                if (!key) return [];
+                var uniqueMap = {};
+                for(var i = 0; i < rawData.length; i++) {
+                    var val = rawData[i][key];
+                    if(val) {
+                        var decoded = decodeHtmlEntities(String(val).trim());
                         var lower = decoded.toLowerCase();
                         if(!uniqueMap[lower]) {
                             uniqueMap[lower] = decoded;
@@ -530,11 +579,11 @@
                 }
             }
 
-            fillSelect('filterMesAnio', getUniqueValues('mesAnio'), true);
-            fillSelect('filterAnio', getUniqueValues('a'), true);
-            fillSelect('filterPilar', getUniqueValues('Pilar del SIG'), false);
-            fillSelect('filterTipo', getUniqueValues('Tipo de norma'), false);
-            fillSelect('filterAutoridad', getUniqueValues('Autoridad'), false);
+            fillSelect('filterMesAnio', getUniqueValuesByKey('mesAnio'), true);
+            fillSelect('filterAnio', getUniqueValuesByKey('a'), true);
+            fillSelect('filterPilar', getUniqueValuesByIdx(IDX.PILAR), false);
+            fillSelect('filterTipo', getUniqueValuesByIdx(IDX.TIPO), false);
+            fillSelect('filterAutoridad', getUniqueValuesByIdx(IDX.AUTORIDAD), false);
         }
 
         function applyFilters() {
@@ -555,10 +604,11 @@
             var filtered = [];
             for(var i = 0; i < rawData.length; i++) {
                 var item = rawData[i];
-                var normaDec = decodeHtmlEntities(item['Norma'] || '').toLowerCase();
-                var sumillaDec = decodeHtmlEntities(item['Sumilla / Descripción'] || '').toLowerCase();
+                var normaDec = decodeHtmlEntities(getResumenCell(item, IDX.NORMA)).toLowerCase();
+                var sumillaDec = decodeHtmlEntities(getResumenCell(item, IDX.SUMILLA)).toLowerCase();
                 
-                var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
+                // ✅ CAMBIO 4: Revisado desde Col O (índice 14)
+                var revisadoVal = decodeHtmlEntities(getResumenCell(item, IDX.REVISADO)).trim().toLowerCase();
                 var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
                 
                 var matchS = !s || normaDec.includes(s) || sumillaDec.includes(s);
@@ -567,9 +617,9 @@
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
                 
-                var matchPI = matchPillar(item['Pilar del SIG'], pi);
-                var matchTI = !ti || decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase() === ti;
-                var matchAU = !au || decodeHtmlEntities(item['Autoridad'] || '').trim().toLowerCase() === au;
+                var matchPI = matchPillar(getResumenCell(item, IDX.PILAR), pi);
+                var matchTI = !ti || decodeHtmlEntities(getResumenCell(item, IDX.TIPO)).trim().toLowerCase() === ti;
+                var matchAU = !au || decodeHtmlEntities(getResumenCell(item, IDX.AUTORIDAD)).trim().toLowerCase() === au;
                 
                 if(matchS && matchEst && matchFE && matchMA && matchAN && matchPI && matchTI && matchAU) {
                     filtered.push(item);
@@ -602,15 +652,14 @@
             var tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
-            var colFKey = headersList.length > 5 ? headersList[5] : '';
-
             for (var i = 0; i < data.length; i++) {
                 var item = data[i];
                 var tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 cursor-pointer transition";
                 
-                var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
-                var revisadoVal = (item['Revisado'] || '').trim().toLowerCase();
+                var valColF = decodeHtmlEntities(getResumenCell(item, IDX.APLICA_SECTOR));
+                // ✅ CAMBIO 5: Revisado desde Col O (índice 14)
+                var revisadoVal = decodeHtmlEntities(getResumenCell(item, IDX.REVISADO)).trim().toLowerCase();
                 var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
                 
                 var statusBadge = isValido 
@@ -619,12 +668,12 @@
 
                 tr.innerHTML = `
                     <td class="p-3 whitespace-nowrap">${statusBadge}</td>
-                    <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
-                    <td class="p-3 font-bold" style="color: #3B599F;">${decodeHtmlEntities(item['Norma'] || '')}</td>
-                    <td class="p-3 text-slate-600 text-xs max-w-md whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
-                    <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
-                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Tipo de norma'] || '')}</td>
-                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
+                    <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${decodeHtmlEntities(getResumenCell(item, IDX.FECHA))}</td>
+                    <td class="p-3 font-bold" style="color: #3B599F;">${decodeHtmlEntities(getResumenCell(item, IDX.NORMA))}</td>
+                    <td class="p-3 text-slate-600 text-xs max-w-md whitespace-normal break-words">${decodeHtmlEntities(getResumenCell(item, IDX.SUMILLA))}</td>
+                    <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(getResumenCell(item, IDX.PILAR))}</span></td>
+                    <td class="p-3 text-xs">${decodeHtmlEntities(getResumenCell(item, IDX.TIPO))}</td>
+                    <td class="p-3 text-xs">${decodeHtmlEntities(getResumenCell(item, IDX.AUTORIDAD))}</td>
                     <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
                 `;
 
@@ -640,13 +689,14 @@
 
         function openModal(item) {
             currentModalItem = item;
-            var idNorma = (item['ID_Norma'] || item['Id_Norma'] || item['ID'] || '').trim();
+            // ✅ CAMBIO 6: ID_Norma directo desde Col A (índice 0)
+            var idNorma = decodeHtmlEntities(getResumenCell(item, IDX.ID_NORMA)).trim();
             
-            document.getElementById('modalNorma').textContent = decodeHtmlEntities(item['Norma'] || 'Detalle de la Norma');
-            document.getElementById('modalFecha').textContent = item['Fecha'] || '-';
-            document.getElementById('modalPilar').textContent = decodeHtmlEntities(item['Pilar del SIG'] || '-');
-            document.getElementById('modalTipo').textContent = decodeHtmlEntities(item['Tipo de norma'] || '-');
-            document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || '-');
+            document.getElementById('modalNorma').textContent = decodeHtmlEntities(getResumenCell(item, IDX.NORMA) || 'Detalle de la Norma');
+            document.getElementById('modalFecha').textContent = decodeHtmlEntities(getResumenCell(item, IDX.FECHA)) || '-';
+            document.getElementById('modalPilar').textContent = decodeHtmlEntities(getResumenCell(item, IDX.PILAR)) || '-';
+            document.getElementById('modalTipo').textContent = decodeHtmlEntities(getResumenCell(item, IDX.TIPO)) || '-';
+            document.getElementById('modalSumilla').textContent = decodeHtmlEntities(getResumenCell(item, IDX.SUMILLA)) || '-';
             document.getElementById('modalIdNormaBadge').textContent = "ID: " + (idNorma || 'N/A');
 
             var containerArticulos = document.getElementById('modalArticulosListContainer');
@@ -667,7 +717,6 @@
                 for (var j = 0; j < matchingArticles.length; j++) {
                     var art = matchingArticles[j];
                     var artRowDiv = document.createElement('div');
-                    // Tarjeta/bloque de artículo altamente diferenciado con borde lateral corporativo, fondo blanco y sombra sutil
                     artRowDiv.className = "p-5 bg-white rounded-2xl border-2 border-slate-200 border-l-4 border-l-[#3B599F] space-y-4 article-row-item shadow-sm relative";
 
                     var innerHtmlFields = '';
@@ -727,7 +776,7 @@
                 containerArticulos.innerHTML = '<p class="text-xs text-slate-400 italic p-2">No se encontraron artículos asociados para este ID_Norma en la hoja Detalle_Articulos.</p>';
             }
 
-            var rec = decodeHtmlEntities(item['Recomendación'] || '');
+            var rec = decodeHtmlEntities(getResumenCell(item, IDX.RECOMENDACION));
             if(rec) {
                 document.getElementById('modalRecomendacion').textContent = rec;
                 document.getElementById('modalRecomendacionContainer').classList.remove('hidden');
@@ -735,7 +784,7 @@
                 document.getElementById('modalRecomendacionContainer').classList.add('hidden');
             }
 
-            var ent = decodeHtmlEntities(item['Entregables recomendados'] || '');
+            var ent = decodeHtmlEntities(getResumenCell(item, IDX.ENTREGABLES));
             if(ent) {
                 document.getElementById('modalEntregables').textContent = ent;
                 document.getElementById('modalEntregablesContainer').classList.remove('hidden');
@@ -743,12 +792,12 @@
                 document.getElementById('modalEntregablesContainer').classList.add('hidden');
             }
 
-            document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
+            document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(getResumenCell(item, IDX.AUTORIDAD)) || '-';
 
-            var colFKey = headersList.length > 5 ? headersList[5] : '';
-            document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
+            document.getElementById('modalColumnaF').textContent = decodeHtmlEntities(getResumenCell(item, IDX.APLICA_SECTOR)) || '-';
 
-            var linkVal = item['Enlace'] || item['Link'] || '';
+            // ✅ CAMBIO 7: Enlace desde Col J (índice 9)
+            var linkVal = decodeHtmlEntities(getResumenCell(item, IDX.ENLACE)).trim();
             if(linkVal) {
                 document.getElementById('modalLinkColI').href = linkVal;
                 document.getElementById('modalLinkContainer').classList.remove('hidden');
@@ -756,7 +805,7 @@
                 document.getElementById('modalLinkContainer').classList.add('hidden');
             }
 
-            var currentTipoNorma = (item['Tipo de norma'] || '').trim();
+            var currentTipoNorma = decodeHtmlEntities(getResumenCell(item, IDX.TIPO)).trim();
             var normalizedTipo = '';
             if (currentTipoNorma.toLowerCase().includes('obligatorio')) normalizedTipo = 'Obligatorio';
             else if (currentTipoNorma.toLowerCase().includes('referencial')) normalizedTipo = 'Referencial';
@@ -764,7 +813,8 @@
 
             document.getElementById('editTipo').value = normalizedTipo;
             
-            var revVal = (item['Revisado'] || '').trim().toLowerCase();
+            // ✅ CAMBIO 8: Revisado desde Col O (índice 14)
+            var revVal = decodeHtmlEntities(getResumenCell(item, IDX.REVISADO)).trim().toLowerCase();
             document.getElementById('editRevisado').value = (revVal === 'si' || revVal === 'sí' || revVal === '1' || revVal === 'x') ? 'si' : '';
 
             document.getElementById('syncStatus').textContent = '';
@@ -783,7 +833,8 @@
 
             var nuevoTipo = document.getElementById('editTipo').value;
             var nuevoRevisado = document.getElementById('editRevisado').value;
-            var idNorma = (currentModalItem['ID_Norma'] || currentModalItem['Id_Norma'] || currentModalItem['ID'] || '').trim();
+            // ✅ CAMBIO 9: ID_Norma desde Col A
+            var idNorma = decodeHtmlEntities(getResumenCell(currentModalItem, IDX.ID_NORMA)).trim();
 
             var articleRows = document.querySelectorAll('.article-row-item');
             var updatedArticles = [];
@@ -806,7 +857,7 @@
             document.getElementById('syncStatus').textContent = "Guardando cambios y sincronizando...";
 
             var dataToSend = {
-                norma: currentModalItem['Norma'],
+                norma: decodeHtmlEntities(getResumenCell(currentModalItem, IDX.NORMA)),
                 idNorma: idNorma,
                 tipoNorma: nuevoTipo,
                 revisado: nuevoRevisado,
@@ -823,12 +874,7 @@
             })
             .then(function() {
                 document.getElementById('syncStatus').textContent = "¡Cambios guardados con éxito!";
-                var filteredData = rawData.filter(item => {
-                    var pi = document.getElementById('filterPilar').value;
-                    return matchPillar(item['Pilar del SIG'], pi);
-                });
-                updateKPIs(filteredData);
-                renderTable(filteredData);
+                applyFilters();
                 setTimeout(function() {
                     closeModal();
                 }, 1000);
