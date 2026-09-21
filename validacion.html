@@ -349,7 +349,6 @@
         // ============================================
         // 🔗 URLs
         // ============================================
-        // ✅ CAMBIO 1: URL con gid específico de Resumen_Normas
         const csvResumenUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=1467030430&single=true&output=csv';
         const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv';
         const scriptAppUrl = 'https://script.google.com/macros/s/AKfycbyzKontvuFNjie7q2KXDRydyEbOYKT7F8e9M622qhAN-UGCmBiSzKSJjvCcESmeliiM/exec';
@@ -458,7 +457,6 @@
                         return b.sortDate.localeCompare(a.sortDate);
                     });
 
-                    // ✅ CAMBIO 2: Header F forzado
                     document.getElementById('thColumnaF').textContent = 'Aplica al Sector';
                     document.getElementById('modalLabelColumnaF').textContent = 'Aplica al Sector';
 
@@ -517,7 +515,6 @@
             var total = data.length;
             var validados = 0;
             for(var i = 0; i < total; i++) {
-                // ✅ CAMBIO 3: Revisado desde Col O (índice 14)
                 var rev = decodeHtmlEntities(getResumenCell(data[i], IDX.REVISADO)).trim().toLowerCase();
                 if(rev === 'si' || rev === 'sí' || rev === '1' || rev === 'x') {
                     validados++;
@@ -607,7 +604,6 @@
                 var normaDec = decodeHtmlEntities(getResumenCell(item, IDX.NORMA)).toLowerCase();
                 var sumillaDec = decodeHtmlEntities(getResumenCell(item, IDX.SUMILLA)).toLowerCase();
                 
-                // ✅ CAMBIO 4: Revisado desde Col O (índice 14)
                 var revisadoVal = decodeHtmlEntities(getResumenCell(item, IDX.REVISADO)).trim().toLowerCase();
                 var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
                 
@@ -658,7 +654,6 @@
                 tr.className = "hover:bg-slate-50 cursor-pointer transition";
                 
                 var valColF = decodeHtmlEntities(getResumenCell(item, IDX.APLICA_SECTOR));
-                // ✅ CAMBIO 5: Revisado desde Col O (índice 14)
                 var revisadoVal = decodeHtmlEntities(getResumenCell(item, IDX.REVISADO)).trim().toLowerCase();
                 var isValido = (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x');
                 
@@ -689,7 +684,6 @@
 
         function openModal(item) {
             currentModalItem = item;
-            // ✅ CAMBIO 6: ID_Norma directo desde Col A (índice 0)
             var idNorma = decodeHtmlEntities(getResumenCell(item, IDX.ID_NORMA)).trim();
             
             document.getElementById('modalNorma').textContent = decodeHtmlEntities(getResumenCell(item, IDX.NORMA) || 'Detalle de la Norma');
@@ -793,10 +787,8 @@
             }
 
             document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(getResumenCell(item, IDX.AUTORIDAD)) || '-';
-
             document.getElementById('modalColumnaF').textContent = decodeHtmlEntities(getResumenCell(item, IDX.APLICA_SECTOR)) || '-';
 
-            // ✅ CAMBIO 7: Enlace desde Col J (índice 9)
             var linkVal = decodeHtmlEntities(getResumenCell(item, IDX.ENLACE)).trim();
             if(linkVal) {
                 document.getElementById('modalLinkColI').href = linkVal;
@@ -813,7 +805,6 @@
 
             document.getElementById('editTipo').value = normalizedTipo;
             
-            // ✅ CAMBIO 8: Revisado desde Col O (índice 14)
             var revVal = decodeHtmlEntities(getResumenCell(item, IDX.REVISADO)).trim().toLowerCase();
             document.getElementById('editRevisado').value = (revVal === 'si' || revVal === 'sí' || revVal === '1' || revVal === 'x') ? 'si' : '';
 
@@ -833,7 +824,6 @@
 
             var nuevoTipo = document.getElementById('editTipo').value;
             var nuevoRevisado = document.getElementById('editRevisado').value;
-            // ✅ CAMBIO 9: ID_Norma desde Col A
             var idNorma = decodeHtmlEntities(getResumenCell(currentModalItem, IDX.ID_NORMA)).trim();
 
             var articleRows = document.querySelectorAll('.article-row-item');
@@ -851,10 +841,14 @@
                 updatedArticles.push(articleObj);
             }
 
-            currentModalItem['Tipo de norma'] = nuevoTipo;
-            currentModalItem['Revisado'] = nuevoRevisado;
+            // Actualización local del item en memoria (para reflejar cambio sin recargar)
+            var tipoKey = headersList[IDX.TIPO];
+            var revisadoKey = headersList[IDX.REVISADO];
+            if (tipoKey) currentModalItem[tipoKey] = nuevoTipo;
+            if (revisadoKey) currentModalItem[revisadoKey] = (nuevoRevisado === 'si' ? 'Sí' : nuevoRevisado);
 
             document.getElementById('syncStatus').textContent = "Guardando cambios y sincronizando...";
+            document.getElementById('syncStatus').style.color = '#64748b';
 
             var dataToSend = {
                 norma: decodeHtmlEntities(getResumenCell(currentModalItem, IDX.NORMA)),
@@ -864,24 +858,33 @@
                 articulosDetalle: updatedArticles
             };
 
+            // ✅ Ya NO usamos 'no-cors' → ahora podemos leer la respuesta del Apps Script
             fetch(scriptAppUrl, {
                 method: 'POST',
-                mode: 'no-cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(dataToSend)
             })
-            .then(function() {
-                document.getElementById('syncStatus').textContent = "¡Cambios guardados con éxito!";
-                applyFilters();
-                setTimeout(function() {
-                    closeModal();
-                }, 1000);
+            .then(function(res) { return res.json(); })
+            .then(function(result) {
+                if (result && result.ok) {
+                    document.getElementById('syncStatus').textContent = "¡Cambios guardados con éxito!";
+                    document.getElementById('syncStatus').style.color = '#6CAC5E';
+                    applyFilters();
+                    setTimeout(function() {
+                        closeModal();
+                    }, 1200);
+                } else {
+                    var msg = (result && result.error) ? result.error : 'Error desconocido';
+                    document.getElementById('syncStatus').textContent = "⚠️ " + msg;
+                    document.getElementById('syncStatus').style.color = '#E06D6D';
+                }
             })
             .catch(function(error) {
                 console.error("Error:", error);
                 document.getElementById('syncStatus').textContent = "Error al guardar los cambios.";
+                document.getElementById('syncStatus').style.color = '#E06D6D';
             });
         }
     </script>
