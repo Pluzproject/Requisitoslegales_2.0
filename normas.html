@@ -10,27 +10,38 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; color: #2c3e50; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #2c3e50;
+        }
         .main-container { max-width: 98%; margin: 0 auto; padding: 2rem 1rem; }
         .bg-corporate-blue { background-color: #3B599F; }
         .text-corporate-blue { color: #3B599F; }
         .border-corporate-blue { border-color: #3B599F; }
     </style>
+<base target="_blank">
 </head>
 <body class="min-h-screen">
 
+    <!-- Header con navegación y botón de cumplimiento -->
     <header class="bg-corporate-blue text-white shadow-md py-6 px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
         <div class="flex items-center space-x-4">
-            <h1 class="text-2xl font-bold tracking-tight">Portal de Requisitos Legales - Listado de Normas</h1>
+            <h1 class="text-2xl font-bold tracking-tight" style="font-family: Arial, sans-serif;">Portal de Requisitos Legales - Listado de Normas</h1>
         </div>
         <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
-            <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center"></nav>
-            <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">Cumplimiento de normas</a>
+            <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
+                <!-- Se rellena dinámicamente según el rol -->
+            </nav>
+            <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
+                Cumplimiento de normas
+            </a>
         </div>
     </header>
 
     <main class="main-container space-y-6">
         
+        <!-- Panel de Filtros Superior Horizontal Sticky (Siempre Visible) -->
         <section class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4 sticky top-4 z-40 backdrop-blur-md bg-white/95">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-3 gap-2">
                 <div class="flex items-center gap-3">
@@ -38,12 +49,17 @@
                     <span id="lastUpdateDisplay" class="text-xs font-medium italic text-slate-500"></span>
                 </div>
                 <div class="flex items-center gap-3">
+                    <!-- BOTONES DE DESCARGA EXCEL -->
                     <button onclick="descargarExcelNormas()" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2 text-white hover:opacity-90 cursor-pointer" style="background-color: #217346;" title="Descargar Normas en Excel">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                         <span>Excel Normas</span>
                     </button>
                     <button onclick="descargarExcelDetalle()" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2 text-white hover:opacity-90 cursor-pointer" style="background-color: #217346;" title="Descargar Detalle Artículos en Excel">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                         <span>Excel Detalle</span>
                     </button>
                     <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline cursor-pointer">Reset Todo</button>
@@ -51,6 +67,7 @@
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4 items-end">
+                <!-- Buscar Texto -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Buscar Texto</label>
                     <div class="relative">
@@ -58,6 +75,8 @@
                         <button onclick="clearFilter('searchInput')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
+                
+                <!-- Fecha Específica -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Fecha Específica</label>
                     <div class="relative">
@@ -65,54 +84,81 @@
                         <button onclick="clearFilter('filterFecha')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
+
+                <!-- Contenedor Rango de Fechas ("Globo") -->
                 <div class="space-y-1 xl:col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
                     <div class="flex justify-between items-center mb-1">
                         <label class="text-xs font-bold text-gray-500">Rango de Fechas (Desde / Hasta)</label>
                         <button onclick="clearDateRange()" class="text-[10px] font-bold text-red-500 hover:underline cursor-pointer">Limpiar rango</button>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div class="relative"><input type="date" id="filterFechaDesde" class="w-full pl-2 pr-2 py-1.5 border rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;" title="Fecha Desde"></div>
-                        <div class="relative"><input type="date" id="filterFechaHasta" class="w-full pl-2 pr-2 py-1.5 border rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;" title="Fecha Hasta"></div>
+                        <div class="relative">
+                            <input type="date" id="filterFechaDesde" class="w-full pl-2 pr-2 py-1.5 border rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;" title="Fecha Desde">
+                        </div>
+                        <div class="relative">
+                            <input type="date" id="filterFechaHasta" class="w-full pl-2 pr-2 py-1.5 border rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;" title="Fecha Hasta">
+                        </div>
                     </div>
                 </div>
+
+                <!-- Periodo (Mes/Año) -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Periodo (Mes/Año)</label>
                     <div class="relative">
-                        <select id="filterMesAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white"><option value="">Seleccionar...</option></select>
+                        <select id="filterMesAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Seleccionar...</option>
+                        </select>
                         <button onclick="clearFilter('filterMesAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
+
+                <!-- Año Específico -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Año Específico</label>
                     <div class="relative">
-                        <select id="filterAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white"><option value="">Todos</option></select>
+                        <select id="filterAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todos</option>
+                        </select>
                         <button onclick="clearFilter('filterAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
+
+                <!-- Pilar del SIG -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Pilar del SIG</label>
                     <div class="relative">
-                        <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white"><option value="">Todos</option></select>
+                        <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todos</option>
+                        </select>
                         <button onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
+
+                <!-- Tipo de Norma -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Tipo de Norma</label>
                     <div class="relative">
-                        <select id="filterTipo" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white"><option value="">Todos</option></select>
+                        <select id="filterTipo" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todos</option>
+                        </select>
                         <button onclick="clearFilter('filterTipo')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
+
+                <!-- Autoridad -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Autoridad</label>
                     <div class="relative">
-                        <select id="filterAutoridad" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white"><option value="">Todas</option></select>
+                        <select id="filterAutoridad" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
+                            <option value="">Todas</option>
+                        </select>
                         <button onclick="clearFilter('filterAutoridad')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- Contenido Principal: Tabla de Normas con Ancho Completo -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
                 <div>
@@ -121,6 +167,8 @@
                 </div>
                 <div id="rowCountDisplay" class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">Mostrando 0 registros</div>
             </div>
+
+            <!-- Tabla de Datos Ampliada -->
             <div class="overflow-x-auto rounded-xl border border-slate-200">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -134,22 +182,33 @@
                             <th class="p-3" id="thColumnaF">Aplica al Sector</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
+                        <!-- Datos dinámicos -->
+                    </tbody>
                 </table>
             </div>
         </section>
+
     </main>
 
+    <!-- Botón Flotante para Ir Arriba -->
     <button id="btnScrollTop" onclick="scrollToTop()" class="fixed bottom-6 right-6 text-white p-3 rounded-full shadow-xl hidden transition-all z-50 cursor-pointer hover:opacity-90 hover:scale-105" style="background-color: #3B599F;" title="Ir arriba">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path>
+        </svg>
     </button>
 
+    <!-- Ventana Flotante (Modal) Optimizada (Solo Lectura) -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden transform transition-all">
+            
+            <!-- Barra de Estado Superior Dinámica -->
             <div id="modalStatusBanner" class="px-6 py-3 flex items-center justify-between text-white font-bold transition-colors duration-300" style="background-color: #FBC13F;">
                 <span id="modalStatusText" class="text-sm tracking-wide uppercase">Pendiente de validar</span>
                 <button onclick="closeModal()" class="text-white hover:opacity-80 text-xl font-bold px-2 cursor-pointer">&times;</button>
             </div>
+
+            <!-- Contenido del Modal -->
             <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto text-left">
                 <div class="flex items-center justify-between">
                     <div>
@@ -158,23 +217,40 @@
                     </div>
                     <span id="modalIdNormaBadge" class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-mono font-bold">ID: -</span>
                 </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <div><span class="text-xs font-bold text-slate-400 block">Fecha</span><span id="modalFecha" class="font-semibold text-slate-700">-</span></div>
-                    <div><span class="text-xs font-bold text-slate-400 block">Pilar del SIG</span><span id="modalPilar" class="font-semibold text-slate-700">-</span></div>
-                    <div><span class="text-xs font-bold text-slate-400 block">Tipo de Norma</span><span id="modalTipo" class="font-semibold text-slate-700">-</span></div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block">Fecha</span>
+                        <span id="modalFecha" class="font-semibold text-slate-700">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block">Pilar del SIG</span>
+                        <span id="modalPilar" class="font-semibold text-slate-700">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block">Tipo de Norma</span>
+                        <span id="modalTipo" class="font-semibold text-slate-700">-</span>
+                    </div>
                 </div>
+
+                <!-- Sumilla -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Sumilla / Descripción Completa</span>
                     <p id="modalSumilla" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
                 </div>
+
+                <!-- Recomendación -->
                 <div id="modalRecomendacionContainer" class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1 hidden">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Recomendación</span>
                     <p id="modalRecomendacion" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
                 </div>
+
+                <!-- Entregables Recomendados -->
                 <div id="modalEntregablesContainer" class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1 hidden">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Entregables recomendados</span>
                     <p id="modalEntregables" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
                 </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <span class="text-xs font-bold text-slate-400 block mb-1">Autoridad Reguladora</span>
@@ -185,57 +261,45 @@
                         <span id="modalColumnaF" class="font-semibold px-3 py-1 bg-slate-100 text-slate-700 rounded-lg inline-block text-xs">-</span>
                     </div>
                 </div>
+
+                <!-- Artículos y Obligaciones (Detalle) - Cada artículo en su propia tarjeta englobada -->
                 <div id="modalArticulosContainerWrapper" class="space-y-3 hidden">
                     <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Artículos y Obligaciones (Detalle)</span>
-                    <div id="modalArticulosListContainer" class="space-y-3"></div>
+                    <div id="modalArticulosListContainer" class="space-y-3">
+                        <!-- Se llena dinámicamente -->
+                    </div>
                 </div>
+
+                <!-- Cajón de Enlace (Columna J) -->
                 <div id="modalLinkContainer" class="hidden pt-2">
                     <a id="modalLinkColI" href="#" target="_blank" class="w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 hover:opacity-90" style="background-color: #3B599F;">
                         <span>Ver norma aquí</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
                     </a>
                 </div>
             </div>
+
+            <!-- Pie del Modal -->
             <div class="bg-slate-50 px-6 py-4 border-t flex justify-end">
                 <button onclick="closeModal()" class="px-5 py-2 rounded-lg text-white font-bold text-sm transition shadow-sm cursor-pointer" style="background-color: #3B599F;">Cerrar</button>
             </div>
+
         </div>
     </div>
 
     <script>
-        // ============================================
-        // 📌 MAPA DE ÍNDICES (Resumen_Normas - nuevo orden)
-        // ============================================
-        const IDX = {
-            ID_NORMA:       0,   // A
-            FECHA:          1,   // B
-            NORMA:          2,   // C
-            PILAR:          3,   // D
-            SUMILLA:        4,   // E
-            APLICA_SECTOR:  5,   // F
-            CONTENIDO:      6,   // G
-            AUTORIDAD:      7,   // H
-            TIPO:           8,   // I
-            ENLACE:         9,   // J
-            ARTICULOS:      10,  // K
-            RECOMENDACION:  11,  // L
-            ENTREGABLES:    12,  // M
-            EVIDENCIA:      13,  // N
-            REVISADO:       14   // O
-        };
-
+        // Control de Sesión y Roles
         window.addEventListener('DOMContentLoaded', function() {
             var rawRole = sessionStorage.getItem('userRole');
             var role = rawRole ? rawRole.trim().toLowerCase() : '';
             
-            // ⚠️ Descomenta el bloque de abajo en producción. Comentado para debug.
-            /*
             if (role !== 'admin' && role !== 'validador' && role !== 'publico') {
                 alert("Acceso no autorizado. Inicie sesión nuevamente.");
                 window.location.href = 'index.html';
                 return;
             }
-            */
 
             var navContainer = document.getElementById('userNav');
             if (navContainer) {
@@ -268,20 +332,42 @@
             document.getElementById('btnReset').addEventListener('click', resetFilters);
         });
 
+        // Control del botón flotante para subir
         window.addEventListener('scroll', function() {
             var btnTop = document.getElementById('btnScrollTop');
-            if (window.scrollY > 300) { btnTop.classList.remove('hidden'); btnTop.classList.add('flex'); }
-            else { btnTop.classList.remove('flex'); btnTop.classList.add('hidden'); }
+            if (window.scrollY > 300) {
+                btnTop.classList.remove('hidden');
+                btnTop.classList.add('flex');
+            } else {
+                btnTop.classList.remove('flex');
+                btnTop.classList.add('hidden');
+            }
         });
 
-        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-        function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
-        function clearFilter(id) { var el = document.getElementById(id); if(el) { el.value = ''; applyFilters(); } }
-        function clearDateRange() { document.getElementById('filterFechaDesde').value = ''; document.getElementById('filterFechaHasta').value = ''; applyFilters(); }
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-        // ============================================
-        // 🔗 URLs CSV
-        // ============================================
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        function clearFilter(id) {
+            var el = document.getElementById(id);
+            if(el) {
+                el.value = '';
+                applyFilters();
+            }
+        }
+
+        function clearDateRange() {
+            document.getElementById('filterFechaDesde').value = '';
+            document.getElementById('filterFechaHasta').value = '';
+            applyFilters();
+        }
+
+        // ✅ CAMBIO 1: URL con gid específico de Resumen_Normas
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=1467030430&single=true&output=csv';
         const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv';
 
@@ -297,13 +383,8 @@
             return txt.value;
         }
 
-        // Helper: leer celda por índice de columna de Resumen_Normas
-        function getCell(row, idx) {
-            var key = headersList[idx];
-            return key ? (row[key] || '') : '';
-        }
-
         function fetchData() {
+            // Cargar Resumen_Normas
             Papa.parse(csvUrl, {
                 download: true,
                 header: true,
@@ -311,21 +392,18 @@
                 complete: function(results) {
                     if (results.meta && results.meta.fields) {
                         headersList = results.meta.fields;
-                        console.log("📋 Headers detectados:", headersList);
                     }
 
                     if (results.data.length > 0) {
-                        var lastRow = results.data[results.data.length - 1];
-                        var lastDate = getCell(lastRow, IDX.FECHA) || "";
+                        var lastDate = results.data[results.data.length - 1]['Fecha'] || "";
                         document.getElementById('lastUpdateDisplay').textContent = "Última act: " + lastDate;
                     }
-
                     rawData = [];
                     for (var i = 0; i < results.data.length; i++) {
                         var row = results.data[i];
-                        var normaText = decodeHtmlEntities(getCell(row, IDX.NORMA)).trim().toUpperCase();
+                        var normaText = (row['Norma'] || '').trim().toUpperCase();
                         if (normaText !== "" && normaText !== "SIN NOVEDAD") {
-                            var fechaStr = decodeHtmlEntities(getCell(row, IDX.FECHA)).trim();
+                            var fechaStr = (row['Fecha'] || '').trim();
                             row.exactDate = fechaStr;
                             var partes = fechaStr.split('/');
                             if(partes.length === 3) {
@@ -339,20 +417,20 @@
                         }
                     }
 
-                    rawData.sort(function(a, b) { return b.sortDate.localeCompare(a.sortDate); });
+                    rawData.sort(function(a, b) {
+                        return b.sortDate.localeCompare(a.sortDate);
+                    });
 
+                    // ✅ CAMBIO 2: Header F forzado a "Aplica al Sector"
                     document.getElementById('thColumnaF').textContent = 'Aplica al Sector';
                     document.getElementById('modalLabelColumnaF').textContent = 'Aplica al Sector';
 
                     populateFilters();
                     renderTable(rawData);
-                },
-                error: function(err) {
-                    console.error("❌ Error cargando CSV:", err);
-                    alert("Error al cargar los datos. Revisa la consola (F12).");
                 }
             });
 
+            // Cargar Detalle_Articulos
             if (csvDetalleArticulosUrl && !csvDetalleArticulosUrl.includes('AQUÍ_PEGAS')) {
                 Papa.parse(csvDetalleArticulosUrl, {
                     download: true,
@@ -361,7 +439,6 @@
                     complete: function(results) {
                         if (results.meta && results.meta.fields) {
                             detalleHeadersList = results.meta.fields;
-                            console.log("📋 Headers Detalle:", detalleHeadersList);
                         }
                         detalleArticulosData = results.data || [];
                     }
@@ -370,37 +447,27 @@
         }
 
         function populateFilters() {
-            function getUniqueValuesByKey(key) {
+            function getUniqueValues(key) {
                 var uniqueMap = {};
                 for(var i = 0; i < rawData.length; i++) {
                     var val = rawData[i][key];
                     if(val) {
-                        var decoded = decodeHtmlEntities(String(val).trim());
+                        var decoded = decodeHtmlEntities(val.trim());
                         var lower = decoded.toLowerCase();
-                        if(!uniqueMap[lower]) uniqueMap[lower] = decoded;
-                    }
-                }
-                return Object.values(uniqueMap);
-            }
-
-            function getUniqueValuesByIdx(idx) {
-                var key = headersList[idx];
-                if (!key) return [];
-                var uniqueMap = {};
-                for(var i = 0; i < rawData.length; i++) {
-                    var val = rawData[i][key];
-                    if(val) {
-                        var decoded = decodeHtmlEntities(String(val).trim());
-                        var lower = decoded.toLowerCase();
-                        if(!uniqueMap[lower]) uniqueMap[lower] = decoded;
+                        if(!uniqueMap[lower]) {
+                            uniqueMap[lower] = decoded;
+                        }
                     }
                 }
                 return Object.values(uniqueMap);
             }
 
             function fillSelect(id, data, sortDesc) {
-                if(sortDesc) data.sort((a, b) => b.localeCompare(a));
-                else data.sort((a, b) => a.localeCompare(b));
+                if(sortDesc) {
+                    data.sort((a, b) => b.localeCompare(a));
+                } else {
+                    data.sort((a, b) => a.localeCompare(b));
+                }
                 var select = document.getElementById(id);
                 select.innerHTML = select.options[0].outerHTML;
                 for(var i = 0; i < data.length; i++) {
@@ -411,11 +478,11 @@
                 }
             }
 
-            fillSelect('filterMesAnio', getUniqueValuesByKey('mesAnio'), true);
-            fillSelect('filterAnio', getUniqueValuesByKey('a'), true);
-            fillSelect('filterPilar', getUniqueValuesByIdx(IDX.PILAR), false);
-            fillSelect('filterTipo', getUniqueValuesByIdx(IDX.TIPO), false);
-            fillSelect('filterAutoridad', getUniqueValuesByIdx(IDX.AUTORIDAD), false);
+            fillSelect('filterMesAnio', getUniqueValues('mesAnio'), true);
+            fillSelect('filterAnio', getUniqueValues('a'), true);
+            fillSelect('filterPilar', getUniqueValues('Pilar del SIG'), false);
+            fillSelect('filterTipo', getUniqueValues('Tipo de norma'), false);
+            fillSelect('filterAutoridad', getUniqueValues('Autoridad'), false);
         }
 
         function applyFilters() {
@@ -436,8 +503,8 @@
             var filtered = [];
             for(var i = 0; i < rawData.length; i++) {
                 var item = rawData[i];
-                var normaDec = decodeHtmlEntities(getCell(item, IDX.NORMA)).toLowerCase();
-                var sumillaDec = decodeHtmlEntities(getCell(item, IDX.SUMILLA)).toLowerCase();
+                var normaDec = decodeHtmlEntities(item['Norma'] || '').toLowerCase();
+                var sumillaDec = decodeHtmlEntities(item['Sumilla / Descripción'] || '').toLowerCase();
                 
                 var matchS = !s || normaDec.includes(s) || sumillaDec.includes(s);
                 var matchFE = !filterSortDate || item.sortDate === filterSortDate;
@@ -446,9 +513,9 @@
                 var matchMA = !ma || item.mesAnio === ma;
                 var matchAN = !an || item.a === an;
                 
-                var matchPI = !pi || decodeHtmlEntities(getCell(item, IDX.PILAR)).trim().toLowerCase() === pi;
-                var matchTI = !ti || decodeHtmlEntities(getCell(item, IDX.TIPO)).trim().toLowerCase() === ti;
-                var matchAU = !au || decodeHtmlEntities(getCell(item, IDX.AUTORIDAD)).trim().toLowerCase() === au;
+                var matchPI = !pi || decodeHtmlEntities(item['Pilar del SIG'] || '').trim().toLowerCase() === pi;
+                var matchTI = !ti || decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase() === ti;
+                var matchAU = !au || decodeHtmlEntities(item['Autoridad'] || '').trim().toLowerCase() === au;
                 
                 if(matchS && matchFE && matchDesde && matchHasta && matchMA && matchAN && matchPI && matchTI && matchAU) {
                     filtered.push(item);
@@ -458,10 +525,15 @@
         }
 
         function resetFilters() {
-            ['searchInput','filterFecha','filterFechaDesde','filterFechaHasta','filterMesAnio','filterAnio','filterPilar','filterTipo','filterAutoridad'].forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el) el.value = '';
-            });
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterFecha').value = '';
+            document.getElementById('filterFechaDesde').value = '';
+            document.getElementById('filterFechaHasta').value = '';
+            document.getElementById('filterMesAnio').value = '';
+            document.getElementById('filterAnio').value = '';
+            document.getElementById('filterPilar').value = '';
+            document.getElementById('filterTipo').value = '';
+            document.getElementById('filterAutoridad').value = '';
             renderTable(rawData);
         }
 
@@ -469,14 +541,296 @@
             var tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
+            var colFKey = headersList.length > 5 ? headersList[5] : '';
+
             for (var i = 0; i < data.length; i++) {
                 var item = data[i];
                 var tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 cursor-pointer transition";
                 
-                var valColF = decodeHtmlEntities(getCell(item, IDX.APLICA_SECTOR));
-                var normaName = decodeHtmlEntities(getCell(item, IDX.NORMA));
-                var tipoNormaText = decodeHtmlEntities(getCell(item, IDX.TIPO));
+                var valColF = colFKey ? decodeHtmlEntities(item[colFKey] || '') : '';
+                var normaName = decodeHtmlEntities(item['Norma'] || '');
+                var tipoNormaText = decodeHtmlEntities(item['Tipo de norma'] || '');
                 
                 var tipoLower = tipoNormaText.toLowerCase();
-                var esOblig = tipoLower.includes('obligatorio') ||
+                var esOblig = tipoLower.includes('obligatorio') || tipoLower.includes('obligatoria');
+                
+                var tipoDisplay = esOblig 
+                    ? `<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px] font-bold tracking-wide uppercase inline-block">Obligatorio</span>` 
+                    : tipoNormaText;
+
+                tr.innerHTML = `
+                    <td class="p-3 text-xs text-slate-500 whitespace-nowrap">${item['Fecha'] || ''}</td>
+                    <td class="p-3 font-bold" style="color: #3B599F;">
+                        ${normaName}
+                    </td>
+                    <td class="p-3 text-slate-600 text-xs max-w-sm whitespace-normal break-words">${decodeHtmlEntities(item['Sumilla / Descripción'] || '')}</td>
+                    <td class="p-3 text-xs font-medium"><span class="px-2 py-1 bg-slate-100 rounded-md">${decodeHtmlEntities(item['Pilar del SIG'] || '')}</span></td>
+                    <td class="p-3 text-xs">${tipoDisplay}</td>
+                    <td class="p-3 text-xs">${decodeHtmlEntities(item['Autoridad'] || '')}</td>
+                    <td class="p-3 text-xs font-semibold text-slate-700">${valColF}</td>
+                `;
+
+                (function(rowObj) {
+                    tr.addEventListener('click', function() {
+                        openModal(rowObj);
+                    });
+                })(item);
+
+                tbody.appendChild(tr);
+            }
+
+            document.getElementById('rowCountDisplay').textContent = "Mostrando " + data.length + " registros";
+        }
+
+        // ============================================
+        // FUNCIONES DE DESCARGA EXCEL
+        // ============================================
+
+        // BOTÓN 1: Descargar Excel de Normas (columnas A, B, C, D, F, G, H, I del nuevo orden)
+        function descargarExcelNormas() {
+            if (rawData.length === 0) {
+                alert("No hay datos para descargar.");
+                return;
+            }
+
+            // Mapeo de columnas: A=0, B=1, C=2, D=3, F=5, G=6, H=7, I=8
+            var columnasIndices = [0, 1, 2, 3, 5, 6, 7, 8];
+            
+            var datosExcel = [];
+            
+            var encabezados = [];
+            for (var i = 0; i < columnasIndices.length; i++) {
+                var idx = columnasIndices[i];
+                if (headersList[idx]) {
+                    encabezados.push(decodeHtmlEntities(headersList[idx]));
+                } else {
+                    encabezados.push('Columna ' + (idx + 1));
+                }
+            }
+            datosExcel.push(encabezados);
+            
+            for (var j = 0; j < rawData.length; j++) {
+                var fila = [];
+                for (var k = 0; k < columnasIndices.length; k++) {
+                    var idx = columnasIndices[k];
+                    var headerKey = headersList[idx];
+                    var valor = headerKey ? decodeHtmlEntities(rawData[j][headerKey] || '') : '';
+                    fila.push(valor);
+                }
+                datosExcel.push(fila);
+            }
+            
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(datosExcel);
+            
+            var wscols = [];
+            for (var c = 0; c < encabezados.length; c++) {
+                wscols.push({ wch: 20 });
+            }
+            ws['!cols'] = wscols;
+            
+            XLSX.utils.book_append_sheet(wb, ws, "Normas");
+            
+            var fecha = new Date();
+            var nombreArchivo = 'Normas_' + fecha.getFullYear() + 
+                               ('0' + (fecha.getMonth() + 1)).slice(-2) + 
+                               ('0' + fecha.getDate()).slice(-2) + '.xlsx';
+            
+            XLSX.writeFile(wb, nombreArchivo);
+        }
+
+        // BOTÓN 2: Descargar Excel de Detalle Artículos
+        // ✅ CAMBIO 3 y 4: Vincula Col A de Detalle_Articulos con Col A (ID_Norma) de Resumen_Normas
+        // y trae la Norma desde Col C (índice 2)
+        function descargarExcelDetalle() {
+            if (detalleArticulosData.length === 0) {
+                alert("No hay datos de detalle para descargar.");
+                return;
+            }
+
+            // ✅ NUEVO: mapa de Resumen_Normas — Col A (índice 0 = ID_Norma) -> Col C (índice 2 = Norma)
+            var mapaHoja1 = {};
+            for (var i = 0; i < rawData.length; i++) {
+                var valorA = (rawData[i][headersList[0]] || '').trim();
+                var valorC = decodeHtmlEntities(rawData[i][headersList[2]] || '');
+                if (valorA) {
+                    mapaHoja1[valorA] = valorC;
+                }
+            }
+
+            var datosExcel = [];
+            
+            var encabezados = ['Norma'];
+            for (var h = 1; h <= 6 && h < detalleHeadersList.length; h++) {
+                encabezados.push(decodeHtmlEntities(detalleHeadersList[h]));
+            }
+            datosExcel.push(encabezados);
+            
+            for (var j = 0; j < detalleArticulosData.length; j++) {
+                var filaDetalle = detalleArticulosData[j];
+                var valorA = (filaDetalle[detalleHeadersList[0]] || '').trim();
+                
+                var normaCorrespondiente = mapaHoja1[valorA] || '';
+                
+                var fila = [normaCorrespondiente];
+                
+                for (var k = 1; k <= 6 && k < detalleHeadersList.length; k++) {
+                    var valor = decodeHtmlEntities(filaDetalle[detalleHeadersList[k]] || '');
+                    fila.push(valor);
+                }
+                
+                datosExcel.push(fila);
+            }
+            
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(datosExcel);
+            
+            var wscols = [];
+            for (var c = 0; c < encabezados.length; c++) {
+                wscols.push({ wch: 25 });
+            }
+            ws['!cols'] = wscols;
+            
+            XLSX.utils.book_append_sheet(wb, ws, "Detalle Artículos");
+            
+            var fecha = new Date();
+            var nombreArchivo = 'Detalle_Articulos_' + fecha.getFullYear() + 
+                               ('0' + (fecha.getMonth() + 1)).slice(-2) + 
+                               ('0' + fecha.getDate()).slice(-2) + '.xlsx';
+            
+            XLSX.writeFile(wb, nombreArchivo);
+        }
+
+        // ============================================
+        // FIN FUNCIONES DE DESCARGA EXCEL
+        // ============================================
+
+        function openModal(item) {
+            // ✅ CAMBIO 5: ID_Norma directo desde Col A (índice 0)
+            var idNorma = headersList.length > 0 ? (item[headersList[0]] || '').trim() : '';
+
+            document.getElementById('modalNorma').textContent = decodeHtmlEntities(item['Norma'] || 'Sin Norma');
+            document.getElementById('modalFecha').textContent = item['Fecha'] || '-';
+            document.getElementById('modalPilar').textContent = decodeHtmlEntities(item['Pilar del SIG'] || '-');
+            document.getElementById('modalTipo').textContent = decodeHtmlEntities(item['Tipo de norma'] || '-');
+            document.getElementById('modalSumilla').textContent = decodeHtmlEntities(item['Sumilla / Descripción'] || 'Sin descripción disponible.');
+            document.getElementById('modalAutoridad').textContent = decodeHtmlEntities(item['Autoridad'] || '-');
+            document.getElementById('modalIdNormaBadge').textContent = "ID: " + (idNorma || 'N/A');
+
+            var colFKey = headersList.length > 5 ? headersList[5] : '';
+            document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
+
+            // Renderizar los artículos de Detalle_Articulos en modo solo lectura con tarjetas englobadas
+            var containerArticulos = document.getElementById('modalArticulosListContainer');
+            if (containerArticulos) {
+                containerArticulos.innerHTML = '';
+
+                var matchingArticles = [];
+                for (var k = 0; k < detalleArticulosData.length; k++) {
+                    var rowObj = detalleArticulosData[k];
+                    var firstKey = detalleHeadersList.length > 0 ? detalleHeadersList[0] : '';
+                    var rowIdNorma = (rowObj[firstKey] || '').trim();
+                    
+                    if (idNorma && rowIdNorma === idNorma) {
+                        matchingArticles.push(rowObj);
+                    }
+                }
+
+                if (matchingArticles.length > 0 && detalleHeadersList.length > 0) {
+                    for (var j = 0; j < matchingArticles.length; j++) {
+                        var art = matchingArticles[j];
+                        var artCard = document.createElement('div');
+                        artCard.className = "p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 shadow-xs mb-3";
+
+                        var innerHtmlFields = '';
+                        for (var h = 1; h < detalleHeadersList.length; h++) {
+                            var headerName = detalleHeadersList[h];
+                            var cellValue = decodeHtmlEntities(art[headerName] || '');
+
+                            innerHtmlFields += `
+                                <div class="space-y-1">
+                                    <span class="text-xs font-bold text-corporate-blue block uppercase tracking-wider">${headerName}</span>
+                                    <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-line bg-white p-3 rounded-lg border border-slate-100">${cellValue || '-'}</p>
+                                </div>
+                            `;
+                        }
+
+                        artCard.innerHTML = `
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between border-b pb-2">
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Artículo / Obligación #${j + 1}</span>
+                                </div>
+                                <div class="grid grid-cols-1 gap-3">${innerHtmlFields}</div>
+                            </div>
+                        `;
+                        containerArticulos.appendChild(artCard);
+                    }
+                    document.getElementById('modalArticulosContainerWrapper').classList.remove('hidden');
+                } else {
+                    document.getElementById('modalArticulosContainerWrapper').classList.add('hidden');
+                }
+            }
+
+            var rec = decodeHtmlEntities(item['Recomendación'] || '');
+            var recContainer = document.getElementById('modalRecomendacionContainer');
+            if(recContainer) {
+                if(rec) {
+                    document.getElementById('modalRecomendacion').textContent = rec;
+                    recContainer.classList.remove('hidden');
+                } else {
+                    recContainer.classList.add('hidden');
+                }
+            }
+
+            var ent = decodeHtmlEntities(item['Entregables recomendados'] || '');
+            var entContainer = document.getElementById('modalEntregablesContainer');
+            if(entContainer) {
+                if(ent) {
+                    document.getElementById('modalEntregables').textContent = ent;
+                    entContainer.classList.remove('hidden');
+                } else {
+                    entContainer.classList.add('hidden');
+                }
+            }
+
+            // ✅ CAMBIO 6: Enlace desde Col J (índice 9)
+            var colJKey = headersList.length > 9 ? headersList[9] : '';
+            var linkContainer = document.getElementById('modalLinkContainer');
+            var linkAnchor = document.getElementById('modalLinkColI');
+            var linkVal = colJKey ? (item[colJKey] || '').trim() : '';
+
+            if (linkVal) {
+                linkAnchor.href = linkVal;
+                linkContainer.classList.remove('hidden');
+            } else {
+                linkContainer.classList.add('hidden');
+            }
+
+            // ✅ CAMBIO 7: Revisado desde Col O (índice 14)
+            var colOKey = headersList.length > 14 ? headersList[14] : '';
+            var revisadoVal = colOKey ? (item[colOKey] || '').trim().toLowerCase() : '';
+            var banner = document.getElementById('modalStatusBanner');
+            var statusText = document.getElementById('modalStatusText');
+
+            if (revisadoVal === 'si' || revisadoVal === 'sí' || revisadoVal === '1' || revisadoVal === 'x') {
+                banner.style.backgroundColor = '#6CAC5E';
+                statusText.textContent = 'Validado';
+                statusText.style.color = '#ffffff';
+            } else {
+                banner.style.backgroundColor = '#FBC13F';
+                statusText.textContent = 'Pendiente de validar';
+                statusText.style.color = '#2c3e50';
+            }
+
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('detailModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('flex');
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
