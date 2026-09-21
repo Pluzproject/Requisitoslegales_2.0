@@ -10,11 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            color: #2c3e50;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; color: #2c3e50; }
         .main-container { max-width: 98%; margin: 0 auto; padding: 2rem 1rem; }
         .bg-corporate-blue { background-color: #3B599F; }
         .text-corporate-blue { color: #3B599F; }
@@ -23,24 +19,18 @@
 </head>
 <body class="min-h-screen">
 
-    <!-- Header con navegación y botón de cumplimiento -->
     <header class="bg-corporate-blue text-white shadow-md py-6 px-8 flex flex-col md:flex-row justify-between items-center gap-4 relative">
         <div class="flex items-center space-x-4">
-            <h1 class="text-2xl font-bold tracking-tight" style="font-family: Arial, sans-serif;">Portal de Requisitos Legales - Listado de Normas</h1>
+            <h1 class="text-2xl font-bold tracking-tight">Portal de Requisitos Legales - Listado de Normas</h1>
         </div>
         <div class="flex items-center space-x-6 flex-wrap justify-center gap-4">
-            <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center">
-                <!-- Se rellena dinámicamente según el rol -->
-            </nav>
-            <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">
-                Cumplimiento de normas
-            </a>
+            <nav id="userNav" class="space-x-6 text-sm font-semibold flex items-center"></nav>
+            <a href="https://pluz.esginnova.com/apps/bpm/index.cfm?id_app=1360&idaplicacion=1360&desdeTop=1" target="_blank" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2" style="background-color: #6CAC5E; color: white;">Cumplimiento de normas</a>
         </div>
     </header>
 
     <main class="main-container space-y-6">
         
-        <!-- Panel de Filtros Superior Horizontal Sticky (Siempre Visible) -->
         <section class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 space-y-4 sticky top-4 z-40 backdrop-blur-md bg-white/95">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-3 gap-2">
                 <div class="flex items-center gap-3">
@@ -48,17 +38,12 @@
                     <span id="lastUpdateDisplay" class="text-xs font-medium italic text-slate-500"></span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <!-- BOTONES DE DESCARGA EXCEL -->
                     <button onclick="descargarExcelNormas()" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2 text-white hover:opacity-90 cursor-pointer" style="background-color: #217346;" title="Descargar Normas en Excel">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         <span>Excel Normas</span>
                     </button>
                     <button onclick="descargarExcelDetalle()" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2 text-white hover:opacity-90 cursor-pointer" style="background-color: #217346;" title="Descargar Detalle Artículos en Excel">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         <span>Excel Detalle</span>
                     </button>
                     <button id="btnReset" class="text-xs font-bold text-red-500 hover:underline cursor-pointer">Reset Todo</button>
@@ -66,7 +51,6 @@
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4 items-end">
-                <!-- Buscar Texto -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Buscar Texto</label>
                     <div class="relative">
@@ -74,8 +58,6 @@
                         <button onclick="clearFilter('searchInput')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
-                
-                <!-- Fecha Específica -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Fecha Específica</label>
                     <div class="relative">
@@ -83,81 +65,54 @@
                         <button onclick="clearFilter('filterFecha')" class="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
-
-                <!-- Contenedor Rango de Fechas ("Globo") -->
                 <div class="space-y-1 xl:col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
                     <div class="flex justify-between items-center mb-1">
                         <label class="text-xs font-bold text-gray-500">Rango de Fechas (Desde / Hasta)</label>
                         <button onclick="clearDateRange()" class="text-[10px] font-bold text-red-500 hover:underline cursor-pointer">Limpiar rango</button>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div class="relative">
-                            <input type="date" id="filterFechaDesde" class="w-full pl-2 pr-2 py-1.5 border rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;" title="Fecha Desde">
-                        </div>
-                        <div class="relative">
-                            <input type="date" id="filterFechaHasta" class="w-full pl-2 pr-2 py-1.5 border rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;" title="Fecha Hasta">
-                        </div>
+                        <div class="relative"><input type="date" id="filterFechaDesde" class="w-full pl-2 pr-2 py-1.5 border rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;" title="Fecha Desde"></div>
+                        <div class="relative"><input type="date" id="filterFechaHasta" class="w-full pl-2 pr-2 py-1.5 border rounded-lg text-xs text-slate-700 bg-white focus:outline-none focus:ring-2" style="border-color: #cbd5e1;" title="Fecha Hasta"></div>
                     </div>
                 </div>
-
-                <!-- Periodo (Mes/Año) -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Periodo (Mes/Año)</label>
                     <div class="relative">
-                        <select id="filterMesAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
-                            <option value="">Seleccionar...</option>
-                        </select>
+                        <select id="filterMesAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white"><option value="">Seleccionar...</option></select>
                         <button onclick="clearFilter('filterMesAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
-
-                <!-- Año Específico -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Año Específico</label>
                     <div class="relative">
-                        <select id="filterAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
-                            <option value="">Todos</option>
-                        </select>
+                        <select id="filterAnio" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white"><option value="">Todos</option></select>
                         <button onclick="clearFilter('filterAnio')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
-
-                <!-- Pilar del SIG -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Pilar del SIG</label>
                     <div class="relative">
-                        <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
-                            <option value="">Todos</option>
-                        </select>
+                        <select id="filterPilar" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white"><option value="">Todos</option></select>
                         <button onclick="clearFilter('filterPilar')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
-
-                <!-- Tipo de Norma -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Tipo de Norma</label>
                     <div class="relative">
-                        <select id="filterTipo" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
-                            <option value="">Todos</option>
-                        </select>
+                        <select id="filterTipo" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white"><option value="">Todos</option></select>
                         <button onclick="clearFilter('filterTipo')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
-
-                <!-- Autoridad -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-gray-500">Autoridad</label>
                     <div class="relative">
-                        <select id="filterAutoridad" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white">
-                            <option value="">Todas</option>
-                        </select>
+                        <select id="filterAutoridad" class="w-full pl-3 pr-8 py-2 border rounded-lg text-sm appearance-none bg-white"><option value="">Todas</option></select>
                         <button onclick="clearFilter('filterAutoridad')" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 font-bold text-sm px-1 cursor-pointer" title="Borrar filtro">&times;</button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Contenido Principal: Tabla de Normas con Ancho Completo -->
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
                 <div>
@@ -166,8 +121,6 @@
                 </div>
                 <div id="rowCountDisplay" class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">Mostrando 0 registros</div>
             </div>
-
-            <!-- Tabla de Datos Ampliada -->
             <div class="overflow-x-auto rounded-xl border border-slate-200">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -181,33 +134,22 @@
                             <th class="p-3" id="thColumnaF">Aplica al Sector</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
-                        <!-- Datos dinámicos -->
-                    </tbody>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 text-sm"></tbody>
                 </table>
             </div>
         </section>
-
     </main>
 
-    <!-- Botón Flotante para Ir Arriba -->
     <button id="btnScrollTop" onclick="scrollToTop()" class="fixed bottom-6 right-6 text-white p-3 rounded-full shadow-xl hidden transition-all z-50 cursor-pointer hover:opacity-90 hover:scale-105" style="background-color: #3B599F;" title="Ir arriba">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path>
-        </svg>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
     </button>
 
-    <!-- Ventana Flotante (Modal) Optimizada (Solo Lectura) -->
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden transform transition-all">
-            
-            <!-- Barra de Estado Superior Dinámica -->
             <div id="modalStatusBanner" class="px-6 py-3 flex items-center justify-between text-white font-bold transition-colors duration-300" style="background-color: #FBC13F;">
                 <span id="modalStatusText" class="text-sm tracking-wide uppercase">Pendiente de validar</span>
                 <button onclick="closeModal()" class="text-white hover:opacity-80 text-xl font-bold px-2 cursor-pointer">&times;</button>
             </div>
-
-            <!-- Contenido del Modal -->
             <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto text-left">
                 <div class="flex items-center justify-between">
                     <div>
@@ -216,40 +158,23 @@
                     </div>
                     <span id="modalIdNormaBadge" class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-mono font-bold">ID: -</span>
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 block">Fecha</span>
-                        <span id="modalFecha" class="font-semibold text-slate-700">-</span>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 block">Pilar del SIG</span>
-                        <span id="modalPilar" class="font-semibold text-slate-700">-</span>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 block">Tipo de Norma</span>
-                        <span id="modalTipo" class="font-semibold text-slate-700">-</span>
-                    </div>
+                    <div><span class="text-xs font-bold text-slate-400 block">Fecha</span><span id="modalFecha" class="font-semibold text-slate-700">-</span></div>
+                    <div><span class="text-xs font-bold text-slate-400 block">Pilar del SIG</span><span id="modalPilar" class="font-semibold text-slate-700">-</span></div>
+                    <div><span class="text-xs font-bold text-slate-400 block">Tipo de Norma</span><span id="modalTipo" class="font-semibold text-slate-700">-</span></div>
                 </div>
-
-                <!-- Sumilla -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Sumilla / Descripción Completa</span>
                     <p id="modalSumilla" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
                 </div>
-
-                <!-- Recomendación -->
                 <div id="modalRecomendacionContainer" class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1 hidden">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Recomendación</span>
                     <p id="modalRecomendacion" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
                 </div>
-
-                <!-- Entregables Recomendados -->
                 <div id="modalEntregablesContainer" class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1 hidden">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Entregables recomendados</span>
                     <p id="modalEntregables" class="text-slate-700 text-sm leading-relaxed text-left">-</p>
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <span class="text-xs font-bold text-slate-400 block mb-1">Autoridad Reguladora</span>
@@ -260,37 +185,26 @@
                         <span id="modalColumnaF" class="font-semibold px-3 py-1 bg-slate-100 text-slate-700 rounded-lg inline-block text-xs">-</span>
                     </div>
                 </div>
-
-                <!-- Artículos y Obligaciones (Detalle) - Cada artículo en su propia tarjeta englobada -->
                 <div id="modalArticulosContainerWrapper" class="space-y-3 hidden">
                     <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue block">Artículos y Obligaciones (Detalle)</span>
-                    <div id="modalArticulosListContainer" class="space-y-3">
-                        <!-- Se llena dinámicamente -->
-                    </div>
+                    <div id="modalArticulosListContainer" class="space-y-3"></div>
                 </div>
-
-                <!-- Cajón de Enlace (Columna J) -->
                 <div id="modalLinkContainer" class="hidden pt-2">
                     <a id="modalLinkColI" href="#" target="_blank" class="w-full py-3 px-4 rounded-xl text-white font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 hover:opacity-90" style="background-color: #3B599F;">
                         <span>Ver norma aquí</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                        </svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     </a>
                 </div>
             </div>
-
-            <!-- Pie del Modal -->
             <div class="bg-slate-50 px-6 py-4 border-t flex justify-end">
                 <button onclick="closeModal()" class="px-5 py-2 rounded-lg text-white font-bold text-sm transition shadow-sm cursor-pointer" style="background-color: #3B599F;">Cerrar</button>
             </div>
-
         </div>
     </div>
 
     <script>
         // ============================================
-        // 📌 MAPA DE ÍNDICES DE COLUMNAS (Resumen_Normas - nuevo orden)
+        // 📌 MAPA DE ÍNDICES (Resumen_Normas - nuevo orden)
         // ============================================
         const IDX = {
             ID_NORMA:       0,   // A
@@ -310,16 +224,18 @@
             REVISADO:       14   // O
         };
 
-        // Control de Sesión y Roles
         window.addEventListener('DOMContentLoaded', function() {
             var rawRole = sessionStorage.getItem('userRole');
             var role = rawRole ? rawRole.trim().toLowerCase() : '';
             
+            // ⚠️ Descomenta el bloque de abajo en producción. Comentado para debug.
+            /*
             if (role !== 'admin' && role !== 'validador' && role !== 'publico') {
                 alert("Acceso no autorizado. Inicie sesión nuevamente.");
                 window.location.href = 'index.html';
                 return;
             }
+            */
 
             var navContainer = document.getElementById('userNav');
             if (navContainer) {
@@ -352,43 +268,19 @@
             document.getElementById('btnReset').addEventListener('click', resetFilters);
         });
 
-        // Control del botón flotante para subir
         window.addEventListener('scroll', function() {
             var btnTop = document.getElementById('btnScrollTop');
-            if (window.scrollY > 300) {
-                btnTop.classList.remove('hidden');
-                btnTop.classList.add('flex');
-            } else {
-                btnTop.classList.remove('flex');
-                btnTop.classList.add('hidden');
-            }
+            if (window.scrollY > 300) { btnTop.classList.remove('hidden'); btnTop.classList.add('flex'); }
+            else { btnTop.classList.remove('flex'); btnTop.classList.add('hidden'); }
         });
 
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function logout() {
-            sessionStorage.clear();
-            window.location.href = 'index.html';
-        }
-
-        function clearFilter(id) {
-            var el = document.getElementById(id);
-            if(el) {
-                el.value = '';
-                applyFilters();
-            }
-        }
-
-        function clearDateRange() {
-            document.getElementById('filterFechaDesde').value = '';
-            document.getElementById('filterFechaHasta').value = '';
-            applyFilters();
-        }
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+        function clearFilter(id) { var el = document.getElementById(id); if(el) { el.value = ''; applyFilters(); } }
+        function clearDateRange() { document.getElementById('filterFechaDesde').value = ''; document.getElementById('filterFechaHasta').value = ''; applyFilters(); }
 
         // ============================================
-        // 🔗 URLs de los CSV
+        // 🔗 URLs CSV
         // ============================================
         const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=1467030430&single=true&output=csv';
         const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv';
@@ -405,14 +297,13 @@
             return txt.value;
         }
 
-        // Helper: leer celda por índice de columna
+        // Helper: leer celda por índice de columna de Resumen_Normas
         function getCell(row, idx) {
             var key = headersList[idx];
             return key ? (row[key] || '') : '';
         }
 
         function fetchData() {
-            // Cargar Resumen_Normas
             Papa.parse(csvUrl, {
                 download: true,
                 header: true,
@@ -420,6 +311,7 @@
                 complete: function(results) {
                     if (results.meta && results.meta.fields) {
                         headersList = results.meta.fields;
+                        console.log("📋 Headers detectados:", headersList);
                     }
 
                     if (results.data.length > 0) {
@@ -427,6 +319,7 @@
                         var lastDate = getCell(lastRow, IDX.FECHA) || "";
                         document.getElementById('lastUpdateDisplay').textContent = "Última act: " + lastDate;
                     }
+
                     rawData = [];
                     for (var i = 0; i < results.data.length; i++) {
                         var row = results.data[i];
@@ -446,20 +339,20 @@
                         }
                     }
 
-                    rawData.sort(function(a, b) {
-                        return b.sortDate.localeCompare(a.sortDate);
-                    });
+                    rawData.sort(function(a, b) { return b.sortDate.localeCompare(a.sortDate); });
 
-                    // Header F fijo: "Aplica al Sector"
                     document.getElementById('thColumnaF').textContent = 'Aplica al Sector';
                     document.getElementById('modalLabelColumnaF').textContent = 'Aplica al Sector';
 
                     populateFilters();
                     renderTable(rawData);
+                },
+                error: function(err) {
+                    console.error("❌ Error cargando CSV:", err);
+                    alert("Error al cargar los datos. Revisa la consola (F12).");
                 }
             });
 
-            // Cargar Detalle_Articulos
             if (csvDetalleArticulosUrl && !csvDetalleArticulosUrl.includes('AQUÍ_PEGAS')) {
                 Papa.parse(csvDetalleArticulosUrl, {
                     download: true,
@@ -468,6 +361,7 @@
                     complete: function(results) {
                         if (results.meta && results.meta.fields) {
                             detalleHeadersList = results.meta.fields;
+                            console.log("📋 Headers Detalle:", detalleHeadersList);
                         }
                         detalleArticulosData = results.data || [];
                     }
@@ -476,29 +370,37 @@
         }
 
         function populateFilters() {
-            function getUniqueValues(idx) {
+            function getUniqueValuesByKey(key) {
+                var uniqueMap = {};
+                for(var i = 0; i < rawData.length; i++) {
+                    var val = rawData[i][key];
+                    if(val) {
+                        var decoded = decodeHtmlEntities(String(val).trim());
+                        var lower = decoded.toLowerCase();
+                        if(!uniqueMap[lower]) uniqueMap[lower] = decoded;
+                    }
+                }
+                return Object.values(uniqueMap);
+            }
+
+            function getUniqueValuesByIdx(idx) {
                 var key = headersList[idx];
                 if (!key) return [];
                 var uniqueMap = {};
                 for(var i = 0; i < rawData.length; i++) {
                     var val = rawData[i][key];
                     if(val) {
-                        var decoded = decodeHtmlEntities(val.trim());
+                        var decoded = decodeHtmlEntities(String(val).trim());
                         var lower = decoded.toLowerCase();
-                        if(!uniqueMap[lower]) {
-                            uniqueMap[lower] = decoded;
-                        }
+                        if(!uniqueMap[lower]) uniqueMap[lower] = decoded;
                     }
                 }
                 return Object.values(uniqueMap);
             }
 
             function fillSelect(id, data, sortDesc) {
-                if(sortDesc) {
-                    data.sort((a, b) => b.localeCompare(a));
-                } else {
-                    data.sort((a, b) => a.localeCompare(b));
-                }
+                if(sortDesc) data.sort((a, b) => b.localeCompare(a));
+                else data.sort((a, b) => a.localeCompare(b));
                 var select = document.getElementById(id);
                 select.innerHTML = select.options[0].outerHTML;
                 for(var i = 0; i < data.length; i++) {
@@ -509,8 +411,72 @@
                 }
             }
 
-            fillSelect('filterMesAnio', getUniqueValues(-1).length ? getUniqueValuesByKey('mesAnio') : getUniqueValuesByKey('mesAnio'), true);
+            fillSelect('filterMesAnio', getUniqueValuesByKey('mesAnio'), true);
             fillSelect('filterAnio', getUniqueValuesByKey('a'), true);
-            fillSelect('filterPilar', getUniqueValues(IDX.PILAR), false);
-            fillSelect('filterTipo', getUniqueValues(IDX.TIPO), false);
-            fill
+            fillSelect('filterPilar', getUniqueValuesByIdx(IDX.PILAR), false);
+            fillSelect('filterTipo', getUniqueValuesByIdx(IDX.TIPO), false);
+            fillSelect('filterAutoridad', getUniqueValuesByIdx(IDX.AUTORIDAD), false);
+        }
+
+        function applyFilters() {
+            var s = document.getElementById('searchInput').value.toLowerCase();
+            var fe = document.getElementById('filterFecha').value;
+            var fDesde = document.getElementById('filterFechaDesde').value;
+            var fHasta = document.getElementById('filterFechaHasta').value;
+            var ma = document.getElementById('filterMesAnio').value;
+            var an = document.getElementById('filterAnio').value;
+            var pi = document.getElementById('filterPilar').value.toLowerCase();
+            var ti = document.getElementById('filterTipo').value.toLowerCase();
+            var au = document.getElementById('filterAutoridad').value.toLowerCase();
+
+            var filterSortDate = fe ? fe.replace(/-/g, '') : '';
+            var sortDesde = fDesde ? fDesde.replace(/-/g, '') : '';
+            var sortHasta = fHasta ? fHasta.replace(/-/g, '') : '';
+
+            var filtered = [];
+            for(var i = 0; i < rawData.length; i++) {
+                var item = rawData[i];
+                var normaDec = decodeHtmlEntities(getCell(item, IDX.NORMA)).toLowerCase();
+                var sumillaDec = decodeHtmlEntities(getCell(item, IDX.SUMILLA)).toLowerCase();
+                
+                var matchS = !s || normaDec.includes(s) || sumillaDec.includes(s);
+                var matchFE = !filterSortDate || item.sortDate === filterSortDate;
+                var matchDesde = !sortDesde || item.sortDate >= sortDesde;
+                var matchHasta = !sortHasta || item.sortDate <= sortHasta;
+                var matchMA = !ma || item.mesAnio === ma;
+                var matchAN = !an || item.a === an;
+                
+                var matchPI = !pi || decodeHtmlEntities(getCell(item, IDX.PILAR)).trim().toLowerCase() === pi;
+                var matchTI = !ti || decodeHtmlEntities(getCell(item, IDX.TIPO)).trim().toLowerCase() === ti;
+                var matchAU = !au || decodeHtmlEntities(getCell(item, IDX.AUTORIDAD)).trim().toLowerCase() === au;
+                
+                if(matchS && matchFE && matchDesde && matchHasta && matchMA && matchAN && matchPI && matchTI && matchAU) {
+                    filtered.push(item);
+                }
+            }
+            renderTable(filtered);
+        }
+
+        function resetFilters() {
+            ['searchInput','filterFecha','filterFechaDesde','filterFechaHasta','filterMesAnio','filterAnio','filterPilar','filterTipo','filterAutoridad'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            renderTable(rawData);
+        }
+
+        function renderTable(data) {
+            var tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            for (var i = 0; i < data.length; i++) {
+                var item = data[i];
+                var tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 cursor-pointer transition";
+                
+                var valColF = decodeHtmlEntities(getCell(item, IDX.APLICA_SECTOR));
+                var normaName = decodeHtmlEntities(getCell(item, IDX.NORMA));
+                var tipoNormaText = decodeHtmlEntities(getCell(item, IDX.TIPO));
+                
+                var tipoLower = tipoNormaText.toLowerCase();
+                var esOblig = tipoLower.includes('obligatorio') ||
