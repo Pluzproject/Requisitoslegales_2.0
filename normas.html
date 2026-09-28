@@ -45,7 +45,6 @@
                     <span id="lastUpdateDisplay" class="text-xs font-medium italic text-slate-500"></span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <!-- BOTONES DE DESCARGA EXCEL -->
                     <button onclick="descargarExcelNormas()" class="px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm flex items-center gap-2 text-white hover:opacity-90 cursor-pointer" style="background-color: #217346;" title="Descargar Normas (respetando filtros)">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -262,7 +261,6 @@
     </div>
 
     <script>
-        // Control de Sesión y Roles
         window.addEventListener('DOMContentLoaded', function() {
             var rawRole = sessionStorage.getItem('userRole');
             var role = rawRole ? rawRole.trim().toLowerCase() : '';
@@ -342,7 +340,7 @@
         const csvDetalleArticulosUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIGndiBxp88Vdkl1NdJ4W63zLqKeotEg8_gBqUMnSz4JHef48eET9R6A265qibhQDbZUUxe5kM-n4L/pub?gid=2006412157&single=true&output=csv';
 
         var rawData = [];
-        var filteredData = [];  // ✅ NUEVO: guarda el resultado del filtro actual
+        var filteredData = [];
         var headersList = [];
         var detalleArticulosData = [];
         var detalleHeadersList = [];
@@ -395,7 +393,7 @@
                     document.getElementById('modalLabelColumnaF').textContent = 'Aplica al Sector';
 
                     populateFilters();
-                    applyFilters(); // Aplica filtros al cargar (sin filtros = todos)
+                    applyFilters();
                 }
             });
 
@@ -409,7 +407,6 @@
                             detalleHeadersList = results.meta.fields;
                         }
                         detalleArticulosData = results.data || [];
-                        // Actualiza contadores ahora que llegó el detalle
                         actualizarContadoresBotones();
                     }
                 });
@@ -492,17 +489,15 @@
                 }
             }
             
-            filteredData = filtered; // ✅ Guardamos el filtro actual
+            filteredData = filtered;
             renderTable(filtered);
             actualizarContadoresBotones();
         }
 
         function actualizarContadoresBotones() {
-            // Contador de Normas filtradas
             var nNormas = filteredData.length;
             document.getElementById('btnExcelNormasLabel').textContent = 'Excel Normas (' + nNormas + ')';
 
-            // Contador de Artículos filtrados (los que pertenecen a las normas filtradas)
             var idsFiltrados = {};
             for (var i = 0; i < filteredData.length; i++) {
                 var idN = (filteredData[i][headersList[0]] || '').trim();
@@ -584,7 +579,6 @@
         // FUNCIONES DE DESCARGA EXCEL
         // ============================================
 
-        // BOTÓN 1: Descargar Excel de Normas (respeta filtros)
         function descargarExcelNormas() {
             if (filteredData.length === 0) {
                 alert("No hay normas para descargar con los filtros actuales.");
@@ -636,16 +630,12 @@
             XLSX.writeFile(wb, nombreArchivo);
         }
 
-        // BOTÓN 2: Descargar Excel de Artículos (respeta filtros)
-        // ✅ Reemplaza Col A (ID_Norma) por el nombre de la Norma
-        // ✅ Trae TODAS las columnas de Detalle_Articulos
         function descargarExcelArticulos() {
             if (detalleArticulosData.length === 0) {
                 alert("No hay datos de artículos para descargar.");
                 return;
             }
 
-            // Mapa: ID_Norma -> Nombre de la Norma (desde Resumen_Normas)
             var mapaIdANorma = {};
             for (var i = 0; i < rawData.length; i++) {
                 var idN = (rawData[i][headersList[0]] || '').trim();
@@ -653,14 +643,12 @@
                 if (idN) mapaIdANorma[idN] = nombreN;
             }
 
-            // Set de IDs filtrados
             var idsFiltrados = {};
             for (var i = 0; i < filteredData.length; i++) {
                 var idF = (filteredData[i][headersList[0]] || '').trim();
                 if (idF) idsFiltrados[idF] = true;
             }
 
-            // Filtrar los artículos que pertenecen a normas filtradas
             var articulosFiltrados = [];
             var firstKey = detalleHeadersList.length > 0 ? detalleHeadersList[0] : '';
             if (!firstKey) {
@@ -683,14 +671,12 @@
 
             var datosExcel = [];
 
-            // Encabezados: reemplaza Col A (ID_Norma) por "Norma", mantiene el resto
             var encabezados = ['Norma'];
             for (var h = 1; h < detalleHeadersList.length; h++) {
                 encabezados.push(decodeHtmlEntities(detalleHeadersList[h]));
             }
             datosExcel.push(encabezados);
 
-            // Filas: reemplaza Col A por el nombre de la norma, mantiene el resto
             for (var j = 0; j < articulosFiltrados.length; j++) {
                 var filaArt = articulosFiltrados[j];
                 var idNorma = (filaArt[firstKey] || '').trim();
@@ -742,10 +728,23 @@
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            var containerArticulos = document.getElementById('modalArticulosListContainer');
-            if (containerArticulos) {
-                containerArticulos.innerHTML = '';
+            // =========================================================
+            // ✅ NUEVA LÓGICA: Solo mostrar artículos si la norma es OBLIGATORIA
+            // =========================================================
+            var tipoNormaText = decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase();
+            var esObligatoria = tipoNormaText.includes('obligatorio') || tipoNormaText.includes('obligatoria');
 
+            var wrapper = document.getElementById('modalArticulosContainerWrapper');
+            var containerArticulos = document.getElementById('modalArticulosListContainer');
+
+            // Siempre limpiamos
+            containerArticulos.innerHTML = '';
+
+            if (!esObligatoria) {
+                // ✅ No es obligatoria → ocultar sección completa, sin aviso
+                wrapper.classList.add('hidden');
+            } else {
+                // Es obligatoria → buscar artículos asociados
                 var matchingArticles = [];
                 for (var k = 0; k < detalleArticulosData.length; k++) {
                     var rowObj = detalleArticulosData[k];
@@ -786,11 +785,13 @@
                         `;
                         containerArticulos.appendChild(artCard);
                     }
-                    document.getElementById('modalArticulosContainerWrapper').classList.remove('hidden');
+                    wrapper.classList.remove('hidden');
                 } else {
-                    document.getElementById('modalArticulosContainerWrapper').classList.add('hidden');
+                    // Obligatoria pero sin artículos → ocultar sección sin aviso
+                    wrapper.classList.add('hidden');
                 }
             }
+            // =========================================================
 
             var rec = decodeHtmlEntities(item['Recomendación'] || '');
             var recContainer = document.getElementById('modalRecomendacionContainer');
