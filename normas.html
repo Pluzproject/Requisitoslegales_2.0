@@ -370,7 +370,11 @@
                     for (var i = 0; i < results.data.length; i++) {
                         var row = results.data[i];
                         var normaText = (row['Norma'] || '').trim().toUpperCase();
-                        if (normaText !== "" && normaText !== "SIN NOVEDAD") {
+                        var tipoText = (row['Tipo de norma'] || '').trim().toLowerCase();
+                        var esNoAplica = (tipoText === 'no aplica');
+
+                        // ✅ Excluir "SIN NOVEDAD" y "No aplica"
+                        if (normaText !== "" && normaText !== "SIN NOVEDAD" && !esNoAplica) {
                             var fechaStr = (row['Fecha'] || '').trim();
                             row.exactDate = fechaStr;
                             var partes = fechaStr.split('/');
@@ -575,10 +579,6 @@
             document.getElementById('rowCountDisplay').textContent = "Mostrando " + data.length + " registros";
         }
 
-        // ============================================
-        // FUNCIONES DE DESCARGA EXCEL
-        // ============================================
-
         function descargarExcelNormas() {
             if (filteredData.length === 0) {
                 alert("No hay normas para descargar con los filtros actuales.");
@@ -710,10 +710,6 @@
             XLSX.writeFile(wb, nombreArchivo);
         }
 
-        // ============================================
-        // FIN FUNCIONES DE DESCARGA EXCEL
-        // ============================================
-
         function openModal(item) {
             var idNorma = headersList.length > 0 ? (item[headersList[0]] || '').trim() : '';
 
@@ -728,23 +724,17 @@
             var colFKey = headersList.length > 5 ? headersList[5] : '';
             document.getElementById('modalColumnaF').textContent = colFKey ? decodeHtmlEntities(item[colFKey] || '-') : '-';
 
-            // =========================================================
-            // ✅ NUEVA LÓGICA: Solo mostrar artículos si la norma es OBLIGATORIA
-            // =========================================================
             var tipoNormaText = decodeHtmlEntities(item['Tipo de norma'] || '').trim().toLowerCase();
             var esObligatoria = tipoNormaText.includes('obligatorio') || tipoNormaText.includes('obligatoria');
 
             var wrapper = document.getElementById('modalArticulosContainerWrapper');
             var containerArticulos = document.getElementById('modalArticulosListContainer');
 
-            // Siempre limpiamos
             containerArticulos.innerHTML = '';
 
             if (!esObligatoria) {
-                // ✅ No es obligatoria → ocultar sección completa, sin aviso
                 wrapper.classList.add('hidden');
             } else {
-                // Es obligatoria → buscar artículos asociados
                 var matchingArticles = [];
                 for (var k = 0; k < detalleArticulosData.length; k++) {
                     var rowObj = detalleArticulosData[k];
@@ -787,11 +777,9 @@
                     }
                     wrapper.classList.remove('hidden');
                 } else {
-                    // Obligatoria pero sin artículos → ocultar sección sin aviso
                     wrapper.classList.add('hidden');
                 }
             }
-            // =========================================================
 
             var rec = decodeHtmlEntities(item['Recomendación'] || '');
             var recContainer = document.getElementById('modalRecomendacionContainer');
