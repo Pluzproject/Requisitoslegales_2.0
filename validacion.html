@@ -208,7 +208,6 @@
     <div id="detailModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full overflow-hidden transform transition-all">
             
-            <!-- Header del modal -->
             <div class="px-6 py-4 bg-corporate-blue text-white flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <h3 id="modalNorma" class="text-lg font-bold">Detalle de la Norma</h3>
@@ -217,7 +216,6 @@
                 <button onclick="closeModal()" class="text-white hover:opacity-80 text-xl font-bold px-2">&times;</button>
             </div>
 
-            <!-- Pestañas -->
             <div class="px-6 pt-4 flex gap-2 border-b">
                 <button id="tabBtnNorma" onclick="switchTab('norma')" class="tab-btn active px-4 py-2 rounded-t-lg border-t border-l border-r font-bold text-sm cursor-pointer">
                     📋 Validar Norma
@@ -227,12 +225,9 @@
                 </button>
             </div>
 
-            <!-- Contenido del modal -->
             <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto text-left">
 
-                <!-- ============================================ -->
-                <!-- PESTAÑA 1: VALIDAR NORMA                     -->
-                <!-- ============================================ -->
+                <!-- PESTAÑA 1: VALIDAR NORMA -->
                 <div id="tabContentNorma" class="tab-content active space-y-4">
                     
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
@@ -294,6 +289,7 @@
                                     <option value="Obligatorio">Obligatorio</option>
                                     <option value="Referencial">Referencial</option>
                                     <option value="Informativo">Informativo</option>
+                                    <option value="No aplica">No aplica</option>
                                 </select>
                             </div>
 
@@ -315,17 +311,14 @@
                     </div>
                 </div>
 
-                <!-- ============================================ -->
-                <!-- PESTAÑA 2: VALIDAR ARTÍCULOS                 -->
-                <!-- ============================================ -->
+                <!-- PESTAÑA 2: VALIDAR ARTÍCULOS -->
                 <div id="tabContentArticulos" class="tab-content space-y-4">
                     
                     <div class="bg-slate-100/70 p-5 rounded-2xl border border-slate-200 space-y-4">
                         <div class="flex justify-between items-center border-b pb-2">
                             <span class="text-xs font-bold uppercase tracking-wider text-corporate-blue">Artículos y Obligaciones (Detalle)</span>
                         </div>
-                        <div id="modalArticulosListContainer" class="space-y-4">
-                        </div>
+                        <div id="modalArticulosListContainer" class="space-y-4"></div>
                     </div>
 
                     <div class="pt-2">
@@ -374,7 +367,6 @@
         var headersList = [];
         var currentModalItem = null;
 
-        // Bandera de estado del modal
         var normaValidada = false;
         var articulosValidados = false;
 
@@ -456,7 +448,11 @@
                     for (var i = 0; i < results.data.length; i++) {
                         var row = results.data[i];
                         var normaText = decodeHtmlEntities(getResumenCell(row, IDX.NORMA)).trim().toUpperCase();
-                        if (normaText !== "" && normaText !== "SIN NOVEDAD") {
+                        var tipoText = decodeHtmlEntities(getResumenCell(row, IDX.TIPO)).trim().toLowerCase();
+                        var esNoAplica = (tipoText === 'no aplica');
+
+                        // ✅ Excluir "SIN NOVEDAD" y "No aplica" de la lista de validación
+                        if (normaText !== "" && normaText !== "SIN NOVEDAD" && !esNoAplica) {
                             var fechaStr = decodeHtmlEntities(getResumenCell(row, IDX.FECHA)).trim();
                             row.exactDate = fechaStr;
                             var partes = fechaStr.split('/');
@@ -765,7 +761,6 @@
                     var artRowDiv = document.createElement('div');
                     artRowDiv.className = "p-5 bg-white rounded-2xl border-2 border-slate-200 border-l-4 border-l-[#3B599F] space-y-4 article-row-item shadow-sm relative";
 
-                    // Guardar el valor original del Artículo Relativo (Col B, índice 1)
                     var artRelativoKey = detalleHeadersList[1];
                     var artRelativoOriginal = artRelativoKey ? (art[artRelativoKey] || '').trim() : '';
                     artRowDiv.setAttribute('data-articulo-original', artRelativoOriginal);
@@ -826,7 +821,6 @@
                 containerArticulos.innerHTML = '<p class="text-xs text-slate-400 italic p-2">No se encontraron artículos asociados para este ID_Norma en la hoja Detalle_Articulos.</p>';
             }
 
-            // Recomendación
             var rec = decodeHtmlEntities(getResumenCell(item, IDX.RECOMENDACION));
             if(rec) {
                 document.getElementById('modalRecomendacion').textContent = rec;
@@ -854,25 +848,22 @@
                 document.getElementById('modalLinkContainer').classList.add('hidden');
             }
 
-            // Tipo y revisado
             var currentTipoNorma = decodeHtmlEntities(getResumenCell(item, IDX.TIPO)).trim();
             var normalizedTipo = '';
             if (currentTipoNorma.toLowerCase().includes('obligatorio')) normalizedTipo = 'Obligatorio';
             else if (currentTipoNorma.toLowerCase().includes('referencial')) normalizedTipo = 'Referencial';
             else if (currentTipoNorma.toLowerCase().includes('informativo')) normalizedTipo = 'Informativo';
+            else if (currentTipoNorma.toLowerCase() === 'no aplica') normalizedTipo = 'No aplica';
 
             document.getElementById('editTipo').value = normalizedTipo;
             
             var revVal = decodeHtmlEntities(getResumenCell(item, IDX.REVISADO)).trim().toLowerCase();
             document.getElementById('editRevisado').value = (revVal === 'si' || revVal === 'sí' || revVal === '1' || revVal === 'x') ? 'si' : '';
 
-            // Mostrar / ocultar tab artículos según tipo
             actualizarTabArticulosSegunTipo();
 
-            // Listener al select de tipo
             document.getElementById('editTipo').onchange = actualizarTabArticulosSegunTipo;
 
-            // Resetear a pestaña 1
             switchTab('norma');
 
             document.getElementById('syncStatusNorma').textContent = '';
@@ -886,7 +877,6 @@
             var esObligatorio = (tipo === 'Obligatorio');
             ocultarTabArticulos(!esObligatorio);
 
-            // Si el tipo no es obligatorio y el usuario está en la pestaña de artículos, volver a norma
             if (!esObligatorio && document.getElementById('tabContentArticulos').classList.contains('active')) {
                 switchTab('norma');
             }
@@ -956,18 +946,30 @@
                     if (tipoKey) currentModalItem[tipoKey] = nuevoTipo;
                     if (revisadoKey) currentModalItem[revisadoKey] = (nuevoRevisado === 'si' ? 'Sí' : nuevoRevisado);
 
+                    // ✅ CASO ESPECIAL: "No aplica" → cerrar, alertar y quitar de la lista
+                    if (nuevoTipo === 'No aplica') {
+                        setTimeout(function () {
+                            closeModal();
+                            alert("Norma marcada como No aplica. Ya no aparecerá en la lista de validación.");
+                            // Remover del arreglo local y refrescar tabla
+                            rawData = rawData.filter(function(r) {
+                                return decodeHtmlEntities(getResumenCell(r, IDX.ID_NORMA)).trim() !== idNorma;
+                            });
+                            applyFilters();
+                        }, 800);
+                        return;
+                    }
+
                     applyFilters();
 
-                    // Reglas de cierre
+                    // Reglas de cierre para tipo normal
                     var esObligatorio = (nuevoTipo === 'Obligatorio');
                     if (!esObligatorio) {
-                        // Referencial / Informativo → se cierra directo
                         setTimeout(function () {
                             closeModal();
                             alert("Excelente, validaste este requisito legal");
                         }, 1000);
                     } else {
-                        // Obligatorio → si los artículos ya estaban validados, cierra
                         verificarCierreAutomatico();
                     }
                 } else {
@@ -1032,7 +1034,6 @@
                     document.getElementById('syncStatusArticulos').style.color = '#6CAC5E';
                     articulosValidados = true;
 
-                    // Reglas de cierre
                     verificarCierreAutomatico();
                 } else {
                     var msg = (result && result.error) ? result.error : ('Respuesta: ' + txt.substring(0, 200));
